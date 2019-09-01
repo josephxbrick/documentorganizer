@@ -6,7 +6,7 @@ This plugin updates page numbers, section numbers, callout numbers, and a table 
 
 # Table of contents and page numbering
 
-The plugin creates a table of contents (TOC) for artboards on the current page organized into sections. It will page-number the artboards for you, as well as add legal-style numbering (1.0, 1.1, 2.0) to the titles of the artboards and in to the TOC. Here is an example of what that can look like:
+The plugin creates a table of contents (TOC) for artboards on the current Sketch page, organized into sections. It will page-number the artboards for you, as well as add legal-style numbering (1.0, 1.1, 2.0) to the titles of the artboards and in to the TOC. Here is an example of what that can look like:
 
 <img src="/readme_images/toc_image_newest.png" width="900">
 
@@ -18,46 +18,50 @@ Note that the table of contents does not yet suppport text wrapping for the TOC 
 
 ## Setting up the TOC
 
-You'll need to set up your document in a particular way in order for the plug-in to create your table of contents. The file `tocsample.sketch` in this repository is set up this way.
+You'll need to set up the artboards of the Sketch page in a particular way in order for the plug-in to create your table of contents. The file `tocsample.sketch` in this repository is set up this way.
 
-This plugin supports only documents that are organized into sections. It assumes that each section will have an artboard that serves as the section-heading page. To designate an artboard as a section-heading page, place an instance of the section-title symbol on it, which displays the title of the section on the artboard. 
+This plugin supports only documents that are organized into sections. It assumes that each section will have an artboard that serves as the section-heading page. To designate an artboard as a section-heading page, place an instance of the section-title symbol on it, which displays the title of the section on the artboard.
 
 Any artboard that's not a section-heading page needs to have an instance of the page-title symbol on it; otherwise, it won't show up in the table of contents.
 
-It doesn't matter how your artboards are ordered in the layer list. The plug-in will use the left-to-right order that the artboards are arranged in. You can either put the artboards in a single horizontal row, or you can put each section's artboards into their own horizontal row and stack the sections vertically (which is helpful when creating a large document). The the artboards in `tocsample.sketch` are arranged in a stack of section rows.
+It doesn't matter how your artboards are ordered in the layer list. The plug-in will use the left-to-right order that the artboards are arranged in. You can either put the artboards in a single horizontal row, or you can put each section's artboards into their own horizontal row and stack the sections vertically (which is helpful when creating a large document). The the artboards in `tocsample.sketch` are arranged in a stack of section rows. Important: In either case, make sure that all artboards in a row have their tops aligned.
 
 
-Important: In either case, make sure that all artboards in a row have their tops aligned.
+Note that all artboards must be on the same Sketch page. This plug-in does not span pages in the Sketch document.
 
 
 ### The TOC group
 
-The table of contents will live in a group on whichever artboard you wish. It doesn't have to be selected in order to update it. You do need to be on the Sketch page that contains the group, however. 
+The table of contents will live in a specific group on whichever artboard you wish. It doesn't have to be selected in order to update it. 
 
-The plug-in will arrange the TOC into however many columns it needs depending on the height this group. You will be prompted for the pixel spacing between columns, which will be ignored if your TOC is a single column.
+The plug-in will arrange the TOC into however many columns it needs depending on the height this group. You can specify for the pixel spacing between these columns, which will be ignored if the TOC is a single column.
 
 Once the TOC is is created in this group, you can resize the group, and the TOC will rearrange itself into properly spaced columns **as you resize it**. 
 
-This group must be called `<tocGroup>` This group must contain a rectangle named `<tocGroupRect>`:
+This group must be called `<tocGroup>` This group must contain a rectangle named `<tocGroupRect>`.
 
 <img src="/readme_images/toc_group.png" width="200">
 
+Note that this needs to be an actual group and **not** an instance of a symbol containing this group, as this plugin does not support nested symbols.
+
+
+## The section-title symbol
+
+The section-title symbol displays the title of a section on an artboard. Each artboard that you want listed in the TOC must contain either a section-title instance or a page-title instance.
+
+The section-title symbol must contain a text override named `<sectionTitle>`. It doesn't matter what the symbol itself is named, or what any instance of the symbol is named. Placing an instance of this symbol on an artboard will make it show up as a section in the TOC.
+
+<img src="/readme_images/section_title_symbol.png" width="380">
+
+And of course, once you place the symbol instance on an artboard, you'll need to set its `<sectionTitle>` override text to the desired title. (The plug-in won't make up section names for you!)
 
 ### The page title symbol
 
-Each artboard that you want listed in the TOC must have either a page-title symbol instance or a section-title symbol instance on it.
 
-The page title symbol must have a text override named `<pageTitle>`. It doesn't matter what the sy mbol itself is named, and it doesn't matter what the default override text is. 
+The page-title symbol displays the title of a page on an artboard. The symbol must have a text override named `<pageTitle>`. It doesn't matter what the symbol itself is named. Placing this symbol on an artboard will make it show up as a page that belongs to a section in the TOC.
 
 <img src="/readme_images/page_title_symbol.png" width="380">
 
-And of course, once you place the symbol instance on an artboard, you'll need to set its override text to the desired title of the page. (The plug-in won't make up page names for you!)
-
-### The section-title symbol (optional)
-
-To have sections in your TOC, you will need to have a section-header artboard that starts each section, and this artboard needs to have an instance of the section-header symbol. This symbol is just like the page-title symbol, except its text override must be named `<sectionTitle>`. It doesn't matter what the symbol or symbol instance is named.
-
-<img src="/readme_images/section_title_symbol.png" width="380">
 
 ### The TOC-page-listing symbol
 
@@ -79,15 +83,11 @@ The symbol instances that the plug-in adds to the TOC will always remain same he
 
 This is the symbol whose instances will be added to the TOC for each section in your document. See "The page-section symbol" above for what it takes to make TOC sections. 
 
-This symbol needs to have a text override called `<tocSectionTitle>` and a text override called `<tocPageNumber>`, but if you don't want your TOC sections to have a page number, you can leave the latter text override out, out or set its opacity to 0.
+This symbol needs to have a text override called `<tocSectionListing>` and a text override called `<tocPageNumber>`. If you don't want your sections to display a page number in the TOC, you can leave the latter text override out, out or set its opacity to 0.
   
 <img src="/readme_images/section_entry_symbol.png" width="390">
 
 Use the same pinning as shown in the section above.
-
-
-
-
 
 
 ### The page number symbol
