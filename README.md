@@ -68,11 +68,11 @@ The page-title symbol displays the title of a page on an artboard. The symbol mu
 <img src="/readme_images/page_title_symbol.png" width="380">
 
 
-### The symbols used to construct the TOC.
+### The symbols used to construct the TOC
 
 The TOC is constructed using instances of two symbols: one for the section-heading entries, and one for the page entries. Important: these symbols different from the symbols used to display section titles and page titles on artboards. When the TOC is constructed, its entries are stacked with no vertical spacing in between, so add any desired vertical padding to the symbols themselves.
 
-The symbol used for section-heading entries in the TOC must have text overrides named `<tocSectionTitle>` and `<tocPageNumber>`. It doesn't matter what the symbol itself is called. Likewise, the symbol for page entries must have text  overrides named `<tocSectionTitle>` and `<tocPageNumber>`. Here's an example of a page-entry symbol.
+The symbol used for section-heading entries in the TOC must have text overrides named `<tocSectionTitle>` and `<tocPageNumber>`. It doesn't matter what the symbol itself is called. Likewise, the symbol for page entries must have text  overrides named `<tocPageTitle>` and `<tocPageNumber>`. Here's an example of a page-entry symbol.
   
 <img src="/readme_images/page_entry_symbol.png" width="480">
 
