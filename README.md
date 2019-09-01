@@ -4,7 +4,7 @@ Note: this plugin requires Sketch 53.2 or above.
 
 This plugin updates page numbers, section numbers, callout numbers, and a table of contents in your document. This readme describes how to set up your document to use this plugin.
 
-# Table of contents and page numbering
+# Table of contents, section numbering, and page numbering
 
 The plugin creates a table of contents (TOC) for artboards on the current Sketch page, organized into sections. It will page-number the artboards for you, as well as add legal-style numbering (1.0, 1.1, 2.0) to the titles of the artboards and in to the TOC. Here is an example of what that can look like:
 
@@ -13,6 +13,8 @@ The plugin creates a table of contents (TOC) for artboards on the current Sketch
 You can customize the look of it however you want, because the TOC is created from symbols that you can customize the look of. Example: when the plugin creates the TOC, the TOC's symbol instances are stacked with no space between them, but you can adjusting the spacing by adding the desired padding to the symbols.  
 
 The TOC will arrange itself into multiple columns (shown above) when there are too many entries to fit in a single column. You can specify the pixel spacing between these columns. (See Settings below.)
+
+There is an option to display only the section headings in the TOC, rather than the section headings along with their associated pages.
 
 Note that the table of contents does not yet suppport text wrapping for the TOC entries.
 
@@ -89,18 +91,32 @@ This symbol needs to have a text override called `<tocSectionListing>` and a tex
 
 Use the same pinning as shown in the section above.
 
+## Page numbering
+
+This plugin automatically updates the page number on each artboard of the page.
+
 
 ### The page number symbol
 
-The page number symbol, which you will put an instance of on each artboard that you want a page number listed, must have a text override named `<pageNumber>`. It doesn't matter what the symbol itself is named or what any of its instances are named. The name of the text override is all that matters. E.g., you can still organize your symbols into folders using slashes in the symbol names.
+The page number symbol, which you will put an instance of on each artboard that you want a page number listed, must have a text override named `<pageNumber>`. It doesn't matter what the symbol itself is named or what any of its instances are named. The name of the text override is all that matters.
 
 <img src="/readme_images/page_number_symbol.png" width="335">
 
 The plug-in will update the page numbers for you before creating the TOC. It starts numbering pages (starting at 1) upon the first instance of this symbol that it finds. 
 
-So if you want to start numbering your artboards at 1 on the second artboard, put the first page number instance on the second artboard. If you want to start numbering at 2, put the first page-number instance on the previous artboard and set its opacity to 0.
+So if you want to start numbering your artboards at 1 on the second artboard, put the first page number instance on the second artboard. If you want to start numbering at 2, put a page-number instance on the previous artboard and set its opacity to 0. (The transparent instance will contain the number 1.)
 
 Note that the hash character in the default override text (which you see above) will be replaced by the page number, so if you want your page numbers listed in the format "Page 1" you would make the default override text "Page #"
+
+### Section numbering
+
+The plugin prefixes the name and section titles with section numbering (which is a value like 1.0, 1.1, 2.0, etc.) followed by a hyphen, which can be either a dash, an n-dash, or an m-dash. It assumes all existing titles either start with just a title with no section prefix, or are titles that already have the section prefix. 
+
+Important: the code here is not as robust as it could be, so avoid using a dash anywhere within the title of the page; the only dash in the text override should be the one separating the section number from the page title. 
+
+## Callouts and the callout listing
+
+Coming soon.
 
 
 ### Troubleshooting
