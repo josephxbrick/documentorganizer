@@ -4,6 +4,10 @@ Note: this plugin requires Sketch 53.2 or above.
 
 This plugin updates page numbers, section numbers, callout numbers, and a table of contents in your document. This readme describes how to set up your document to use this plugin.
 
+The easiest way to get install this plugin is to choose `Download Zip` from the `Clone or Download` button at the top of the page, unzip the downloaded file, and double-click `documentorganizer.sketchplugin`.
+
+<img src="/readme_images/clone-or-download.png" width="387">
+
 # Table of contents, section numbering, and page numbering
 
 The plugin creates a table of contents (TOC) for artboards on the current Sketch page, organized into sections. It will page-number the artboards for you, as well as add legal-style numbering (1.0, 1.1, 2.0) to the titles of the artboards and in to the TOC. Here is an example of what that can look like:
@@ -65,15 +69,15 @@ The page-title symbol displays the title of a page on an artboard. The symbol mu
 <img src="/readme_images/page_title_symbol.png" width="380">
 
 
-### The TOC-page-listing symbol
+### The symbols used to construct the TOC.
 
-This is the symbol whose instances will be added to the TOC for each page in your document. It needs to have a text override called `<tocPageTitle>` and a text override called `<tocPageNumber>`. Note that these overrides cannot be in nested symbols. Again, it doesn't matter what the symbol or its instances are called.
+The TOC is constructed using instances of two symbols: one for the section-heading entries, and one for the page entries. Important: these symbols different from the symbols used to display section titles and page titles on artboards. When the TOC is constructed, its entries are stacked with no vertical spacing in between, so add any desired vertical padding to the symbols themselves.
+
+The symbol used for section-heading entries in the TOC must have text overrides named `<tocSectionTitle>` and `<tocPageNumber>`. It doesn't matter what the symbol itself is called. Likewise, the symbol for page entries must have text  overrides named `<tocSectionTitle>` and `<tocPageNumber>`. Here's an example of a page-entry symbol.
   
 <img src="/readme_images/page_entry_symbol.png" width="480">
 
-When added to the TOC, the symbol instances will be stacked upon each other with no space in between, so build any desired padding into the symbol itself.
-
-You'll also need to set design this symbol so that it resizes its content, with the title and page number pinned appropriately. For best results, use this pinning:
+You'll also need to design these symbols so that they appropriately lay themselves out on resize, with the title and page number pinned appropriately. For best results, use this pinning:
 
 <img src="/readme_images/page_entry_pinning_1.png" width="380"> 
 
@@ -81,20 +85,9 @@ You'll also need to set design this symbol so that it resizes its content, with 
 
 The symbol instances that the plug-in adds to the TOC will always remain same height as the corresponding symbol.
 
-### The TOC-section-listing symbol (optional)
-
-This is the symbol whose instances will be added to the TOC for each section in your document. See "The page-section symbol" above for what it takes to make TOC sections. 
-
-This symbol needs to have a text override called `<tocSectionListing>` and a text override called `<tocPageNumber>`. If you don't want your sections to display a page number in the TOC, you can leave the latter text override out, out or set its opacity to 0.
-  
-<img src="/readme_images/section_entry_symbol.png" width="390">
-
-Use the same pinning as shown in the section above.
-
 ## Page numbering
 
 This plugin automatically updates the page number on each artboard of the page.
-
 
 ### The page number symbol
 
@@ -108,17 +101,22 @@ So if you want to start numbering your artboards at 1 on the second artboard, pu
 
 Note that the hash character in the default override text (which you see above) will be replaced by the page number, so if you want your page numbers listed in the format "Page 1" you would make the default override text "Page #"
 
-### Section numbering
+## Section numbering
 
-The plugin prefixes the name and section titles with section numbering (which is a value like 1.0, 1.1, 2.0, etc.) followed by a hyphen, which can be either a dash, an n-dash, or an m-dash. It assumes all existing titles either start with just a title with no section prefix, or are titles that already have the section prefix. 
+The plugin prefixes the section names and page names section numbering (which is a value like 1.0, 1.1, 2.0, etc.) followed by a hyphen, which can be either a dash, an n-dash, or an m-dash. It assumes all existing titles either start with just a title with no section prefix, or are titles that already have the section prefix. 
 
 Important: the code here is not as robust as it could be, so avoid using a dash anywhere within the title of the page; the only dash in the text override should be the one separating the section number from the page title. 
 
 ## Callouts and the callout listing
 
-Coming soon.
+Coming soon. For now, examine `tocsample.sketch` in this repository 
 
+## Troubleshooting
 
-### Troubleshooting
+### The table of contents is in the wrong order
 
-If you have any issues, check out the sample.sketch file in this repository.
+Make sure the tops of each row of artboards are aligned perfectly.
+
+### Section numbering in the table of contents is messed up
+
+Go to the artboard(s) that with the bad section number and remove the section prefix (including the dash) from the text override of the artboard's title instane.
