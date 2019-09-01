@@ -1,22 +1,26 @@
-# Table of contents: a Sketch plugin
+# Document Organizer: a Sketch plugin
 
 Note: this plugin requires Sketch 53.2 or above.
 
-This sketch plugin creates a table of contents (TOC) for artboards on the current page. If your document has sections, it will organize the table of contents into sections. It will also page-number your artboards for you. Here is an example of what that looks like:
+This plugin updates page numbers, section numbers, callout numbers, and a table of contents in your document
+
+# Table of contents and page numbering
+
+The plugin creates a table of contents (TOC) for artboards on the current page. If your document has sections, it will organize the TOC into sections. It will also page-number your artboards for you. Here is an example of what that looks like:
 
 <img src="/readme_images/toc_image_newest.png" width="900">
 
-You can customize the look of it however you want, as the TOC is created from symbols that you can customize the look of. Note that it does not support text wrapping of the page or section names.
+You can customize the look of it however you want, as the TOC is created from symbols that you can customize the look of. Note that the table of contents does not yet suppport text wrapping.
 
 ## Setting up the TOC
 
 You'll need to set up your document in a particular way in order for the plug-in to create your table of contents. The tocsample.sketch file in this repository is set up in that way. 
 
-Note that it doesn't matter how your artboards are ordered in the layer list. The plug-in will use the left-to-right or top-to-bottom order that the artboards are arranged in, so all artboards need to be arranged in a single horizontal row or a single vertical column. (The plug-in will figure out which.) 
+Note that it doesn't matter how your artboards are ordered in the layer list. The plug-in will use the left-to-right order that the artboards are arranged in when all artboards are arranged in a single horizontal row. You can also put each section's artboards into their own horizontal row and stack these sections vertically. In either case, make sure that the artboards in each row have their tops aligned.
 
-The plugin does not support placing artboards on top of artboards, which is a practice I don't quite understand.
+The plugin does not support positioning artboards on top of other artboards.
 
-For the TOC to use sections, each section must start with a section-heading artboard. Again, check out the sample sketch file to see the setup.
+For the TOC to use sections, each section must start with a section-heading artboard, which is identified by containing an instance of the page- symbol (see below). Artboards that represent pages of a section need to contain an instance of the yyyyyyyy symbol. Again, check out tocsample.sketch in this repository.
 
 ### The TOC group
 
@@ -30,9 +34,36 @@ This group must be called `<tocGroup>` This group must contain a rectangle named
 
 <img src="/readme_images/toc_group.png" width="200">
 
+### The TOC-page-listing symbol
+
+This is the symbol whose instances will be added to the TOC for each page in your document. It needs to have a text override called `<tocPageTitle>` and a text override called `<tocPageNumber>`. Note that these overrides cannot be in nested symbols. Again, it doesn't matter what the symbol or its instances are called.
+  
+<img src="/readme_images/page_entry_symbol.png" width="480">
+
+When added to the TOC, the symbol instances will be stacked upon each other with no space in between, so build any desired padding into the symbol itself.
+
+You'll also need to set design this symbol so that it resizes its content, with the title and page number pinned appropriately. For best results, use this pinning:
+
+<img src="/readme_images/page_entry_pinning_1.png" width="380"> 
+
+<img src="/readme_images/page_entry_pinning_2.png" width="380">
+
+The symbol instances that the plug-in adds to the TOC will always remain same height as the corresponding symbol.
+
+### The TOC-section-listing symbol (optional)
+
+This is the symbol whose instances will be added to the TOC for each section in your document. See "The page-section symbol" above for what it takes to make TOC sections. 
+
+This symbol needs to have a text override called `<tocSectionTitle>` and a text override called `<tocPageNumber>`, but if you don't want your TOC sections to have a page number, you can leave the latter text override out, out or set its opacity to 0.
+  
+<img src="/readme_images/section_entry_symbol.png" width="390">
+
+Use the same pinning as shown in the section above.
+
+
 ### The page number symbol
 
-The page number symbol, which you will put an instance of on each artboard that you want a page number listed, must have a text override named `<pageNumber>`. It doesn't matter what the symbol itself or any of its instances is named. (In the example below it's named `pageNumber`, but you can call it whatever you like. This is so you can still organize your symbols into folders using slashes.)
+The page number symbol, which you will put an instance of on each artboard that you want a page number listed, must have a text override named `<pageNumber>`. It doesn't matter what the symbol itself is named or what any of its instances are named. The name of the text override is all that matters. E.g., you can still organize your symbols into folders using slashes in the symbol names.
 
 <img src="/readme_images/page_number_symbol.png" width="335">
 
@@ -52,37 +83,11 @@ The page title symbol must have a text override named `<pageTitle>`. It doesn't 
 
 And of course, once you place the symbol instance on an artboard, you'll need to set its override text to the desired title of the page. (The plug-in won't make up page names for you!)
 
-### The page-section symbol (optional)
+### The section-title symbol (optional)
 
-To have sections in your TOC, you will need to have a section header artboard that starts each section, and this artboard needs to have an instance of the section-header symbol. This symbol is just like the page-title symbol, except its text override must be named `<sectionTitle>`. Again, as with every symbol this plugin uses, it doesn't matter what the symbol or symbol instance is named.
+To have sections in your TOC, you will need to have a section header artboard that starts each section, and this artboard needs to have an instance of the section-header symbol. This symbol is just like the page-title symbol, except its text override must be named `<sectionTitle>`. It doesn't matter what the symbol or symbol instance is named.
 
 <img src="/readme_images/section_title_symbol.png" width="380">
-
-### The TOC page-title symbol
-
-This is the symbol whose instances will be added to the TOC for each page in your document. It needs to have a text override called `<tocPageTitle>` and a text override called `<tocPageNumber>`. Note that these overrides cannot be in nested symbols. Again, it doesn't matter what the symbol or its instances are called.
-  
-<img src="/readme_images/page_entry_symbol.png" width="480">
-
-When added to the TOC, the symbol instances will be stacked upon each other with no space in between, so build any desired padding into the symbol itself.
-
-You'll also need to set design this symbol so that it resizes its content, with the title and page number pinned appropriately. For best results, use this pinning:
-
-<img src="/readme_images/page_entry_pinning_1.png" width="380"> 
-
-<img src="/readme_images/page_entry_pinning_2.png" width="380">
-
-The symbol instances that the plug-in adds to the TOC will always remain same height as the corresponding symbol.
-
-### The TOC section-title symbol (optional)
-
-This is the symbol whose instances will be added to the TOC for each section in your document. See "The page-section symbol" above for what it takes to make TOC sections. 
-
-This symbol needs to have a text override called `<tocSectionTitle>` and a text override called `<tocPageNumber>`, but if you don't want your TOC sections to have a page number, you can leave the latter text override out, out or set its opacity to 0.
-  
-<img src="/readme_images/section_entry_symbol.png" width="390">
-
-Use the same pinning as shown in the section above.
 
 ### Troubleshooting
 
