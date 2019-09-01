@@ -1,1 +1,53 @@
-
+{
+  "author": "Joseph Brick",
+  "commands": [{
+      "script": "main.js",
+      "name": "Organize All",
+      "identifier": "organizeDocument",
+      "handlers": {
+        "run": "_organizeDocument"
+      }
+    },
+    {
+      "script": "main.js",
+      "name": "Update Callouts on Artboard",
+      "identifier": "updateCalloutsOnArtboard",
+      "handlers": {
+        "run": "_updateCalloutsOnArtboard"
+      }
+    },
+    {
+      "script": "main.js",
+      "name": "Settings",
+      "identifier": "settings",
+      "handlers": {
+        "run": "_settings"
+      }
+    },
+    {
+      "name": "layersresized",
+      "identifier": "layersresized",
+      "script": "main.js",
+      "handlers": {
+        "actions": {
+          "LayersResized.finish": "_onLayersResizedFinish"
+        }
+      }
+    }
+  ],
+  "menu": {
+    "title": "Organize Document",
+    "items": [
+      "organizeDocument",
+      "updateCalloutsOnArtboard",
+      "-",
+      "settings"
+    ]
+  },
+  "identifier": "https://github.com/josephxbrick/organize-sketch-doc",
+  "homepage": "https://github.com/josephxbrick/organize-sketch-doc",
+  "version": "1.0",
+  "description": "Various functions for tidying up a document",
+  "authorEmail": "jbrick@gmail.com",
+  "name": "Organize Document"
+}
