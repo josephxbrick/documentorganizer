@@ -63,7 +63,6 @@ And of course, once you place the symbol instance on an artboard, you'll need to
 
 ### The page title symbol
 
-
 The page-title symbol displays the title of a page on an artboard. The symbol must have a text override named `<pageTitle>`. It doesn't matter what the symbol itself is named. Placing this symbol on an artboard will make it show up as a page that belongs to a section in the TOC.
 
 <img src="/readme_images/page_title_symbol.png" width="380">
@@ -113,10 +112,10 @@ Coming soon. For now, examine `tocsample.sketch` in this repository
 
 ## Troubleshooting
 
-### The table of contents is in the wrong order
+### The TOC is in the wrong order
 
-Make sure the tops of each row of artboards are aligned perfectly.
+Make sure the tops of each row of artboards are aligned perfectly and arranged left-to right, whether your artboards are arranged in a single horizontal row, or if each section's artboards are arranged in their own row.
 
-### Section numbering in the table of contents is messed up
+### Section numbering is messed up
 
-Go to the artboard(s) that with the bad section number and remove the section prefix (including the dash) from the text override of the artboard's title instane.
+Go to the artboard(s) with the bad section number and remove the section prefix (including the dash) from the text override of the artboard's title instance. Also, the only dash in the text override should be the one separating the section number from the page title.
