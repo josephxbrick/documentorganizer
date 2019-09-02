@@ -451,18 +451,22 @@ const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
   const dashes = [dash, ndash, mdash];
   const dashIndex = storedValue('dashType');
   const desiredDash = dashes[dashIndex];
-  text = text.replace(dash, desiredDash).replace(ndash, desiredDash).replace(mdash, desiredDash).replace(desiredDash, ` ${desiredDash} `);
+  text = text.replace(dash, desiredDash).replace(ndash, desiredDash).replace(mdash, desiredDash).replace(desiredDash, ` ${desiredDash} `).trim();
   // replace multiple consecutive spaces with a single space
   while(text.indexOf('  ') != -1){
      text = text.replace('  ',' ');
   }
-  if (text.indexOf(desiredDash) < 0){
-    return `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text}`;
-  } else {
-    return `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text.substring(text.indexOf(desiredDash) + 2, text.length)}`;
+  const charArray = text.split('');
+  let prefixEndChar = 0;
+  for (let i = 0; i < charArray.length; i++){
+    const char = charArray[i];
+    if ('1234567890 -.'.concat(ndash).concat(mdash).indexOf(char) < 0){
+      prefixEndChar = i
+      break;
+    }
   }
+  return `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text.substring(prefixEndChar, text.length)}`
 }
-
 const checkNameArtboardSetup = (doc, summary) => {
   const pageTitle = symbolMasterWithOverrideName(doc, '<pageTitle>');
   if (pageTitle === undefined) {
