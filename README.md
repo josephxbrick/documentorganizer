@@ -6,7 +6,7 @@ This plugin updates page numbers, section numbers, callout numbers, and a table 
 
 The easiest way to get install this plugin is to choose `Download Zip` from the `Clone or Download` button at the top of the page, unzip the downloaded file, and double-click `documentorganizer.sketchplugin`.
 
-<img src="/readme_images/clone-or-download.png" width="387">
+<img src="/readme_images/clone-or-download.png" width="320">
 
 # Table of contents, section numbering, and page numbering
 
