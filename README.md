@@ -6,6 +6,8 @@ This plugin updates page numbers, section numbers, callout numbers, and a table 
 
 In addition to the documentation below, there is a `tocsample.sketch` file in the repository that's a sketch file designed to work with this plugin. It contains some explanations of how the plugin expects the document to be set up.
 
+## Installing the plugin
+
 The easiest way to  install this plugin is to choose `Download Zip` from the `Clone or Download` button at the top of the page, unzip the downloaded file, and double-click `documentorganizer.sketchplugin`.
 
 <img src="/readme_images/clone-or-download.png" width="320">
