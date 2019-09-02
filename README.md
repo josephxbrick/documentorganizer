@@ -112,10 +112,6 @@ Coming soon. For now, examine `tocsample.sketch` in this repository
 
 ## Troubleshooting
 
-### The TOC is in the wrong order
+### The TOC lists pages in the wrong order
 
 Make sure the tops of each row of artboards are aligned perfectly and arranged left-to right, whether your artboards are arranged in a single horizontal row, or if each section's artboards are arranged in their own row.
-
-### Section numbering is messed up
-
-Go to the artboard(s) with the bad section number and remove the section prefix (including the dash) from the text override of the artboard's title instance. Also, the only dash in the text override should be the one separating the section number from the page title.
