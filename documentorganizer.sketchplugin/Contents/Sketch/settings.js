@@ -5,7 +5,8 @@ const Settings = require('sketch/settings');
 const valuesForStorage = [
   {name: 'tocColumnSpacing', key: 'organize_document_columnSpacing', default: 50},
   {name: 'tocShowColumnsOnly', key: 'organize_document_showTOCSectionsOnly', default: 0},
-  {name: 'dashType', key: 'organize_document_dashType', default: 1}
+  {name: 'dashType', key: 'organize_document_dashType', default: 1},
+  {name: 'useSections', key: 'organize_document_useSections', default: 1}
 ];
 
 
@@ -18,7 +19,7 @@ const settingsDialog = (context) => {
   alert.addButtonWithTitle("Cancel");
   let curY = 0;
   const rightColumnPos = 130;
-  const viewWidth = 340;
+  const viewWidth = 360;
   const viewHeight = 240;
   const alertContent = NSView.alloc().init();
   alertContent.setFlipped(true);
@@ -43,27 +44,39 @@ const settingsDialog = (context) => {
   controls.push(tocShowLabel);
   const tocShowRadios = createRadioButtons(["All pages","Section headings only"], storedValue('tocShowColumnsOnly'), {x: rightColumnPos, y: curY, width: viewWidth});  // < ================ Stored value
   curY = pushControlAndGetNewY(controls, tocShowRadios);
-  // Dash type label, dropdown, and help text
-  const dashStyleLabel = createLabel("Section dash type:", {x: 0, y: curY, width: viewWidth});
-  controls.push(dashStyleLabel);
-  const dashStyleSelect = createSelect(['-', '\u2013', '\u2014'], storedValue('dashType'), {x: rightColumnPos, y: curY, width: 45});  // < ================ Stored value
-  curY = pushControlAndGetNewY(controls, dashStyleSelect, 0);
-  const dashHelp = createDescription("Dashes appear between section numbers and page titles", NSColor.grayColor(), 11, {x: rightColumnPos, y: curY, width: viewWidth - rightColumnPos, height: textHeight(11, 2)});
-  curY = pushControlAndGetNewY(controls, dashHelp);
-  // Divider line
-  const divider2 = createDivider( {x:0, y: curY, width: viewWidth});
+  // divider line
+  const divider2 = createDivider({x:0, y: curY, width: viewWidth});
   curY = pushControlAndGetNewY(controls, divider2);
 
+  //Section numbering checkbox
+  const useSectionsCheckbox = createCheckbox('Use section numbering', storedValue('useSections'), {x:0, y: curY, width: viewWidth}); // < ================ Stored value
+  curY = pushControlAndGetNewY(controls, useSectionsCheckbox, 5);
+  useSectionsCheckbox.setAction("callAction:");
+  useSectionsCheckbox.setCOSJSTargetFunction(function(sender) { dashStyleSelect.setEnabled(sender.state()); });
+  const sectionsHelp = createDescription("Section and page titles can include section numbering. Without section numbering, you will need to manually number callouts.", NSColor.grayColor(), 11, {x: 0, y: curY, width: viewWidth, height: textHeight(11, 2)});
+  curY = pushControlAndGetNewY(controls, sectionsHelp);
+  // Dash type label, dropdown, and help text
+  const dashStyleLabel = createLabel("Dash style:", {x: 0, y: curY, width: viewWidth});
+  controls.push(dashStyleLabel);
+  const dashStyleSelect = createSelect(['-', '\u2013', '\u2014'], storedValue('dashType'), {x: 73, y: curY, width: 45});  // < ================ Stored value
+  dashStyleSelect.setEnabled(storedValue('useSections'));
+  curY = pushControlAndGetNewY(controls, dashStyleSelect, 0);
+  const dashHelp = createDescription("Dashes appear between section numbers and page titles", NSColor.grayColor(), 11, {x: 73, y: curY, width: viewWidth - 73, height: textHeight(11, 2)});
+  curY = pushControlAndGetNewY(controls, dashHelp);
+  // divider line
+  const divider3 = createDivider( {x:0, y: curY, width: viewWidth});
+  curY = pushControlAndGetNewY(controls, divider3);
   // add all controls to the alertContent view
   addControls(alertContent, controls);
 	alertContent.frame = NSMakeRect(0,0,viewWidth,CGRectGetMaxY(controls[controls.length - 1].frame()));
   alert.accessoryView = alertContent;
   // Store the values if cancel isn't hit
-  console.log(spacingField.getValue())
+
   if (alert.runModal() == 1000){
     setStoredValue('tocColumnSpacing', spacingField.getValue());
     setStoredValue('tocShowColumnsOnly', tocShowRadios.getValue());
     setStoredValue('dashType', dashStyleSelect.getValue());
+    setStoredValue('useSections', useSectionsCheckbox.getValue());
     return true;
   } else {
     return undefined;

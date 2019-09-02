@@ -18,13 +18,19 @@ _settings = (context) => {
     pageNumberArtboards(context, summary);
     nameArtboards(context, summary)
     tableOfContents(context, summary);
-    updateCalloutLists(doc);
+    if (storedValue('useSections')){
+      updateCalloutLists(doc);
+    }
   }
   displaySummary(doc, summary);
 }
 
 // called from plug-in menu
 _updateCalloutsOnArtboard = (context) => {
+  if (!storedValue('useSections')){
+    context.document.showMessage('This document must use section numbering to number the callouts automatically.');
+    return;
+  }
   const doc = context.document;
   const page = doc.currentPage();
   artboard = page.currentArtboard();
@@ -52,7 +58,9 @@ _organizeDocument = (context) => {
     tableOfContents(context, summary);
   }
   displaySummary(doc, summary);
-  updateCalloutLists(doc);
+  if (storedValue('useSections')){
+    updateCalloutLists(doc);
+  }
 }
 
 
@@ -406,6 +414,8 @@ const checkDateSetup = (doc, summary) => {
 //==================================================================
 
 const nameArtboards = (context, summary) => {
+  // get stored useSections setting
+  const useSections = Number(storedValue('useSections'));
   const doc = context.document;
   const page = doc.currentPage();
   let sectionNumber = sectionPageNumber = 0;
@@ -421,7 +431,7 @@ const nameArtboards = (context, summary) => {
       if (pageTitle != undefined){
         sectionNumber++;
         sectionPageNumber = 0;
-        pageTitle = addSectionNumbers(pageTitle, sectionNumber, sectionPageNumber);
+        pageTitle = addSectionNumbers(pageTitle, sectionNumber, sectionPageNumber, useSections);
         setOverrideText(instance, '<sectionTitle>', pageTitle);
         artboard.setName(pageTitle);
         titlesAdded++;
@@ -429,7 +439,7 @@ const nameArtboards = (context, summary) => {
       pageTitle = getOverrideText(instance, '<pageTitle>');
       if (pageTitle != undefined){
         sectionPageNumber++;
-        pageTitle = addSectionNumbers(pageTitle, sectionNumber, sectionPageNumber);
+        pageTitle = addSectionNumbers(pageTitle, sectionNumber, sectionPageNumber, useSections);
         setOverrideText(instance, '<pageTitle>', pageTitle);
         artboard.setName(pageTitle);
         titlesAdded++;
@@ -441,7 +451,8 @@ const nameArtboards = (context, summary) => {
 }
 
 // adds section numbers, makes all dashes match the dash preference
-const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
+const addSectionNumbers = (text, sectionNumber, sectionPageNumber, useSections) => {
+
   const dash = '-';
   const ndash = '\u2013';
   const mdash = '\u2014';
@@ -458,7 +469,12 @@ const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
       break;
     }
   }
-  retVal = `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text.substring(prefixEndChar, charArray.length)}`
+  if (useSections){
+      retVal = `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text.substring(prefixEndChar, charArray.length)}`
+  } else {
+      retVal = `${text.substring(prefixEndChar, charArray.length)}`
+  }
+
   return retVal
 }
 
