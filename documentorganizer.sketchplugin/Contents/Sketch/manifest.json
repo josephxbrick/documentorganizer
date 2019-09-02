@@ -36,7 +36,7 @@
     }
   ],
   "menu": {
-    "title": "Organize Document",
+    "title": "Organize Document",	   
     "items": [
       "organizeDocument",
       "updateCalloutsOnArtboard",
@@ -47,6 +47,7 @@
   "identifier": "https://github.com/josephxbrick/organize-sketch-doc",
   "homepage": "https://github.com/josephxbrick/organize-sketch-doc",
   "version": "1.0",
+  "icon" : "icon.png",
   "description": "Various functions for tidying up a document",
   "authorEmail": "jbrick@gmail.com",
   "name": "Organize Document"

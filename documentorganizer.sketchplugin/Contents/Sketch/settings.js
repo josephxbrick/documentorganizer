@@ -27,7 +27,7 @@ const settingsDialog = (context) => {
   // create and layout controls
   const controls = [];
   // Heading
-  const description = createDescription("Organize your document with page numbers, section/callout numbering, and a table of contents (TOC).", NSColor.blackColor(), 12, {x: 0, y: curY, width: viewWidth, height: textHeight(12, 2)});
+  const description = createDescription("Organize your document with page numbers, section/callout numbering, and a table of contents (TOC).", NSColor.darkGrayColor(), 12, {x: 0, y: curY, width: viewWidth, height: textHeight(12, 2)});
   curY = pushControlAndGetNewY(controls, description);
   // Divider line
   const divider1 = createDivider({x:0, y: curY, width: viewWidth});
