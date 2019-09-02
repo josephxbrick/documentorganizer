@@ -102,9 +102,9 @@ Note that the hash character in the default override text (which you see above) 
 
 ## Section numbering
 
-The plugin prefixes the section names and page names section numbering (which is a value like 1.0, 1.1, 2.0, etc.) followed by a hyphen, which can be either a dash, an n-dash, or an m-dash. It assumes all existing titles either start with just a title with no section prefix, or are titles that already have the section prefix. 
+The plugin prefixes  section titles and page titles with section numbering (which is a value like 1.0, 1.1, 2.0, etc.) followed by a hyphen, which can be either a dash, an n-dash, or an m-dash. (Note to self: I should make section numbering optional.)
 
-Important: the code here is not as robust as it could be, so avoid using a dash anywhere within the title of the page; the only dash in the text override should be the one separating the section number from the page title. 
+Important: the title of the page (after the prefix) cannot begin with a number, a period, or any type of dash.
 
 ## Callouts and the callout listing
 
