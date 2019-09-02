@@ -15,7 +15,6 @@ _settings = (context) => {
     if (val === undefined){
       return;
     }
-    console.log('got to here')
     pageNumberArtboards(context, summary);
     nameArtboards(context, summary)
     tableOfContents(context, summary);
@@ -97,7 +96,6 @@ Optional elements (if you have sections in your doc)
 
 const tableOfContents = (context, summary) => {
   const tocArray = getTOCArray(context);
-  console.log('toc')
   const doc = context.document;
   initializeTOC(doc)
   createTOC(doc, tocArray, summary);
@@ -408,7 +406,6 @@ const checkDateSetup = (doc, summary) => {
 //==================================================================
 
 const nameArtboards = (context, summary) => {
-  console.log('name artboards')
   const doc = context.document;
   const page = doc.currentPage();
   let sectionNumber = sectionPageNumber = 0;
@@ -443,30 +440,28 @@ const nameArtboards = (context, summary) => {
   summary.push(`${titlesAdded} artboards named`);
 }
 
-// adds section numbers, makes all dashes ndashes
+// adds section numbers, makes all dashes match the dash preference
 const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
   const dash = '-';
   const ndash = '\u2013';
   const mdash = '\u2014';
-  const dashes = [dash, ndash, mdash];
   const dashIndex = storedValue('dashType');
-  const desiredDash = dashes[dashIndex];
-  text = text.replace(dash, desiredDash).replace(ndash, desiredDash).replace(mdash, desiredDash).replace(desiredDash, ` ${desiredDash} `).trim();
-  // replace multiple consecutive spaces with a single space
-  while(text.indexOf('  ') != -1){
-     text = text.replace('  ',' ');
-  }
-  const charArray = text.split('');
+  const desiredDash = [dash, ndash, mdash][dashIndex];
+  const possibleIndexChars = '1234567890 .-'.concat(ndash).concat(mdash);
+  // find index of first character that isn't part of an section number prefix
+  const charArray = text.trim().split('');
   let prefixEndChar = 0;
   for (let i = 0; i < charArray.length; i++){
     const char = charArray[i];
-    if ('1234567890 -.'.concat(ndash).concat(mdash).indexOf(char) < 0){
-      prefixEndChar = i
+    if (possibleIndexChars.indexOf(char) < 0){
+      prefixEndChar = i;
       break;
     }
   }
-  return `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text.substring(prefixEndChar, text.length)}`
+  retVal = `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text.substring(prefixEndChar, charArray.length)}`
+  return retVal
 }
+
 const checkNameArtboardSetup = (doc, summary) => {
   const pageTitle = symbolMasterWithOverrideName(doc, '<pageTitle>');
   if (pageTitle === undefined) {
