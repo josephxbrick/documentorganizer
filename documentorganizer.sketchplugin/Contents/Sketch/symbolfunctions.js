@@ -1,7 +1,6 @@
 // assumes non-nested symbol
 const setOverrideText = (instance, overrideName, newText) => {
-	const symbolMaster = instance.symbolMaster();
-	const children = symbolMaster.children();
+	const children = instance.symbolMaster().children();
 	for (let i = 0; i < children.count(); i++){
 		const child = children[i];
 		if (child.class() === MSTextLayer && child.name() == overrideName){
@@ -33,10 +32,20 @@ const symbolsWithOverride = (symbols, overrideName) => {
 	return retval;
 }
 
+const instanceHasOverride = (instance, overrideName) => 	{
+	const children = instance.symbolMaster().children()
+	for (let i = 0; i < children.count(); i++){
+		const child = children[i];
+		if (child.name() == overrideName){
+			return true;
+		}
+	}
+	return false;
+}
+
 // assumes non-nested symbol
 const getDefaultOverrideText = (instance, overrideName) => {
-	const symbolMaster = instance.symbolMaster();
-	const children = symbolMaster.children();
+	const children = instance.symbolMaster().children();
 	for (let i = 0; i < children.count(); i++){
 		const child = children[i];
 		if (child.class() === MSTextLayer && child.name() == overrideName){
@@ -48,8 +57,7 @@ const getDefaultOverrideText = (instance, overrideName) => {
 
 // assumes non-nested symbol
 const getOverrideText = (instance, overrideName) => {
-	const symbolMaster = instance.symbolMaster();
-	const children = symbolMaster.children();
+	const children = instance.symbolMaster().children();
 	for (let i = 0; i < children.count(); i++){
 		const child = children[i];
 		if (child.class() === MSTextLayer && child.name() == overrideName){
@@ -63,7 +71,7 @@ const getOverrideLayerfromMaster = (symbolMaster, overrideName) => {
 	const children = symbolMaster.children();
 	for (let i = 0; i < children.count(); i++){
 		const child = children[i];
-		if (child.class() === MSTextLayer && child.name() == overrideName){
+		if (child.name() == overrideName){
 			return child;
 		}
 	}

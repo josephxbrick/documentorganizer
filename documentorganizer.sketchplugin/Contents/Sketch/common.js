@@ -1,58 +1,62 @@
 const UI = require('sketch/ui');
 
+const allArtboards = (page) => {
+  return toArray(page.layers()).filter(item => item.class() === MSArtboardGroup);
+}
+
 //get string from user. defaultValue is ignored if value is stored in key
-// const getStringFromUser = (prompt, defaultValue, key)  => {
-//   let storedValue = Settings.settingForKey(key);
-//   if (storedValue === undefined) {
-//     storedValue = defaultValue;
-//   }
-//   let retval = undefined;
-//   const ui = UI.getInputFromUser(
-//     prompt, {
-//       type: UI.INPUT_TYPE.string,
-//       initialValue: storedValue,
-//     },
-//     (err, value) => {
-//       if (!err) {
-//         // user did not cancel
-//         retval = value;
-//       }
-//     }
-//   );
-//   ui.setIcon(NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path()));
-//   if (retval !== undefined) {
-//     Settings.setSettingForKey(key, retval);
-//   }
-//   return retval;
-// }
-//
-// const getSelectionFromUser = (prompt, possibleValues, defaultValue, key) => {
-//   let storedValue = Settings.settingForKey(key);
-//   if (storedValue === undefined) {
-//     storedValue = defaultValue;
-//   }
-//   let retval = undefined;
-//   UI.getInputFromUser(
-//     prompt, {
-//       type: UI.INPUT_TYPE.selection,
-//       possibleValues: possibleValues,
-//       initialValue: storedValue,
-//     },
-//     (err, value) => {
-//       if (!err) {
-//         // user did not cancel
-//         retval = value;
-//       }
-//     }
-//   );
-//   if (retval !== undefined) {
-//     Settings.setSettingForKey(key, retval);
-//   }
-//   return retval;
-// }
-//
-//
-//
+const getStringFromUser = (prompt, defaultValue, key)  => {
+  let storedValue = Settings.settingForKey(key);
+  if (storedValue === undefined) {
+    storedValue = defaultValue;
+  }
+  let retval = undefined;
+  const ui = UI.getInputFromUser(
+    prompt, {
+      type: UI.INPUT_TYPE.string,
+      initialValue: storedValue,
+    },
+    (err, value) => {
+      if (!err) {
+        // user did not cancel
+        retval = value;
+      }
+    }
+  );
+  ui.setIcon(NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path()));
+  if (retval !== undefined) {
+    Settings.setSettingForKey(key, retval);
+  }
+  return retval;
+}
+
+const getSelectionFromUser = (prompt, possibleValues, defaultValue, key) => {
+  let storedValue = Settings.settingForKey(key);
+  if (storedValue === undefined) {
+    storedValue = defaultValue;
+  }
+  let retval = undefined;
+  UI.getInputFromUser(
+    prompt, {
+      type: UI.INPUT_TYPE.selection,
+      possibleValues: possibleValues,
+      initialValue: storedValue,
+    },
+    (err, value) => {
+      if (!err) {
+        // user did not cancel
+        retval = value;
+      }
+    }
+  );
+  if (retval !== undefined) {
+    Settings.setSettingForKey(key, retval);
+  }
+  return retval;
+}
+
+
+
 const displaySummary = (doc, summary)  => {
   const br = String.fromCharCode(13);
   const slash = String.fromCharCode(47);
@@ -120,4 +124,15 @@ const sortByHorizontalPosition = (layers) => {
 
 const sortByVerticalPosition = (layers) => {
   layers.sort((a, b) => a.frame().y() - b.frame().y());
+}
+
+function sortArtboards(context, sortFunction) {
+  const doc = context.document;
+  const page = doc.currentPage();
+  artboards = allArtboards(page);
+  sortFunction(artboards);
+	for (artboard of artboards){
+    artboard.moveToLayer_beforeLayer(page,nil);
+		artboard.select_byExpandingSelection(false,true);
+  }
 }

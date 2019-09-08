@@ -15,6 +15,7 @@ _settings = (context) => {
     if (val === undefined){
       return;
     }
+    sortArtboards(context, sortLayersByRows);
     pageNumberArtboards(context, summary);
     nameArtboards(context, summary)
     tableOfContents(context, summary);
@@ -44,6 +45,7 @@ _updateCalloutsOnArtboard = (context) => {
 // called from plug-in menu
 _organizeDocument = (context) => {
   const doc = context.document;
+  sortArtboards(context);
   let summary = [];
   if (checkPageNumberSetup(doc, summary) !== undefined) {
     pageNumberArtboards(context, summary);
@@ -78,7 +80,7 @@ _onLayersResizedFinish = (context, instance) => {
       layoutTOC(doc);
     }
     if (layer.name() == '<calloutListGroup>') {
-      layoutArtboardCallouts(layer, doc);
+      layoutCalloutDescriptions(layer, doc);
     }
   };
 }
@@ -114,9 +116,7 @@ const getTOCArray = (context) => {
   const doc = context.document;
   const page = doc.currentPage();
   // get all artboards on the current page
-  const artboards = toArray(page.layers()).filter(item => item.class() === MSArtboardGroup);
-  // sort artboards based on how they are laid out, left-to-right or top-to-bottom
-  sortLayersByRows(artboards);
+  const artboards = allArtboards(page);
   // this array will contain each TOC entry, which will be either a section title or page title)
   const tocArray = [];
   for (const artboard of artboards) {
@@ -172,7 +172,7 @@ const initializeTOC = (doc) => {
 
 // load the TOC with sectionTitle and pageTitle instances
 const createTOC = (doc, tocArray, summary) => {
-  const showSectionsOnly =  storedValue('tocShowColumnsOnly');
+  const showSectionsOnly =  (storedValue('tocShowColumnsOnly') == 0) ? false: true;
 
   let tocItemCount = 0;``
   const page = doc.currentPage();
@@ -249,13 +249,13 @@ const createTOC = (doc, tocArray, summary) => {
 
 const layoutTOC = (doc) => {
   // get stored colSpacing setting
+
   const colSpacing = Number(storedValue('tocColumnSpacing'));
   const page = doc.currentPage();
   const tocGroup = layerWithName(page, MSLayerGroup, '<tocGroup>');
   const tocRect = layerWithName(tocGroup, MSRectangleShape, '<tocGroupRect>')
   const tocW = tocGroup.frame().width();
   const tocH = tocGroup.frame().height();
-  // get all groups in toc
   const groups = toArray(tocGroup.layers()).filter(item => item.class() === MSLayerGroup);
   let curY = curCol = 0;
   // add groups to an array of columns while setting each group's vertical position
@@ -263,6 +263,7 @@ const layoutTOC = (doc) => {
     []
   ];
   for (const group of groups) {
+
     if (curY > 0 && curY + group.frame().height() > tocH) {
       // group extends beyond the height of the TOC, so create new column for it
       curCol++
@@ -280,7 +281,7 @@ const layoutTOC = (doc) => {
     let column = columns[i];
     let x = i * (colWidth + colSpacing);
     for (j = 0; j < column.length; j++) {
-      let group = column[j];
+      const group = column[j];
       // set all pinning to false
       group.setFixed_forEdge_(false, 32) //pin top
       group.setFixed_forEdge_(false, 1) // pin right
@@ -307,6 +308,33 @@ const layoutTOC = (doc) => {
   tocRect.frame().setWidth(tocGroup.frame().width());
   tocRect.frame().setHeight(tocGroup.frame().height());
 }
+
+// assumes all members of group are symbol instances
+// const wrapGroup = (group, width) => {
+//   let runningTop = 0;
+//   const instances = group.layers());
+//   for (let i = 0; i < instances.count(); i++){
+//     const instance = instances[i];
+//     let overrideName = undefined;
+//     instance.frame().setY(runningTop);
+//     if (instanceHasOverride(instance, '<tocSectionTitle>')){
+//       overrideName = '<tocSectionTitle>';
+//     } else {
+//       overrideName = '<tocPageTitle>';
+//     }
+//     const master = instance.symbolMaster();
+//     const override = getOverrideLayerfromMaster(master, overrideName);
+//     const overrideCopy = override.copy();
+//     group.addLayers([overrideCopy]);
+//     const horizontalPadding = master.frame().width() - override.frame().width();
+//     const verticalPadding = master.frame().height() - override.frame().height();
+//     overrideCopy.frame().setWidth(width - horizontalPadding);
+//     overrideCopy.setStringValue(getOverrideText(instance, overrideName));
+//     runningTop += verticalPadding + overrideCopy.frame().height();
+//     group.removeLayer(overrideCopy);
+//   }
+//   return runningTop;
+// }
 
 // make sure user is set up for TOC
 const checkTocSetup = (doc, summary) => {
@@ -342,7 +370,7 @@ const checkTocSetup = (doc, summary) => {
 const addCurrentDate = (context, summary) => {
   const doc = context.document;
   const page = doc.currentPage();
-  const artboards = toArray(page.layers()).filter(item => item.class() === MSArtboardGroup);
+  const artboards = allArtboards(page);
   let datesAdded = 0;
   for (const artboard of artboards) {
     instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
@@ -419,7 +447,7 @@ const nameArtboards = (context, summary) => {
   const doc = context.document;
   const page = doc.currentPage();
   let sectionNumber = sectionPageNumber = 0;
-  const artboards = toArray(page.layers()).filter(item => item.class() === MSArtboardGroup);
+  const artboards = allArtboards(page);
   sortLayersByRows(artboards);
   let titlesAdded = 0;
   for (const artboard of artboards) {
@@ -493,7 +521,7 @@ const pageNumberArtboards = (context, summary) => {
   const doc = context.document
   const page = doc.currentPage();
   const startPageNum = 1;
-  const artboards = toArray(page.layers()).filter(item => item.class() === MSArtboardGroup);
+  const artboards = allArtboards(page);
   sortLayersByRows(artboards);
   let curPage = startPageNum;
   let totalPages = 0
@@ -553,7 +581,7 @@ const checkPageNumberSetup = (doc, summary) => {
 const updateCalloutLists = (doc) => {
   const page = doc.currentPage();
   // get all artboards on the current page
-  const artboards = toArray(page.layers()).filter(item => item.class() === MSArtboardGroup);
+  const artboards = allArtboards(page);
   for (const artboard of artboards) {
     updateCalloutsOnArtboard(artboard, doc);
   }
@@ -576,55 +604,56 @@ const updateCalloutsOnArtboard = (artboard, doc) => {
     calloutListDescriptions.push({description: overrideText, calloutNumber: calloutNumber});
     callout.setName(`${sectionNumber}.${calloutCount} - ${overrideText.substring(0,30)}...`);
   }
-  let calloutListGroup = layerWithName(artboard, MSLayerGroup, '<calloutListGroup>');
-  if (calloutListGroup !== undefined && calloutListDescriptions.length > 0){
+  let calloutDescriptionsGroup = layerWithName(artboard, MSLayerGroup, '<calloutListGroup>');
+  if (calloutDescriptionsGroup !== undefined && calloutListDescriptions.length > 0){
     // get reference to the listing symbol
-    const calloutListSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
-    // remove existing groups from calloutListGroup
-    const instances = toArray(calloutListGroup.layers()).filter(item => item.class() === MSSymbolInstance || item.class() === MSTextLayer);
+    const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
+    // remove existing groups from calloutDescriptionsGroup
+    const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() === MSSymbolInstance || item.class() === MSTextLayer);
     for (const instance of instances) {
-      calloutListGroup.removeLayer(instance);
+      calloutDescriptionsGroup.removeLayer(instance);
     }
-    // add one symbol to calloutListGroup per string in array
+    // add one symbol to calloutDescriptionsGroup per string in array
     for (calloutListDescription of calloutListDescriptions){
-      const instance = calloutListSymbol.newSymbolInstance();
+      const instance = calloutDescriptionSymbol.newSymbolInstance();
       instance.setConstrainProportions(0); // unlock the aspect ratio
-      calloutListGroup.addLayers([instance]);
+      calloutDescriptionsGroup.addLayers([instance]);
       setOverrideText(instance, '<calloutListDescription>', calloutListDescription.description);
       setOverrideText(instance, '<calloutListNumber>', calloutListDescription.calloutNumber);
       instance.setName(calloutListDescription.calloutNumber);
     }
-    layoutArtboardCallouts(calloutListGroup, doc);
+    layoutCalloutDescriptions(calloutDescriptionsGroup, doc);
   }
 }
 
-const layoutArtboardCallouts = (calloutListGroup, doc) => {
-  const groupRect = layerWithName(calloutListGroup, MSRectangleShape, '<calloutGroupRect>')
-  const calloutListSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
-  const overrideLayer = getOverrideLayerfromMaster(calloutListSymbol, '<calloutListDescription>')
-  const symbolPaddingVertical = calloutListSymbol.frame().height() - overrideLayer.frame().height();
-  const symbolPaddingHorizonal = calloutListSymbol.frame().width() - overrideLayer.frame().width();
-  const instances = toArray(calloutListGroup.layers()).filter(item => item.class() === MSSymbolInstance);
+// lays out the descriptions for callouts in the calloutDescriptionsGroup
+const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
+  const groupRect = layerWithName(calloutDescriptionsGroup, MSRectangleShape, '<calloutGroupRect>')
+  const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
+  const overrideLayer = getOverrideLayerfromMaster(calloutDescriptionSymbol, '<calloutListDescription>')
+  const symbolPaddingVertical = calloutDescriptionSymbol.frame().height() - overrideLayer.frame().height();
+  const symbolPaddingHorizonal = calloutDescriptionSymbol.frame().width() - overrideLayer.frame().width();
+  const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() === MSSymbolInstance);
   let runningTop = 0;
   for (instance of instances){
-    instance.frame().setWidth(calloutListGroup.frame().width());
+    instance.frame().setWidth(calloutDescriptionsGroup.frame().width());
     instance.frame().setY(runningTop);
     const overrideLayerCopy = overrideLayer.copy();
-    calloutListGroup.addLayers([overrideLayerCopy]);
-    overrideLayerCopy.frame().setWidth(calloutListGroup.frame().width() - symbolPaddingHorizonal);
+    calloutDescriptionsGroup.addLayers([overrideLayerCopy]);
+    overrideLayerCopy.frame().setWidth(calloutDescriptionsGroup.frame().width() - symbolPaddingHorizonal);
     overrideLayerCopy.setStringValue(getOverrideText(instance, '<calloutListDescription>'));
     runningTop += symbolPaddingVertical + overrideLayerCopy.frame().height();
-    calloutListGroup.removeLayer(overrideLayerCopy);
+    calloutDescriptionsGroup.removeLayer(overrideLayerCopy);
   }
-  // set the calloutListGroup's rectangle to size of group, just in case
-  groupRect.frame().setWidth(calloutListGroup.frame().width());
-  groupRect.frame().setHeight(calloutListGroup.frame().height());
+  // set the calloutDescriptionsGroup's rectangle to size of group, just in case
+  groupRect.frame().setWidth(calloutDescriptionsGroup.frame().width());
+  groupRect.frame().setHeight(calloutDescriptionsGroup.frame().height());
 }
 
 // Callouts can be organized into groups, or they can just be on the artboard.
 // If they are in groups, the sort order will be sorted first by group (running left to right),
 // then by vertical position within each group.
-const sortedCallouts= (artboard) => {
+const sortedCallouts = (artboard) => {
   let callouts = [];
   // get all top-level layer groups
   const groups = toArray(artboard.layers()).filter(item => item.class() === MSLayerGroup);
