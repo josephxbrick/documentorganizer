@@ -678,11 +678,11 @@ const sortedCallouts = (artboard) => {
   let callouts = [];
   // get all top-level layer groups
   const groups = toArray(artboard.layers()).filter(item => item.class() === MSLayerGroup);
-  sortByHorizontalPosition(groups);
+  sortByHorizontalPositio(groups);
   for (group of groups){
     const symbols = toArray(group.children()).filter(item => item.class() === MSSymbolInstance);
     const instances = symbolsWithOverride(symbols, '<calloutDescription>');
-    sortByVerticalPosition(instances);
+    sortLayersByRows(instances);
     callouts = callouts.concat(instances);
   }
   // get all ungrouped callout symbols
