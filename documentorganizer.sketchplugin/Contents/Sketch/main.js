@@ -9,13 +9,14 @@ const {
 _settings = (context) => {
   let summary = [];
   const doc = context.document;
+  page = doc.currentPage();
   // check if file is set up for creating a TOC
   if (checkTocSetup(doc, summary) !== undefined) {
     const val = settingsDialog(context);
     if (val === undefined){
       return;
     }
-    sortArtboards(context, sortLayersByRows);
+    sortArtboards(page);
     pageNumberArtboards(context, summary);
     nameArtboards(context, summary)
     tableOfContents(context, summary);
@@ -28,10 +29,11 @@ _settings = (context) => {
 
 // called from plug-in menu
 _updateCalloutsOnArtboard = (context) => {
-  if (!storedValue('useSections')){
-    context.document.showMessage('This document must use section numbering to number the callouts automatically.');
-    return;
-  }
+  // if (!storedValue('useSections')){
+  //   context.document.showMessage('This document must use section numbering to number the callouts automatically.');
+  //   return;
+  // }
+
   const doc = context.document;
   const page = doc.currentPage();
   artboard = page.currentArtboard();
@@ -45,7 +47,8 @@ _updateCalloutsOnArtboard = (context) => {
 // called from plug-in menu
 _organizeDocument = (context) => {
   const doc = context.document;
-  sortArtboards(context);
+  page = doc.currentPage();
+  sortArtboards(page);
   let summary = [];
   if (checkPageNumberSetup(doc, summary) !== undefined) {
     pageNumberArtboards(context, summary);
@@ -443,23 +446,25 @@ const checkDateSetup = (doc, summary) => {
 
 const nameArtboards = (context, summary) => {
   // get stored useSections setting
-  const useSections = Number(storedValue('useSections'));
   const doc = context.document;
   const page = doc.currentPage();
-  let sectionNumber = sectionPageNumber = 0;
+  let sectionNumber = sectionPageNumber = titlesAdded = 0;
   const artboards = allArtboards(page);
   sortLayersByRows(artboards);
-  let titlesAdded = 0;
+  let sectionTitle = undefined;
+  // find index of first character that isn't part of an section number prefix
+
   for (const artboard of artboards) {
-    pageTitle = undefined;
+    let pageTitle = undefined;
     instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
     for (const instance of instances) {
       // check if current instance contains override '<sectionTitle>'
       pageTitle = getOverrideText(instance, '<sectionTitle>');
       if (pageTitle != undefined){
+        sectionTitle = pageTitle;
         sectionNumber++;
         sectionPageNumber = 0;
-        pageTitle = addSectionNumbers(pageTitle, sectionNumber, sectionPageNumber, useSections);
+        pageTitle = addSectionNumbers(pageTitle, sectionNumber, sectionPageNumber);
         setOverrideText(instance, '<sectionTitle>', pageTitle);
         artboard.setName(pageTitle);
         titlesAdded++;
@@ -467,10 +472,14 @@ const nameArtboards = (context, summary) => {
       pageTitle = getOverrideText(instance, '<pageTitle>');
       if (pageTitle != undefined){
         sectionPageNumber++;
-        pageTitle = addSectionNumbers(pageTitle, sectionNumber, sectionPageNumber, useSections);
+        pageTitle = addSectionNumbers(pageTitle, sectionNumber, sectionPageNumber);
         setOverrideText(instance, '<pageTitle>', pageTitle);
         artboard.setName(pageTitle);
         titlesAdded++;
+      }
+      pageTitle = getOverrideText(instance, '<sectionNamePageHeader>');
+      if (pageTitle != undefined && sectionTitle != undefined){
+        setOverrideText(instance, '<sectionNamePageHeader>', removeSectionNumbers(sectionTitle));
       }
     }
   }
@@ -478,32 +487,44 @@ const nameArtboards = (context, summary) => {
   summary.push(`${titlesAdded} artboards named`);
 }
 
-// adds section numbers, makes all dashes match the dash preference
-const addSectionNumbers = (text, sectionNumber, sectionPageNumber, useSections) => {
-
-  const dash = '-';
+const prefixEndIndex = (text) => {
   const ndash = '\u2013';
   const mdash = '\u2014';
-  const dashIndex = storedValue('dashType');
-  const desiredDash = [dash, ndash, mdash][dashIndex];
   const possibleIndexChars = '1234567890 .-'.concat(ndash).concat(mdash);
-  // find index of first character that isn't part of an section number prefix
   const charArray = text.trim().split('');
-  let prefixEndChar = 0;
   for (let i = 0; i < charArray.length; i++){
     const char = charArray[i];
     if (possibleIndexChars.indexOf(char) < 0){
-      prefixEndChar = i;
-      break;
+      return i;
     }
   }
-  if (useSections){
-      retVal = `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text.substring(prefixEndChar, charArray.length)}`
+  return 0;
+}
+// adds section numbers, makes all dashes match the dash preference
+const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
+
+  const endIndex = prefixEndIndex(text);
+  let retval = undefined;
+  const ndash = '\u2013';
+  const mdash = '\u2014';
+  const dasharray = ['-', ndash, mdash];
+  const index = Number(storedValue('dashType'));
+  console.log(index);
+
+  const desiredDash = dasharray[index];
+  if (storedValue('useSections')){
+      retval = `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text.substring(endIndex)}`
   } else {
-      retVal = `${text.substring(prefixEndChar, charArray.length)}`
+      retval = `${text.substring(endIndex)}`
   }
 
-  return retVal
+  return retval
+}
+
+const removeSectionNumbers = (text) => {
+
+  const endIndex = prefixEndIndex(text);
+  return `${text.substring(endIndex)}`
 }
 
 const checkNameArtboardSetup = (doc, summary) => {

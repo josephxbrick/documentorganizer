@@ -1,5 +1,6 @@
 const UI = require('sketch/ui');
 
+
 const allArtboards = (page) => {
   return toArray(page.layers()).filter(item => item.class() === MSArtboardGroup);
 }
@@ -54,6 +55,8 @@ const getSelectionFromUser = (prompt, possibleValues, defaultValue, key) => {
   }
   return retval;
 }
+
+
 
 
 
@@ -114,9 +117,7 @@ const sortLayersByRows = (layers) => {
   }
   layers.sort( (a, b) => sortVal(a, minX, minY) - sortVal(b, minX, minY) );
 }
-const sortVal = (layer, minX, minY) => {
-  return (layer.frame().y() - minY) * 100 + (layer.frame().x() - minX);
-}
+const sortVal = (layer, minX, minY) =>  {return (layer.frame().y() - minY) * 100 + (layer.frame().x())}
 
 const sortByHorizontalPosition = (layers) => {
   layers.sort((a, b) => a.frame().x() - b.frame().x());
@@ -126,13 +127,11 @@ const sortByVerticalPosition = (layers) => {
   layers.sort((a, b) => a.frame().y() - b.frame().y());
 }
 
-function sortArtboards(context, sortFunction) {
-  const doc = context.document;
-  const page = doc.currentPage();
+function sortArtboards(page) {
   artboards = allArtboards(page);
-  sortFunction(artboards);
+  sortLayersByRows(artboards);
 	for (artboard of artboards){
     artboard.moveToLayer_beforeLayer(page,nil);
-		artboard.select_byExpandingSelection(false,true);
+		artboard.select_byExtendingSelection(false,true);
   }
 }
