@@ -451,17 +451,15 @@ const nameArtboards = (context, summary) => {
   let sectionNumber = sectionPageNumber = titlesAdded = 0;
   const artboards = allArtboards(page);
   sortLayersByRows(artboards);
-  let sectionTitle = undefined;
   // find index of first character that isn't part of an section number prefix
 
   for (const artboard of artboards) {
-    let pageTitle = undefined;
+    let pageTitle = docTitle = undefined;
     instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
     for (const instance of instances) {
       // check if current instance contains override '<sectionTitle>'
       pageTitle = getOverrideText(instance, '<sectionTitle>');
       if (pageTitle != undefined){
-        sectionTitle = pageTitle;
         sectionNumber++;
         sectionPageNumber = 0;
         pageTitle = addSectionNumbers(pageTitle, sectionNumber, sectionPageNumber);
@@ -477,9 +475,9 @@ const nameArtboards = (context, summary) => {
         artboard.setName(pageTitle);
         titlesAdded++;
       }
-      pageTitle = getOverrideText(instance, '<sectionNamePageHeader>');
-      if (pageTitle != undefined && sectionTitle != undefined){
-        setOverrideText(instance, '<sectionNamePageHeader>', removeSectionNumbers(sectionTitle));
+
+      if (instanceHasOverride(instance, '<documentTitle>')){
+        setOverrideText(instance, '<documentTitle>', storedValue('docTitle'));
       }
     }
   }
@@ -509,7 +507,6 @@ const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
   const mdash = '\u2014';
   const dasharray = ['-', ndash, mdash];
   const index = Number(storedValue('dashType'));
-  console.log(index);
 
   const desiredDash = dasharray[index];
   if (storedValue('useSections')){
@@ -678,7 +675,7 @@ const sortedCallouts = (artboard) => {
   let callouts = [];
   // get all top-level layer groups
   const groups = toArray(artboard.layers()).filter(item => item.class() === MSLayerGroup);
-  sortByHorizontalPositio(groups);
+  sortByHorizontalPosition(groups);
   for (group of groups){
     const symbols = toArray(group.children()).filter(item => item.class() === MSSymbolInstance);
     const instances = symbolsWithOverride(symbols, '<calloutDescription>');

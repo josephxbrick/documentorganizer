@@ -6,7 +6,8 @@ const valuesForStorage = [
   {name: 'tocColumnSpacing', key: 'organize_document_columnSpacing', default: 50},
   {name: 'tocShowColumnsOnly', key: 'organize_document_showTOCSectionsOnly', default: 0},
   {name: 'dashType', key: 'organize_document_dashType', default: 1},
-  {name: 'useSections', key: 'organize_document_useSections', default: 1}
+  {name: 'useSections', key: 'organize_document_useSections', default: 1},
+  {name: 'docTitle', key: 'organize_document_docTitle', default: 'Document title'}
 ];
 
 // Thanks to Jason Burns, whose Symbol Orgainzer plugin provided many "Aha!" moments in constructing this settings dialog
@@ -17,11 +18,11 @@ const settingsDialog = (context) => {
   alert.addButtonWithTitle("OK");
   alert.addButtonWithTitle("Cancel");
   let curY = 0;
-  const rightColumnPos = 130;
   const viewWidth = 360;
   const viewHeight = 240;
   const alertContent = NSView.alloc().init();
   alertContent.setFlipped(true);
+  let divider = helpText = label = controlDescription = undefined;
 
   // create and layout controls
   const controls = [];
@@ -30,50 +31,62 @@ const settingsDialog = (context) => {
   curY = pushControlAndGetNewY(controls, description);
 
   // Divider line
-  const divider1 = createDivider({x:0, y: curY, width: viewWidth});
-  curY = pushControlAndGetNewY(controls, divider1);
+  divider = createDivider({x:0, y: curY, width: viewWidth});
+  curY = pushControlAndGetNewY(controls, divider);
 
   // Column spacing label, field, and help text
-  const spacingLabel = createLabel("TOC column spacing:", {x: 0, y: curY, width: viewWidth});
-  controls.push(spacingLabel);
+  label = createLabel("Title of document:", {x: 0, y: curY, width: viewWidth});
+  controls.push(label);
+  // ======== titleFields's value is stored: used to populate the title of the document ======== //
+  const titleField = createField(storedValue('docTitle'), {x: 114, y: curY, width: viewWidth - 114});
+  curY = pushControlAndGetNewY(controls, titleField, 4);
+  controlDescription = createDescription("Used to populate the page title", NSColor.grayColor(), 11, {x: 114, y: curY, width: viewWidth - 114, height: textHeight(11, 1)});
+  curY = pushControlAndGetNewY(controls, controlDescription);
+
+  // Divider line
+  divider = createDivider({x:0, y: curY, width: viewWidth});
+  curY = pushControlAndGetNewY(controls, divider);
+
+  label = createLabel("TOC column spacing:", {x: 0, y: curY, width: viewWidth});
+  controls.push(label);
   // ======== spacingField's value is stored: used to specify spacing between columns======== //
-  const spacingField = createField(storedValue('tocColumnSpacing'), {x: rightColumnPos, y: curY, width: 34});
+  const spacingField = createField(storedValue('tocColumnSpacing'), {x: 130, y: curY, width: 34});
   curY = pushControlAndGetNewY(controls, spacingField, 4);
-  const spacingHelp = createDescription("Applies when table of contents has multiple columns", NSColor.grayColor(), 11, {x: rightColumnPos, y: curY, width: viewWidth - rightColumnPos, height: textHeight(11, 2)});
-  curY = pushControlAndGetNewY(controls, spacingHelp);
+  controlDescription = createDescription("Applies when table of contents has multiple columns", NSColor.grayColor(), 11, {x: 130, y: curY, width: viewWidth - 130, height: textHeight(11, 2)});
+  curY = pushControlAndGetNewY(controls, controlDescription);
 
   // radio buttons
-  const tocShowLabel = createLabel("Include in TOC:", {x: 0, y: curY, width: viewWidth});
-  controls.push(tocShowLabel);
+  label = createLabel("Include in TOC:", {x: 0, y: curY, width: viewWidth}, 1);
+  controls.push(label);
   // ======== tocShowRadios's value is stored: used to show all TOC entries or just section headers ======== //
-  const tocShowRadios = createRadioButtons(["All pages","Section headings only"], storedValue('tocShowColumnsOnly'), {x: rightColumnPos, y: curY, width: viewWidth});  //
+  const tocShowRadios = createRadioButtons(["All pages","Section headings only"], storedValue('tocShowColumnsOnly'), {x: 130, y: curY, width: viewWidth});  //
   curY = pushControlAndGetNewY(controls, tocShowRadios);
 
   // divider line
-  const divider2 = createDivider({x:0, y: curY, width: viewWidth});
-  curY = pushControlAndGetNewY(controls, divider2);
+  divider = createDivider({x:0, y: curY, width: viewWidth});
+  curY = pushControlAndGetNewY(controls, divider);
 
   // ======== useSectionsCheckbox value is stored: used to specify whether to use section numbering ======== //
   const useSectionsCheckbox = createCheckbox('Use section numbering', storedValue('useSections'), {x:0, y: curY, width: viewWidth});
   curY = pushControlAndGetNewY(controls, useSectionsCheckbox, 5);
   useSectionsCheckbox.setAction("callAction:");
   useSectionsCheckbox.setCOSJSTargetFunction(function(sender) { dashStyleSelect.setEnabled(sender.state()); });
-  const sectionsHelp = createDescription("Section and page titles can include section numbering. Without section numbering, you will need to manually number callouts.", NSColor.grayColor(), 11, {x: 0, y: curY, width: viewWidth, height: textHeight(11, 2)});
-  curY = pushControlAndGetNewY(controls, sectionsHelp);
+  controlDescription = createDescription("Section and page titles can include section numbering. Without section numbering, you will need to manually number callouts.", NSColor.grayColor(), 11, {x: 0, y: curY, width: viewWidth, height: textHeight(11, 2)});
+  curY = pushControlAndGetNewY(controls, controlDescription);
 
   // Dash type label, dropdown, and help text
-  const dashStyleLabel = createLabel("Dash style:", {x: 0, y: curY, width: viewWidth});
-  controls.push(dashStyleLabel);
+  label = createLabel("Dash style:", {x: 0, y: curY, width: viewWidth}, 6);
+  controls.push(label);
   // ======== dashStyleSelect's value is stored: used to choose which kind of dash is used to separate section number from page title  ======== //
   const dashStyleSelect = createSelect(['-', '\u2013', '\u2014'], storedValue('dashType'), {x: 73, y: curY, width: 45});  //
   dashStyleSelect.setEnabled(storedValue('useSections'));
   curY = pushControlAndGetNewY(controls, dashStyleSelect, 0);
-  const dashHelp = createDescription("Dashes appear between section numbers and page titles", NSColor.grayColor(), 11, {x: 73, y: curY, width: viewWidth - 73, height: textHeight(11, 2)});
-  curY = pushControlAndGetNewY(controls, dashHelp);
+  controlDescription = createDescription("Dashes appear between section numbers and page titles", NSColor.grayColor(), 11, {x: 73, y: curY, width: viewWidth - 73, height: textHeight(11, 2)});
+  curY = pushControlAndGetNewY(controls, controlDescription);
 
   // divider line
-  const divider3 = createDivider( {x:0, y: curY, width: viewWidth});
-  curY = pushControlAndGetNewY(controls, divider3);
+  divider = createDivider( {x:0, y: curY, width: viewWidth});
+  curY = pushControlAndGetNewY(controls, divider);
 
   // add all controls to the alertContent view
   addControls(alertContent, controls);
@@ -83,6 +96,7 @@ const settingsDialog = (context) => {
   // 1000 means Okay button was pressed, so store values //
   if (alert.runModal() == 1000){
     setStoredValue('tocColumnSpacing', spacingField.getValue());
+    setStoredValue('docTitle', titleField.getValue());
     setStoredValue('tocShowColumnsOnly', tocShowRadios.getValue());
     setStoredValue('dashType', dashStyleSelect.getValue());
     setStoredValue('useSections', useSectionsCheckbox.getValue());
@@ -170,9 +184,9 @@ const createRadioButtons = (options, selected, frame) => {
 }
 
 // create a non-bolded label
-const createLabel = (text, frame) => {
+const createLabel = (text, frame, topPadding = 2) => {
   frame.height = textHeight(12, 1);
-	const label = NSTextField.alloc().initWithFrame(NSMakeRect(frame.x, frame.y, frame.width, frame.height));
+	const label = NSTextField.alloc().initWithFrame(NSMakeRect(frame.x, frame.y + topPadding, frame.width, frame.height));
 	label.setStringValue(text);
 	label.setFont(NSFont.systemFontOfSize(12));
 	label.setBezeled(false);
@@ -253,7 +267,6 @@ const settingsObjectFromName = (name) => {
 
 // Add a control to array and return its bottom bound
 const pushControlAndGetNewY = (controls, control, padding = 12) => {
-  const settingPad = padding;
   controls.push(control);
-  return CGRectGetMaxY(control.frame()) + settingPad;
+  return CGRectGetMaxY(control.frame()) + padding;
 }

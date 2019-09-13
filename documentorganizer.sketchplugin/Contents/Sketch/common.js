@@ -57,9 +57,6 @@ const getSelectionFromUser = (prompt, possibleValues, defaultValue, key) => {
 }
 
 
-
-
-
 const displaySummary = (doc, summary)  => {
   const br = String.fromCharCode(13);
   const slash = String.fromCharCode(47);
