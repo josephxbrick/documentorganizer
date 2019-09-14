@@ -13,7 +13,7 @@ The easiest way to  install this plugin is to choose `Download Zip` from the `Cl
 
 ## Downloading the sample file
 
-In addition to the documentation below, there is a `tocsample.sketch` file in the repository that's a sketch file designed to work with this plugin. It contains some explanations of how the plugin expects the document to be set up. Hit the download button [here](https://github.com/josephxbrick/documentorganizer/blob/master/documentorganizer.sketchplugin/tocsample.sketch) to get the file.
+In addition to the documentation below, there is a `tocsample.sketch` file in the repository that's a sketch file designed to work with this plugin. It contains some explanations of how the plugin expects the document to be set up. Hit the download button [here](tocsample.sketch) to get the file.
 
 # Table of contents, section numbering, and page numbering
 
