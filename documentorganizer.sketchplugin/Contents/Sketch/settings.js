@@ -40,7 +40,7 @@ const settingsDialog = (context) => {
   // ======== titleFields's value is stored: used to populate the title of the document ======== //
   const titleField = createField(storedValue('docTitle'), {x: 114, y: curY, width: viewWidth - 114});
   curY = pushControlAndGetNewY(controls, titleField, 4);
-  controlDescription = createDescription("Used to populate the page title", NSColor.grayColor(), 11, {x: 114, y: curY, width: viewWidth - 114, height: textHeight(11, 1)});
+  controlDescription = createDescription("Used to populate the document title", NSColor.grayColor(), 11, {x: 114, y: curY, width: viewWidth - 114, height: textHeight(11, 1)});
   curY = pushControlAndGetNewY(controls, controlDescription);
 
   // Divider line

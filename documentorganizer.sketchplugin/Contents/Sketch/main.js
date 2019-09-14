@@ -5,7 +5,10 @@ const {
   toArray
 } = require('util');
 
-// called from plug-in menu
+//=======================================================================================================================
+//  Respond to plugin menu-items
+//=======================================================================================================================
+
 _settings = (context) => {
   let summary = [];
   const doc = context.document;
@@ -17,9 +20,9 @@ _settings = (context) => {
       return;
     }
     sortArtboards(page);
-    pageNumberArtboards(context, summary);
-    nameArtboards(context, summary)
-    tableOfContents(context, summary);
+    // pageNumberArtboards(context, summary);
+    const tocArray = numberAndNameArtboards(context, summary);   //
+    tableOfContents(context, tocArray, summary);
     if (storedValue('useSections')){
       updateCalloutLists(doc);
     }
@@ -27,13 +30,28 @@ _settings = (context) => {
   displaySummary(doc, summary);
 }
 
-// called from plug-in menu
-_updateCalloutsOnArtboard = (context) => {
-  // if (!storedValue('useSections')){
-  //   context.document.showMessage('This document must use section numbering to number the callouts automatically.');
-  //   return;
+_organizeDocument = (context) => {
+  const doc = context.document;
+  let tocArray = undefined;
+  page = doc.currentPage();
+  sortArtboards(page);
+  let summary = [];
+  if (checkNameArtboardSetup(doc, summary) !== undefined) {
+    tocArray = numberAndNameArtboards(context, summary);
+  }
+  // if (checkDateSetup(doc, summary) !== undefined) {
+  //   addCurrentDate(context, summary);
   // }
+  if (checkTocSetup(doc, summary) !== undefined) {
+    tableOfContents(context, tocArray, summary);
+  }
+  displaySummary(doc, summary);
+  if (storedValue('useSections')){
+    updateCalloutLists(doc);
+  }
+}
 
+_updateCalloutsOnArtboard = (context) => {
   const doc = context.document;
   const page = doc.currentPage();
   artboard = page.currentArtboard();
@@ -43,31 +61,6 @@ _updateCalloutsOnArtboard = (context) => {
     updateCalloutsOnArtboard(artboard, doc);
   }
 }
-
-// called from plug-in menu
-_organizeDocument = (context) => {
-  const doc = context.document;
-  page = doc.currentPage();
-  sortArtboards(page);
-  let summary = [];
-  if (checkPageNumberSetup(doc, summary) !== undefined) {
-    pageNumberArtboards(context, summary);
-  }
-  if (checkNameArtboardSetup(doc, summary) !== undefined) {
-    nameArtboards(context, summary);
-  }
-  // if (checkDateSetup(doc, summary) !== undefined) {
-  //   addCurrentDate(context, summary);
-  // }
-  if (checkTocSetup(doc, summary) !== undefined) {
-    tableOfContents(context, summary);
-  }
-  displaySummary(doc, summary);
-  if (storedValue('useSections')){
-    updateCalloutLists(doc);
-  }
-}
-
 
 // called when any layer is resized; this is defined in manifest.json
 _onLayersResizedFinish = (context, instance) => {
@@ -88,71 +81,159 @@ _onLayersResizedFinish = (context, instance) => {
   };
 }
 
-//======================================================
+//=======================================================================================================================
+//  Name and number artboards
+//=======================================================================================================================
 
-/*
-This creates a table of contents for artboards on the current page. If the document
-is broken into sections using section-heading pages, the TOC will be broken up
-into sections as well
+const numberAndNameArtboards = (context, summary) => {
+  // get stored useSections setting
+  const tocArray = [];
+  let template = undefined;
+  const doc = context.document;
+  const page = doc.currentPage();
+  const pageNumberSymbol = symbolMasterWithOverrideName(doc, '<pageNumber>');
+  const pageNumberLayers = toArray(pageNumberSymbol.children());
+  for (const layer of pageNumberLayers){
+    if (layer.class() === MSTextLayer && layer.name() == '<pageNumber>'){
+      template = layer.stringValue();
+    }
+  }
+  let pageNumberTemplate = undefined;
+  let sectionNumber = sectionPageNumber = titlesAdded = 0;
+  const startPageNum = 1;
+  let curPage = startPageNum;
+  let firstPageFound = false;
+  const artboards = allArtboards(page);
+  // find index of first character that isn't part of an section number prefix
+  for (const artboard of artboards) {
+    let curPageTitle = curSectionTitle = undefined;
+    const instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
+    for (const instance of instances) {
+      if (instanceHasOverride(instance, '<pageNumber>')){
+        if (template.indexOf('#') < 0) {
+          setOverrideText(instance, '<pageNumber>', curPage.toString());
+        } else {
+          setOverrideText(instance, '<pageNumber>', template.replace('#', curPage));
+        }
+        firstPageFound = true;
+      }
+      // check if current instance contains override '<sectionTitle>'
+      if (instanceHasOverride(instance, '<sectionTitle>')){
+        sectionNumber++;
+        sectionPageNumber = 0;
+        curSectionTitle = addSectionNumbers(getOverrideText(instance, '<sectionTitle>'), sectionNumber, sectionPageNumber);
+        setOverrideText(instance, '<sectionTitle>', curSectionTitle);
+        artboard.setName(curSectionTitle);
+        titlesAdded++;
+      }
+      // check if current instance contains override '<pageTitle>'
+      if (instanceHasOverride(instance, '<pageTitle>')){
+        sectionPageNumber++;
+        curPageTitle = addSectionNumbers(getOverrideText(instance, '<pageTitle>'), sectionNumber, sectionPageNumber);
+        setOverrideText(instance, '<pageTitle>', curPageTitle);
+        artboard.setName(curPageTitle);
+        titlesAdded++;
+      };
+      // check if current instance contains override '<documentTitle>'
+      if (instanceHasOverride(instance, '<documentTitle>')){
+        setOverrideText(instance, '<documentTitle>', storedValue('docTitle'));
+      }
+    }
 
-Required elements:
-  - A symbol instance with a text override named <pageTitle> on all pages you want a TOC page entry
-  - A symbol instance with a text override named <pageNumber> on any page you want the TOC to show a page number
-  - A symbol master (on the Symbols page) with text overrides <tocPageTitle> and <tocPageNumber>
-    This symbol will be instantiated in the TOC for each page that has an instance with the override <pageTitle>
-Optional elements (if you have sections in your doc)
-  - A symbol instance with a text override named <sectionTitle> on all pages you want a TOC section entry
-  - A symbol master (on the Symbols page) with text override <tocSectionTitle>
-    (This symbol can also include a <tocPageNumber> override if you want to page-number sections)
-    This symbol will be instantiated in the TOC for each page that has an instance with the override <sectionTitle>
-*/
+    if (curSectionTitle !== undefined || curPageTitle !== undefined) {
+      tocArray.push({
+        artboard: artboard,
+        sectionTitle: (curSectionTitle === undefined) ? '<undefined>' : curSectionTitle,
+        pageTitle: (curPageTitle === undefined) ? '<undefined>' : curPageTitle,
+        pageNumber: (curPage === undefined) ? '<undefined>' : curPage
+      });
+    }
+    if (firstPageFound) {
+      curPage++;
+    }
+  }
+  // summary
+  summary.push(`${titlesAdded} artboards named`);
+  return tocArray;
+}
 
-const tableOfContents = (context, summary) => {
-  const tocArray = getTOCArray(context);
+const prefixEndIndex = (text) => {
+  const ndash = '\u2013';
+  const mdash = '\u2014';
+  const possibleIndexChars = '1234567890 .-'.concat(ndash).concat(mdash);
+  const charArray = text.trim().split('');
+  for (let i = 0; i < charArray.length; i++){
+    const char = charArray[i];
+    if (possibleIndexChars.indexOf(char) < 0){
+      return i;
+    }
+  }
+  return 0;
+}
+// adds section numbers, makes all dashes match the dash preference
+const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
+  const endIndex = prefixEndIndex(text);
+  let retval = undefined;
+  const ndash = '\u2013';
+  const mdash = '\u2014';
+  const dasharray = ['-', ndash, mdash];
+  const index = Number(storedValue('dashType'));
+  const desiredDash = dasharray[index];
+  if (storedValue('useSections')){
+      retval = `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text.substring(endIndex)}`
+  } else {
+      retval = `${text.substring(endIndex)}`
+  }
+  return retval
+}
+
+const removeSectionNumbers = (text) => {
+  const endIndex = prefixEndIndex(text);
+  return `${text.substring(endIndex)}`
+}
+
+const checkNameArtboardSetup = (doc, summary) => {
+  const pageTitle = symbolMasterWithOverrideName(doc, '<pageTitle>');
+  if (pageTitle === undefined) {
+    summary.push('[ERROR]Name artboards: No symbol with override <pageTitle> found.');
+    return undefined;
+  }
+  const sectionTitle = symbolMasterWithOverrideName(doc, '<sectionTitle>');
+  if (sectionTitle === undefined) {
+    summary.push('[ERROR]Name artboards: No symbol with override <sectionTitle> found.');
+    return undefined;
+  }
+  const pageNumber = symbolMasterWithOverrideName(doc, '<pageNumber>');
+  if (pageNumber === undefined) {
+    summary.push('[ERROR]Page-number artboards: No symbol with override <pageNumber> found.');
+    return undefined;
+  }
+  return 'success';
+}
+
+//=======================================================================================================================
+//  Table of contents
+
+//  This creates a table of contents for artboards on the current page. If the document
+//  is broken into sections using section-heading pages, the TOC will be broken up
+//  into sections as well
+//
+//  Required elements:
+//    - A symbol instance with a text override named <sectionTitle> on all pages you want a TOC section entry
+//    - A symbol instance with a text override named <pageTitle> on all pages you want a TOC page entry
+//    - A symbol instance with a text override named <pageNumber> on any page you want the TOC to show a page number
+//    - A symbol master (on the Symbols page) with text overrides <tocSectionTitle> and <tocPageNumber>
+//      This symbol will be instantiated in the TOC for each page that has an instance with the override <sectionTitle>
+//    - A symbol master (on the Symbols page) with text overrides <tocPageTitle> and <tocPageNumber>
+//      This symbol will be instantiated in the TOC for each page that has an instance with the override <pageTitle>
+
+//=======================================================================================================================
+
+const tableOfContents = (context, tocArray, summary) => {
   const doc = context.document;
   initializeTOC(doc)
   createTOC(doc, tocArray, summary);
   layoutTOC(doc);
-}
-
-const getTOCArray = (context) => {
-  const doc = context.document;
-  const page = doc.currentPage();
-  // get all artboards on the current page
-  const artboards = allArtboards(page);
-  // this array will contain each TOC entry, which will be either a section title or page title)
-  const tocArray = [];
-  for (const artboard of artboards) {
-    let curPageNumber = curPageTitle = curSectionTitle = undefined;
-    // get all symbol instances on the current artboard and find the ones that we care about
-    const instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
-    for (const instance of instances) {
-      // Here we will walk through every symbol instance on the artboard looking for TOC values.
-      // The second parameter of getOverrideText() is the name of the text override whose
-      // value we want. If the instance's symbol does not offer that override, getOverrideText()
-      // returns undefined.
-      if (curPageNumber === undefined) {
-        curPageNumber = getOverrideText(instance, '<pageNumber>');
-      }
-      if (curSectionTitle === undefined) {
-        curSectionTitle = getOverrideText(instance, '<sectionTitle>');
-      }
-      if (curPageTitle === undefined) {
-        curPageTitle = getOverrideText(instance, '<pageTitle>');
-      }
-    }
-    // if we have a page title or a section title, we've got a TOC entry, so log it
-    if (curSectionTitle !== undefined || curPageTitle !== undefined) {
-
-      tocArray.push({
-        sectionTitle: (curSectionTitle === undefined) ? '<undefined>' : curSectionTitle,
-        pageTitle: (curPageTitle === undefined) ? '<undefined>' : curPageTitle,
-        pageNumber: (curPageNumber === undefined) ? '<undefined>' : curPageNumber,
-
-      });
-    }
-  }
-  return tocArray;
 }
 
 // remove all previous TOC groups from the TOC
@@ -170,8 +251,6 @@ const initializeTOC = (doc) => {
     return undefined;
   }
 }
-
-// ===================================================================================================
 
 // load the TOC with sectionTitle and pageTitle instances
 const createTOC = (doc, tocArray, summary) => {
@@ -202,16 +281,15 @@ const createTOC = (doc, tocArray, summary) => {
       if (tocItem.sectionTitle != '<undefined>') {
         // this item is a TOC section header
         instance = tocSectionMaster.newSymbolInstance();
-        instance.setConstrainProportions(0); // unlock the aspect ratio
         instance.frame().setWidth(initColWidth);
         // we've just started a new section, so set isPartOfSection to true
         isPartOfSection = true;
       } else if (tocItem.pageTitle != '<undefined>') {
         // this item is a TOC page
         instance = tocPageMaster.newSymbolInstance();
-        instance.setConstrainProportions(0); // unlock the aspect ratio
         instance.frame().setWidth(initColWidth);
       }
+      instance.setConstrainProportions(0); // unlock the aspect ratio
       // store text values into object properties, because we can't set the overrides
       // yet as the instances are not part of the document
       instance.pageTitle = (tocItem.sectionTitle != '<undefined>') ?  tocItem.sectionTitle: tocItem.pageTitle;
@@ -243,16 +321,15 @@ const createTOC = (doc, tocArray, summary) => {
   // now that all instances reside in the document, we can update their overrides
   instances = toArray(tocGroup.children()).filter(item => item.class() === MSSymbolInstance);
   for (instance of instances) {
-    setOverrideText(instance, '<tocPageTitle>', instance.pageTitle);
-    setOverrideText(instance, '<tocSectionTitle>', instance.pageTitle);
-    setOverrideText(instance, '<tocPageNumber>', instance.pageNumber);
+    setOverrideText(instance, '<tocPageNumber>', instance.pageNumber.toString());
+    setOverrideText(instance, '<tocPageTitle>', instance.pageTitle.toString());
+    setOverrideText(instance, '<tocSectionTitle>', instance.pageTitle.toString());
   }
   summary.push(`${tocItemCount} items added to TOC`);
 }
 
 const layoutTOC = (doc) => {
   // get stored colSpacing setting
-
   const colSpacing = Number(storedValue('tocColumnSpacing'));
   const page = doc.currentPage();
   const tocGroup = layerWithName(page, MSLayerGroup, '<tocGroup>');
@@ -312,32 +389,6 @@ const layoutTOC = (doc) => {
   tocRect.frame().setHeight(tocGroup.frame().height());
 }
 
-// assumes all members of group are symbol instances
-// const wrapGroup = (group, width) => {
-//   let runningTop = 0;
-//   const instances = group.layers());
-//   for (let i = 0; i < instances.count(); i++){
-//     const instance = instances[i];
-//     let overrideName = undefined;
-//     instance.frame().setY(runningTop);
-//     if (instanceHasOverride(instance, '<tocSectionTitle>')){
-//       overrideName = '<tocSectionTitle>';
-//     } else {
-//       overrideName = '<tocPageTitle>';
-//     }
-//     const master = instance.symbolMaster();
-//     const override = getOverrideLayerfromMaster(master, overrideName);
-//     const overrideCopy = override.copy();
-//     group.addLayers([overrideCopy]);
-//     const horizontalPadding = master.frame().width() - override.frame().width();
-//     const verticalPadding = master.frame().height() - override.frame().height();
-//     overrideCopy.frame().setWidth(width - horizontalPadding);
-//     overrideCopy.setStringValue(getOverrideText(instance, overrideName));
-//     runningTop += verticalPadding + overrideCopy.frame().height();
-//     group.removeLayer(overrideCopy);
-//   }
-//   return runningTop;
-// }
 
 // make sure user is set up for TOC
 const checkTocSetup = (doc, summary) => {
@@ -368,7 +419,111 @@ const checkTocSetup = (doc, summary) => {
   }
   return retval;
 }
-//============================================================
+
+//=======================================================================================================================
+//  Callouts
+//=======================================================================================================================
+
+const updateCalloutLists = (doc) => {
+  const page = doc.currentPage();
+  // get all artboards on the current page
+  const artboards = allArtboards(page);
+  for (const artboard of artboards) {
+    updateCalloutsOnArtboard(artboard, doc);
+  }
+}
+
+const updateCalloutsOnArtboard = (artboard, doc) => {
+  const callouts = sortedCallouts(artboard));
+  let calloutCount = 0;
+  const sectionNumber = artboard.name().substring(0, artboard.name().indexOf(' '));
+  // get all symbol instances on the current artboard and find the ones that we care about
+  const calloutListDescriptions = [];
+  for (const callout of callouts) {
+    calloutCount ++;
+    let overrideText = getOverrideText(callout, '<calloutDescription>');
+    const calloutNumber = `${sectionNumber}.${calloutCount}`;
+    setOverrideText(callout, '<calloutNumber>', calloutNumber);
+      // reset this to its normal value to avoid the bug where you can't change any override in the Sketch UI.
+    setOverrideText(callout, '<calloutDescription>', '');
+    setOverrideText(callout, '<calloutDescription>', overrideText);
+    calloutListDescriptions.push({description: overrideText, calloutNumber: calloutNumber});
+    callout.setName(`${sectionNumber}.${calloutCount} - ${overrideText.substring(0,30)}...`);
+  }
+  let calloutDescriptionsGroup = layerWithName(artboard, MSLayerGroup, '<calloutListGroup>');
+  if (calloutDescriptionsGroup !== undefined && calloutListDescriptions.length > 0){
+    // get reference to the listing symbol
+    const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
+    // remove existing groups from calloutDescriptionsGroup
+    const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() === MSSymbolInstance || item.class() === MSTextLayer);
+    for (const instance of instances) {
+      calloutDescriptionsGroup.removeLayer(instance);
+    }
+    // add one symbol to calloutDescriptionsGroup per string in array
+    for (calloutListDescription of calloutListDescriptions){
+      const instance = calloutDescriptionSymbol.newSymbolInstance();
+      instance.setConstrainProportions(0); // unlock the aspect ratio
+      instance.setFixed_forEdge_(true, 4); // pin left
+      instance.setFixed_forEdge_(true, 32); // pin top
+      calloutDescriptionsGroup.addLayers([instance]);
+      setOverrideText(instance, '<calloutListDescription>', calloutListDescription.description);
+      setOverrideText(instance, '<calloutListNumber>', calloutListDescription.calloutNumber);
+      instance.setName(calloutListDescription.calloutNumber);
+    }
+    layoutCalloutDescriptions(calloutDescriptionsGroup, doc);
+  }
+}
+
+// lays out the descriptions for callouts in the calloutDescriptionsGroup
+const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
+  const groupRect = layerWithName(calloutDescriptionsGroup, MSRectangleShape, '<calloutGroupRect>')
+  const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
+  const overrideLayer = getOverrideLayerfromMaster(calloutDescriptionSymbol, '<calloutListDescription>')
+  const symbolPaddingVertical = calloutDescriptionSymbol.frame().height() - overrideLayer.frame().height();
+  const symbolPaddingHorizonal = calloutDescriptionSymbol.frame().width() - overrideLayer.frame().width();
+  const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() === MSSymbolInstance);
+  let runningTop = 0;
+  for (instance of instances){
+    instance.frame().setWidth(calloutDescriptionsGroup.frame().width());
+    instance.frame().setY(runningTop);
+    const overrideLayerCopy = overrideLayer.copy();
+    calloutDescriptionsGroup.addLayers([overrideLayerCopy]);
+    overrideLayerCopy.frame().setWidth(calloutDescriptionsGroup.frame().width() - symbolPaddingHorizonal);
+    overrideLayerCopy.setStringValue(getOverrideText(instance, '<calloutListDescription>'));
+    runningTop += symbolPaddingVertical + overrideLayerCopy.frame().height();
+    calloutDescriptionsGroup.removeLayer(overrideLayerCopy);
+  }
+  // set the calloutDescriptionsGroup's rectangle to size of group, just in case
+  calloutDescriptionsGroup.frame().setHeight(runningTop);
+  groupRect.frame().setWidth(calloutDescriptionsGroup.frame().width());
+  groupRect.frame().setHeight(calloutDescriptionsGroup.frame().height());
+}
+
+// Callouts can be organized into groups, or they can just be on the artboard.
+// If they are in groups, the sort order will be sorted first by group (running left to right),
+// then by vertical position within each group.
+const sortedCallouts = (artboard) => {
+  let callouts = [];
+  // get all top-level layer groups
+  const groups = toArray(artboard.layers()).filter(item => item.class() === MSLayerGroup);
+  sortByHorizontalPosition(groups);
+  for (group of groups){
+    const symbols = toArray(group.children()).filter(item => item.class() === MSSymbolInstance);
+    const instances = symbolsWithOverride(symbols, '<calloutDescription>');
+    sortLayersByRows(instances);
+    callouts = callouts.concat(instances);
+  }
+  // get all ungrouped callout symbols
+  const ungroupedSymbols = toArray(artboard.layers()).filter(item => item.class() === MSSymbolInstance);
+  const instances = symbolsWithOverride(ungroupedSymbols, '<calloutDescription>');
+  sortByVerticalPosition(instances);
+  callouts = callouts.concat(instances);
+  return callouts;
+}
+
+//=======================================================================================================================
+//  Add current date
+//=======================================================================================================================
 
 const addCurrentDate = (context, summary) => {
   const doc = context.document;
@@ -384,7 +539,6 @@ const addCurrentDate = (context, summary) => {
     }
   }
   // summary
-  const br = String.fromCharCode(13);
   summary.push(`${datesAdded} dates updated`);
 }
 
@@ -440,252 +594,4 @@ const checkDateSetup = (doc, summary) => {
     return undefined;
   }
   return 'success';
-}
-
-//==================================================================
-
-const nameArtboards = (context, summary) => {
-  // get stored useSections setting
-  const doc = context.document;
-  const page = doc.currentPage();
-  let sectionNumber = sectionPageNumber = titlesAdded = 0;
-  const artboards = allArtboards(page);
-  sortLayersByRows(artboards);
-  // find index of first character that isn't part of an section number prefix
-
-  for (const artboard of artboards) {
-    let pageTitle = docTitle = undefined;
-    instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
-    for (const instance of instances) {
-      // check if current instance contains override '<sectionTitle>'
-      pageTitle = getOverrideText(instance, '<sectionTitle>');
-      if (pageTitle != undefined){
-        sectionNumber++;
-        sectionPageNumber = 0;
-        pageTitle = addSectionNumbers(pageTitle, sectionNumber, sectionPageNumber);
-        setOverrideText(instance, '<sectionTitle>', pageTitle);
-        artboard.setName(pageTitle);
-        titlesAdded++;
-      }
-      pageTitle = getOverrideText(instance, '<pageTitle>');
-      if (pageTitle != undefined){
-        sectionPageNumber++;
-        pageTitle = addSectionNumbers(pageTitle, sectionNumber, sectionPageNumber);
-        setOverrideText(instance, '<pageTitle>', pageTitle);
-        artboard.setName(pageTitle);
-        titlesAdded++;
-      }
-
-      if (instanceHasOverride(instance, '<documentTitle>')){
-        setOverrideText(instance, '<documentTitle>', storedValue('docTitle'));
-      }
-    }
-  }
-  // summary
-  summary.push(`${titlesAdded} artboards named`);
-}
-
-const prefixEndIndex = (text) => {
-  const ndash = '\u2013';
-  const mdash = '\u2014';
-  const possibleIndexChars = '1234567890 .-'.concat(ndash).concat(mdash);
-  const charArray = text.trim().split('');
-  for (let i = 0; i < charArray.length; i++){
-    const char = charArray[i];
-    if (possibleIndexChars.indexOf(char) < 0){
-      return i;
-    }
-  }
-  return 0;
-}
-// adds section numbers, makes all dashes match the dash preference
-const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
-
-  const endIndex = prefixEndIndex(text);
-  let retval = undefined;
-  const ndash = '\u2013';
-  const mdash = '\u2014';
-  const dasharray = ['-', ndash, mdash];
-  const index = Number(storedValue('dashType'));
-
-  const desiredDash = dasharray[index];
-  if (storedValue('useSections')){
-      retval = `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text.substring(endIndex)}`
-  } else {
-      retval = `${text.substring(endIndex)}`
-  }
-
-  return retval
-}
-
-const removeSectionNumbers = (text) => {
-
-  const endIndex = prefixEndIndex(text);
-  return `${text.substring(endIndex)}`
-}
-
-const checkNameArtboardSetup = (doc, summary) => {
-  const pageTitle = symbolMasterWithOverrideName(doc, '<pageTitle>');
-  if (pageTitle === undefined) {
-    summary.push('[ERROR]Name artboards: No symbol with override <pageTitle> found.');
-    return undefined;
-  }
-  return 'success';
-}
-
-// =============================================================
-
-const pageNumberArtboards = (context, summary) => {
-  const doc = context.document
-  const page = doc.currentPage();
-  const startPageNum = 1;
-  const artboards = allArtboards(page);
-  sortLayersByRows(artboards);
-  let curPage = startPageNum;
-  let totalPages = 0
-  let numbersAdded = 0;
-  let firstPageWithNumber = 0;
-  let firstPageFound = false;
-
-  for (let i = 0; i < artboards.length; i++) {
-    let artboard = artboards[i];
-    instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
-    for (const instance of instances) {
-      if (setPageNumber(instance, '<pageNumber>', curPage) !== undefined) {
-        firstPageFound = true;
-        numbersAdded++;
-      }
-    }
-    if (firstPageFound) {
-      if (firstPageWithNumber == 0) {
-        firstPageWithNumber = i + 1;
-      }
-      totalPages = curPage;
-      curPage++;
-    }
-  }
-  // summary
-  const br = String.fromCharCode(13);
-  summary.push(`${numbersAdded} page numbers updated`);
-}
-
-const setPageNumber = (instance, overrideName, pageNumber) => {
-  let template = getDefaultOverrideText(instance, overrideName);
-  if (template !== undefined) {
-    if (template.indexOf('#') >= 0) {
-      // look for '#' in default override (e.g., 'Page #') and replace # with pageNumber
-      template = template.replace('#', pageNumber);
-      return setOverrideText(instance, overrideName, template);
-    } else {
-      // '#' not found, so simply set the override text to page number
-      return setOverrideText(instance, overrideName, pageNumber.toString());
-    }
-  }
-  return undefined;
-}
-
-// make sure user is set up for page numbers
-const checkPageNumberSetup = (doc, summary) => {
-  const pageNumber = symbolMasterWithOverrideName(doc, '<pageNumber>');
-  if (pageNumber === undefined) {
-    summary.push('[ERROR]Page-number artboards: No symbol with override <pageNumber> found.');
-    return undefined;
-  }
-  return 'success';
-}
-
-// =======================================================================
-
-const updateCalloutLists = (doc) => {
-  const page = doc.currentPage();
-  // get all artboards on the current page
-  const artboards = allArtboards(page);
-  for (const artboard of artboards) {
-    updateCalloutsOnArtboard(artboard, doc);
-  }
-}
-
-const updateCalloutsOnArtboard = (artboard, doc) => {
-  const callouts = sortedCallouts(artboard));
-  let calloutCount = 0;
-  const sectionNumber = artboard.name().substring(0, artboard.name().indexOf(' '));
-  // get all symbol instances on the current artboard and find the ones that we care about
-  const calloutListDescriptions = [];
-  for (const callout of callouts) {
-    calloutCount ++;
-    let overrideText = getOverrideText(callout, '<calloutDescription>');
-    const calloutNumber = `${sectionNumber}.${calloutCount}`;
-    setOverrideText(callout, '<calloutNumber>', calloutNumber);
-      // reset this to its normal value to avoid the bug where you can't change any override in the Sketch UI.
-    setOverrideText(callout, '<calloutDescription>', '');
-    setOverrideText(callout, '<calloutDescription>', overrideText);
-    calloutListDescriptions.push({description: overrideText, calloutNumber: calloutNumber});
-    callout.setName(`${sectionNumber}.${calloutCount} - ${overrideText.substring(0,30)}...`);
-  }
-  let calloutDescriptionsGroup = layerWithName(artboard, MSLayerGroup, '<calloutListGroup>');
-  if (calloutDescriptionsGroup !== undefined && calloutListDescriptions.length > 0){
-    // get reference to the listing symbol
-    const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
-    // remove existing groups from calloutDescriptionsGroup
-    const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() === MSSymbolInstance || item.class() === MSTextLayer);
-    for (const instance of instances) {
-      calloutDescriptionsGroup.removeLayer(instance);
-    }
-    // add one symbol to calloutDescriptionsGroup per string in array
-    for (calloutListDescription of calloutListDescriptions){
-      const instance = calloutDescriptionSymbol.newSymbolInstance();
-      instance.setConstrainProportions(0); // unlock the aspect ratio
-      calloutDescriptionsGroup.addLayers([instance]);
-      setOverrideText(instance, '<calloutListDescription>', calloutListDescription.description);
-      setOverrideText(instance, '<calloutListNumber>', calloutListDescription.calloutNumber);
-      instance.setName(calloutListDescription.calloutNumber);
-    }
-    layoutCalloutDescriptions(calloutDescriptionsGroup, doc);
-  }
-}
-
-// lays out the descriptions for callouts in the calloutDescriptionsGroup
-const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
-  const groupRect = layerWithName(calloutDescriptionsGroup, MSRectangleShape, '<calloutGroupRect>')
-  const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
-  const overrideLayer = getOverrideLayerfromMaster(calloutDescriptionSymbol, '<calloutListDescription>')
-  const symbolPaddingVertical = calloutDescriptionSymbol.frame().height() - overrideLayer.frame().height();
-  const symbolPaddingHorizonal = calloutDescriptionSymbol.frame().width() - overrideLayer.frame().width();
-  const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() === MSSymbolInstance);
-  let runningTop = 0;
-  for (instance of instances){
-    instance.frame().setWidth(calloutDescriptionsGroup.frame().width());
-    instance.frame().setY(runningTop);
-    const overrideLayerCopy = overrideLayer.copy();
-    calloutDescriptionsGroup.addLayers([overrideLayerCopy]);
-    overrideLayerCopy.frame().setWidth(calloutDescriptionsGroup.frame().width() - symbolPaddingHorizonal);
-    overrideLayerCopy.setStringValue(getOverrideText(instance, '<calloutListDescription>'));
-    runningTop += symbolPaddingVertical + overrideLayerCopy.frame().height();
-    calloutDescriptionsGroup.removeLayer(overrideLayerCopy);
-  }
-  // set the calloutDescriptionsGroup's rectangle to size of group, just in case
-  groupRect.frame().setWidth(calloutDescriptionsGroup.frame().width());
-  groupRect.frame().setHeight(calloutDescriptionsGroup.frame().height());
-}
-
-// Callouts can be organized into groups, or they can just be on the artboard.
-// If they are in groups, the sort order will be sorted first by group (running left to right),
-// then by vertical position within each group.
-const sortedCallouts = (artboard) => {
-  let callouts = [];
-  // get all top-level layer groups
-  const groups = toArray(artboard.layers()).filter(item => item.class() === MSLayerGroup);
-  sortByHorizontalPosition(groups);
-  for (group of groups){
-    const symbols = toArray(group.children()).filter(item => item.class() === MSSymbolInstance);
-    const instances = symbolsWithOverride(symbols, '<calloutDescription>');
-    sortLayersByRows(instances);
-    callouts = callouts.concat(instances);
-  }
-  // get all ungrouped callout symbols
-  const ungroupedSymbols = toArray(artboard.layers()).filter(item => item.class() === MSSymbolInstance);
-  const instances = symbolsWithOverride(ungroupedSymbols, '<calloutDescription>');
-  sortByVerticalPosition(instances);
-  callouts = callouts.concat(instances);
-  return callouts;
 }

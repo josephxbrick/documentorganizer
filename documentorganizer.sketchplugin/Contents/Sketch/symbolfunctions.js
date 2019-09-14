@@ -55,6 +55,8 @@ const getDefaultOverrideText = (instance, overrideName) => {
 	return undefined;
 }
 
+
+
 // assumes non-nested symbol
 const getOverrideText = (instance, overrideName) => {
 	const children = instance.symbolMaster().children();

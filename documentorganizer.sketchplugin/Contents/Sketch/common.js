@@ -132,3 +132,30 @@ function sortArtboards(page) {
 		artboard.select_byExtendingSelection(false,true);
   }
 }
+
+// This code is for wrapping the TOC. It's not working yet.
+// const wrapGroup = (group, width) => {
+//   let runningTop = 0;
+//   const instances = group.layers());
+//   for (let i = 0; i < instances.count(); i++){
+//     const instance = instances[i];
+//     let overrideName = undefined;
+//     instance.frame().setY(runningTop);
+//     if (instanceHasOverride(instance, '<tocSectionTitle>')){
+//       overrideName = '<tocSectionTitle>';
+//     } else {
+//       overrideName = '<tocPageTitle>';
+//     }
+//     const master = instance.symbolMaster();
+//     const override = getOverrideLayerfromMaster(master, overrideName);
+//     const overrideCopy = override.copy();
+//     group.addLayers([overrideCopy]);
+//     const horizontalPadding = master.frame().width() - override.frame().width();
+//     const verticalPadding = master.frame().height() - override.frame().height();
+//     overrideCopyframe().setWidth(width - horizontalPadding);
+//     overrideCopy.setStringValue(getOverrideText(instance, overrideName));
+//     runningTop += verticalPadding + overrideCopy.frame().height();
+//     group.removeLayer(overrideCopy);
+//   }
+//   return runningTop;
+// }

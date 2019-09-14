@@ -2,7 +2,7 @@
   "author": "Joseph Brick",
   "commands": [{
       "script": "main.js",
-      "name": "Organize All",
+      "name": "Organize Document Now",
       "identifier": "organizeDocument",
       "handlers": {
         "run": "_organizeDocument"
@@ -10,7 +10,7 @@
     },
     {
       "script": "main.js",
-      "name": "Update Callouts on Artboard",
+      "name": "Update Callouts on Current Artboard",
       "identifier": "updateCalloutsOnArtboard",
       "handlers": {
         "run": "_updateCalloutsOnArtboard"
@@ -36,7 +36,7 @@
     }
   ],
   "menu": {
-    "title": "Organize Document",	   
+    "title": "Organize Document",
     "items": [
       "organizeDocument",
       "updateCalloutsOnArtboard",
