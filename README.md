@@ -157,12 +157,11 @@ This symbol has two text overrides. Both will be populated by the plugin.
 
 ## Auto-numbering of the callouts
 
-The callouts (that point to elements in the mockups) are numbered in order vertically: the higher the callout, the lower its number. If multiple callouts have the same `y` value, they will be numbered left to right.
+The callouts (that point to elements in the mockups) are numbered in order vertically: the higher the callout on the artboard, the lower its number. If multiple callouts have the same `y` value, they will be numbered left to right.
 
-Note that you can create groups of callouts on the given artboard if you want numbering to be in group order. For example, say you have two mobile mockups on an artboard laid out left-to-right. If you group the callouts with the mockups, the callouts will first number the leftmost group's callouts, and then number the group to the right. The image below shows how callouts will be numbered when grouped with two separate mockups on an artboard:
+Note that you can create groups of callouts on the given artboard if you want numbering to be in group order. For example, say you have two mobile mockups on an artboard laid out left-to-right. If you group the callouts with the mockups, the callouts will first number the leftmost group's callouts vertically, and then number the callouts in the group to the right vertically. The image below shows how two sets of callouts will be numbered when each set is grouped with each callout.
 
 <img src="/readme_images/multiMockupExample.png" width="675">
-
 
 ---
 
