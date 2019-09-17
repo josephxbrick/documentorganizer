@@ -157,7 +157,11 @@ This symbol has two text overrides. Both will be populated by the plugin.
 
 ## The callout-description group
 
-The plugin needs to know where you want the description listing to appear in the artboard. It expects the artboard to contain a group called `<calloutListingGroup>` that cont a rectangle called `<calloutGroupRect>`. Each time the plugin is run, it will delete all callout-description elements from the group will popoulate the group with new instances. Again, see the [sample sketch file](tocsample.sketch) included in this repository for an example.
+The plugin needs to know where you want the description listing to appear in the artboard. It expects the artboard to contain a group called `<calloutListingGroup>` that cont a rectangle called `<calloutGroupRect>`. 
+
+<img src="/readme_images/calloutListGroup.png" width="229">
+
+Each time the plugin is run, it will delete all callout-description elements from the group will popoulate the group with new instances. Again, see the [sample sketch file](tocsample.sketch) included in this repository for an example.
 
 ## Auto-numbering of the callouts
 
