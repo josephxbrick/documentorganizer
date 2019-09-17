@@ -119,9 +119,30 @@ Important: the title of the page (after the prefix) cannot begin with a number, 
 
 # Callouts and the callout listing
 
-The plugin will automatically number your callouts and organize your callout descriptions. 
+The plugin will automatically number your callouts and organize your callout descriptions. When using section numbering, the callouts are automatically numbered based on their layout.
 
-<img src="/readme_images/calloutsOverview.png" width="900">
+<img src="/readme_images/calloutsOverview.png" width="872">
+
+Callouts require that the document has two symbols defined: one whose instances point to locations in the mockups, and another that shows the callout descriptions in a vertical list. (See the image above.) 
+
+Note that when editing an artboard with mockups, you will modify only the callouts that point to locations in the mockup; the descriptions list is automatically generated when the plugin is run. (See details below.) Again, it will be helpful to refer to the [sample sketch file](tocsample.sketch) included in this repository.
+
+## The callout symbol
+
+<img src="/readme_images/calloutOverrides.png" width="334">
+
+Instances of this symbol are used to point out various elements of a mockup. The symbol contains the graphics that define the look of the pointer, and two text overrides, which must have the names listed below:
+
+* `<calloutNumber>` This text override displays the callout number. There is no need to edit this override when the plugin uses section numbering; the callouts will be automatically numbered for you. 
+* `<calloutDescription>` This override is used to define the callout's description. Note that the text layer to create this override should have its opacity set to 0 (so it's not visible). Set its font size to 1px so that a long description will fit. This description is used by the plugin when creating the callout description listing. 
+
+## The callout description symbol
+
+Note that this symbol allows for text wrapping to deal with longer descriptions. It is important that the symbol's pinning is defined correctly, both of the graphical (numbered) indicator as well as of the descriptive text:
+
+The graphical (numbered) indicator should be pinned as follows:
+
+<img src="/readme_images/calloutListingIndicator.png" width="565">
 
 ---
 
