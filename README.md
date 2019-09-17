@@ -15,6 +15,8 @@ The easiest way to  install this plugin is to choose `Download Zip` from the `Cl
 
 In addition to the documentation below, there is a `tocsample.sketch` file in the repository that's a sketch file designed to work with this plugin. It contains some explanations of how the plugin expects the document to be set up. Hit the download button [here](tocsample.sketch) to get the file.
 
+---
+
 # Table of contents, section numbering, and page numbering
 
 The plugin creates a table of contents (TOC) for artboards on the current Sketch page, organized into sections. It will page-number the artboards for you, as well as add legal-style numbering (1.0, 1.1, 2.0) to the titles of the artboards and in to the TOC. Here is an example of what that can look like:
@@ -113,9 +115,13 @@ The plugin prefixes  section titles and page titles with section numbering (whic
 
 Important: the title of the page (after the prefix) cannot begin with a number, a period, or any type of dash.
 
-## Callouts and the callout listing
+---
+
+# Callouts and the callout listing
 
 Coming soon. For now, examine `tocsample.sketch` in this repository 
+
+---
 
 # AddCurrentDateToArtboards
 
@@ -153,6 +159,8 @@ Note that the short [MMM] dates follow AP Style Guide recommendations, where Mar
 * [MMMM] [DDD], [YYYY] – January 3rd, 2021
 * [DD] [MMM] [YYYY] – 03 Jan 2021
 * [MM].[DD].[YYYY] – 01.03.2021
+
+---
 
 # Troubleshooting
 
