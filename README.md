@@ -119,7 +119,9 @@ Important: the title of the page (after the prefix) cannot begin with a number, 
 
 # Callouts and the callout listing
 
-Coming soon. For now, examine `tocsample.sketch` in this repository 
+The plugin will automatically number your callouts and organize your callout descriptions. 
+
+<img src="/readme_images/calloutsOverview.png" width="900">
 
 ---
 
