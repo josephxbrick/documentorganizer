@@ -153,7 +153,11 @@ The description (text) layer should be pinned and have its text attributes set a
 This symbol has two text overrides. Both will be populated by the plugin.
 
 * `<calloutListNumber>` This override displays the callout number
-* `calloutListDescription>` This override displays the callout description
+* `<calloutListDescription>` This override displays the callout description
+
+## The callout-description group
+
+The plugin needs to know where you want the description listing to appear in the artboard. It expects the artboard to contain a group called `<calloutListingGroup>` that cont a rectangle called `<calloutGroupRect>`. Each time the plugin is run, it will delete all callout-description elements from the group will popoulate the group with new instances. Again, see the [sample sketch file](tocsample.sketch) included in this repository for an example.
 
 ## Auto-numbering of the callouts
 
@@ -168,8 +172,6 @@ Note that you can create groups of callouts on the given artboard if you want nu
 # AddCurrentDateToArtboards
 
 A Sketch plugin that updates today's date on artboards in the current Sketch page that contain a symbol instance to display the page number. 
-
-To see how it works, try the sample.sketch file in the repository.
 
 To get a date, an artboard needs to include a symbol instance with a text override named `"<currentDate>"`. The name of the symbol instance itself does not matter. Note that this override cannot be in a nested symbol.
 
