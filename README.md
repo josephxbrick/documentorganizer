@@ -138,11 +138,31 @@ Instances of this symbol are used to point out various elements of a mockup. The
 
 ## The callout description symbol
 
-Note that this symbol allows for text wrapping to deal with longer descriptions. It is important that the symbol's pinning is defined correctly, both of the graphical (numbered) indicator as well as of the descriptive text:
+Instances of this symbol create the description listing, using the descriptions defined in the symbol instances above. Note that you will NOT be creating instances of this symbol; the plugin does that for you, just as the plugin automatically creates instances of the TOC elements. 
+
+This symbol allows for text wrapping to deal with longer descriptions. It is important that the symbol's pinning is defined appropriately, both of the graphical (numbered) indicator as well as of the descriptive text:
 
 The graphical (numbered) indicator should be pinned as follows:
 
 <img src="/readme_images/calloutListingIndicator.png" width="565">
+
+The description (text) layer should be pinned and have its text attributes set as follows:
+
+<img src="/readme_images/calloutListingIndicatorText.png" width="565">
+
+This symbol has two text overrides. Both will be populated by the plugin.
+
+* `<calloutListNumber>` This override displays the callout number
+* `calloutListDescription>` This override displays the callout description
+
+## Auto-numbering of the callouts
+
+The callouts (that point to elements in the mockups) are numbered in order vertically: the higher the callout, the lower its number. If multiple callouts have the same `y` value, they will be numbered left to right.
+
+Note that you can create groups of callouts on the given artboard if you want numbering to be in group order. For example, say you have two mobile mockups on an artboard laid out left-to-right. If you group the callouts with the mockups, the callouts will first number the leftmost group's callouts, and then number the group to the right. The image below shows how callouts will be numbered when grouped with two separate mockups on an artboard:
+
+<img src="/readme_images/multiMockupExample.png" width="675">
+
 
 ---
 
