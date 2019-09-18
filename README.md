@@ -155,9 +155,9 @@ This symbol has two text overrides. Both will be populated by the plugin.
 * `<calloutListNumber>` This override displays the callout number
 * `<calloutListDescription>` This override displays the callout description
 
-## The callout-description group
+## The callout descriptions list group
 
-The plugin needs to know where you want the description listing to appear in the artboard. It expects the artboard to contain a group called `<calloutListGroup>` that cont a rectangle called `<calloutGroupRect>`. 
+The plugin needs to know where you want the description listing for the callouts to appear in the artboard. It expects the artboard to contain a group called `<calloutListGroup>` that contains a rectangle called `<calloutGroupRect>`. 
 
 <img src="/readme_images/calloutListGroup.png" width="229">
 
