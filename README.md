@@ -127,6 +127,28 @@ Callouts require that the document has two symbols defined: one whose instances 
 
 Note that when editing an artboard with mockups, you will modify only the callouts that point to locations in the mockup; the descriptions list is automatically generated when the plugin is run. (See details below.) Again, it will be helpful to refer to the [sample sketch file](tocsample.sketch) included in this repository.
 
+## The plugin menu
+
+<img src="/readme_images/calloutMenus.png" width="677">
+
+After installing the plugin, the `Organize Document` menu item will appear in Sketch's plugin menu. 
+
+### Organize Document Now
+
+Choosing `Organize Document Now` will update all artboards on the current Sketch page, including the TOC, section numbering, page numbering, callouts, document-title instances, and current-date instances, in accordance with the current settings.
+
+### Update Callouts on Current Artboard
+
+Choosing `Update Callouts on Current Artboard` will only renumber the callouts on the current artboard, which is a time saver when fiddling arround a given artboard callouts.
+
+### Settings
+
+<img src="/readme_images/settings.png" width="566">
+
+Settings brings up the Settings dialog, which hopefully is self-explanatory. Once the settings are set, they are saved, so choosing `Organize Document Now` will observe the settings.
+
+
+
 ## The callout symbol
 
 <img src="/readme_images/calloutOverrides.png" width="334">
