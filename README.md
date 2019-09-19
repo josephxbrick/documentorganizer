@@ -214,7 +214,13 @@ Here are the supported formats:
 * [MM]  – 01
 * [M] – 1
 
-Note that the short [MMM] dates follow AP Style Guide recommendations, where March, April, May, June, and July are not abbrevieated, and September is abbreviated as Sept.
+Note that short [MMM] dates follow AP Style Guide recommendations, where March, April, May, June, and July are not abbrevieated, and September is abbreviated as Sept.
+
+### Weekday formats, assuming it's Friday
+* [WW] - Friday
+* [W] - Fri
+
+Note that short [W] weekdays follow AP Style Guide recommendations, where Tuesday is "Tues", Thursday is "Thurs", and all other weekdays are shortened to their first three letters.
 
 ### Date formats, assiming it's the 3rd of the month:
 * [DDD] – 3rd
@@ -225,14 +231,14 @@ Note that the short [MMM] dates follow AP Style Guide recommendations, where Mar
 * [YYYY] – 2021
 * [YY] – 21
 
-## Examples assuming it's January 3rd, 2021
-* [MMMM] [DDD], [YYYY] – January 3rd, 2021
+### Examples assuming it's January 3rd, 2021
+* [WW], [MMMM] [DDD], [YYYY] – Sunday, January 3rd, 2021
 * [DD] [MMM] [YYYY] – 03 Jan 2021
 * [MM].[DD].[YYYY] – 01.03.2021
 
 ---
 
-# Troubleshooting
+# Troubleshooting the plugin
 
 ## The TOC lists pages in the wrong order
 
