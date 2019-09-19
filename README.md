@@ -231,8 +231,8 @@ Note that short [W] weekdays follow AP Style Guide recommendations, where Tuesda
 * [YYYY] – 2021
 * [YY] – 21
 
-### Examples assuming it's January 3rd, 2021
-* [WW], [MMMM] [DDD], [YYYY] – Sunday, January 3rd, 2021
+### Examples templates, assuming it's January 3rd, 2021
+* Today is [WW], [MMMM] [DDD], [YYYY] – Today is Sunday, January 3rd, 2021
 * [DD] [MMM] [YYYY] – 03 Jan 2021
 * [MM].[DD].[YYYY] – 01.03.2021
 
