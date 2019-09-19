@@ -82,23 +82,20 @@ _onLayersResizedFinish = (context, instance) => {
 }
 
 //=======================================================================================================================
-//  Name and number artboards
+//  Add section numbering to page/section title instances, name artboards after page/section title instances, update all
+//  doc-title symbol instances, update all current-date instances, return tocArray (used by createTOC() function)
 //=======================================================================================================================
 
 const numberAndNameArtboards = (context, summary) => {
   // get stored useSections setting
   const tocArray = [];
-  let template = undefined;
+  let pageNumberTemplate = dateTemplate = symbol = undefined;
   const doc = context.document;
   const page = doc.currentPage();
-  const pageNumberSymbol = symbolMasterWithOverrideName(doc, '<pageNumber>');
-  const pageNumberLayers = toArray(pageNumberSymbol.children());
-  for (const layer of pageNumberLayers){
-    if (layer.class() === MSTextLayer && layer.name() == '<pageNumber>'){
-      template = layer.stringValue();
-    }
-  }
-  let pageNumberTemplate = undefined;
+  symbol = symbolMasterWithOverrideName(doc, '<pageNumber>');
+  pageNumberTemplate = getOverrideLayerfromSymbol(symbol, '<pageNumber>').stringValue();
+  symbol = symbolMasterWithOverrideName(doc, '<currentDate>');
+  dateTemplate = (symbol != undefined) ? getOverrideLayerfromSymbol(symbol, '<currentDate>').stringValue() : undefined;
   let sectionNumber = sectionPageNumber = titlesAdded = 0;
   const startPageNum = 1;
   let curPage = startPageNum;
@@ -110,10 +107,10 @@ const numberAndNameArtboards = (context, summary) => {
     const instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
     for (const instance of instances) {
       if (instanceHasOverride(instance, '<pageNumber>')){
-        if (template.indexOf('#') < 0) {
+        if (pageNumberTemplate.indexOf('#') < 0) {
           setOverrideText(instance, '<pageNumber>', curPage.toString());
         } else {
-          setOverrideText(instance, '<pageNumber>', template.replace('#', curPage));
+          setOverrideText(instance, '<pageNumber>', pageNumberTemplate.replace('#', curPage));
         }
         firstPageFound = true;
       }
@@ -137,6 +134,9 @@ const numberAndNameArtboards = (context, summary) => {
       // check if current instance contains override '<documentTitle>'
       if (instanceHasOverride(instance, '<documentTitle>')){
         setOverrideText(instance, '<documentTitle>', storedValue('docTitle'));
+      }
+      if (instanceHasOverride(instance, '<currentDate>')){
+        setOverrideText(instance, '<currentDate>', currentDate(dateTemplate));
       }
     }
 
@@ -213,20 +213,22 @@ const checkNameArtboardSetup = (doc, summary) => {
 
 //=======================================================================================================================
 //  Table of contents
-
-//  This creates a table of contents for artboards on the current page. If the document
-//  is broken into sections using section-heading pages, the TOC will be broken up
-//  into sections as well
+//
+//  This creates a table of contents for artboards on the current page. This plugin assumes that the TOC is broken into
+//  sections, where each section is headed by an artboard containg a section-title symbol instance, and that all artboards
+//  belonging to a section contain a page-title symbol instance.
 //
 //  Required elements:
-//    - A symbol instance with a text override named <sectionTitle> on all pages you want a TOC section entry
-//    - A symbol instance with a text override named <pageTitle> on all pages you want a TOC page entry
-//    - A symbol instance with a text override named <pageNumber> on any page you want the TOC to show a page number
-//    - A symbol master (on the Symbols page) with text overrides <tocSectionTitle> and <tocPageNumber>
-//      This symbol will be instantiated in the TOC for each page that has an instance with the override <sectionTitle>
-//    - A symbol master (on the Symbols page) with text overrides <tocPageTitle> and <tocPageNumber>
-//      This symbol will be instantiated in the TOC for each page that has an instance with the override <pageTitle>
-
+//    Each artboard that will be represented in the TOC must have either:
+//    - A symbol instance with a text override named <sectionTitle> on all artboards you want a TOC section entry
+//    - A symbol instance with a text override named <pageTitle> on all artboards you want a TOC page entry
+//    Page numbers are also required. Page numbering will start at 1 upon finding the first instance of:
+//    - A symbol instance with a text override named <pageNumber> on any artboard you want the TOC to show a page number
+//    The TOC requires the following symbols. The plugin will create instances of them to create the TOC.
+//    - A symbol (on the Symbols page) with text overrides <tocSectionTitle> and <tocPageNumber>
+//      This symbol will be instantiated in the TOC for each page that has a section-title instance (see above)
+//    - A symbol (on the Symbols page) with text overrides <tocPageTitle> and <tocPageNumber>
+//      This symbol will be instantiated in the TOC for each page that has a page-title instance (see above)
 //=======================================================================================================================
 
 const tableOfContents = (context, tocArray, summary) => {
@@ -478,7 +480,7 @@ const updateCalloutsOnArtboard = (artboard, doc) => {
 const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
   const groupRect = layerWithName(calloutDescriptionsGroup, MSRectangleShape, '<calloutGroupRect>')
   const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
-  const overrideLayer = getOverrideLayerfromMaster(calloutDescriptionSymbol, '<calloutListDescription>')
+  const overrideLayer = getOverrideLayerfromSymbol(calloutDescriptionSymbol, '<calloutListDescription>')
   const symbolPaddingVertical = calloutDescriptionSymbol.frame().height() - overrideLayer.frame().height();
   const symbolPaddingHorizonal = calloutDescriptionSymbol.frame().width() - overrideLayer.frame().width();
   const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() === MSSymbolInstance);
@@ -519,79 +521,4 @@ const sortedCallouts = (artboard) => {
   sortByVerticalPosition(instances);
   callouts = callouts.concat(instances);
   return callouts;
-}
-
-//=======================================================================================================================
-//  Add current date
-//=======================================================================================================================
-
-const addCurrentDate = (context, summary) => {
-  const doc = context.document;
-  const page = doc.currentPage();
-  const artboards = allArtboards(page);
-  let datesAdded = 0;
-  for (const artboard of artboards) {
-    instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
-    for (const instance of instances) {
-      if (setCurrentDate(instance, '<currentDate>') !== undefined) {
-        datesAdded++;
-      }
-    }
-  }
-  // summary
-  summary.push(`${datesAdded} dates updated`);
-}
-
-const setCurrentDate = (instance, overrideName) => {
-  let template = originalTemplate = getDefaultOverrideText(instance, overrideName);
-  if (template !== undefined) {
-    const today = new Date();
-    const d = today.getDate();
-    const m = today.getMonth(); //January is 0
-    const y = today.getFullYear();
-    const longMonth = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][m];
-    // using month abbreviations from writing style guide, rather than just first 3 letters.
-    const shortMonth = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'][m];
-
-    // comments below assume date of 1/3/2019
-    template = template.replace('[MMMM]', longMonth); // January
-    template = template.replace('[MMM]', shortMonth); // Jan
-    template = template.replace('[MM]', '0'.concat(m + 1).slice(-2)); // 01
-    template = template.replace('[M]', m + 1); // 1
-    template = template.replace(['[DDD]'], addOrdinalIndicator(d)); // 3rd
-    template = template.replace(['[DD]'], '0'.concat(d).slice(-2)); // 03
-    template = template.replace('[D]', d); // 3
-    template = template.replace('[YYYY]', y); // 2019
-    template = template.replace('[YY]', y.toString().slice(-2)); // 19
-
-    if (template == originalTemplate) {
-      // no template specified, so return date in MM/DD/YYYY format
-      template = `${'0'.concat(m + 1).slice(-2)}/${'0'.concat(d).slice(-2)}/${y}`;
-    }
-    return setOverrideText(instance, overrideName, template);
-  }
-  return undefined;
-}
-
-const addOrdinalIndicator = (num) => {
-  lastNum = num.toString().slice(-1);
-  if (lastNum == '1') {
-    return `${num}st`;
-  } else if (lastNum == '2') {
-    return `${num}nd`;
-  } else if (lastNum == '3') {
-    return `${num}rd`;
-  } else {
-    return `${num}th`;
-  }
-}
-
-// make sure user is set up for current date
-const checkDateSetup = (doc, summary) => {
-  const curDate = symbolMasterWithOverrideName(doc, '<currentDate>');
-  if (curDate === undefined) {
-    summary.push('[ERROR]Update dates: No symbol with override <currentDate> found.');
-    return undefined;
-  }
-  return 'success';
 }

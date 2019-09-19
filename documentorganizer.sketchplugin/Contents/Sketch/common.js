@@ -133,6 +133,57 @@ function sortArtboards(page) {
   }
 }
 
+const currentDate = (dateTemplate = '[MM]/[DD]/[YYYY]') => {
+  const origTemplate = dateTemplate;
+  const today = new Date();
+  const w = today.getDay(); // Sunday is 0, Saturday is 6
+  const d = today.getDate(); // date of month: 1 to (max) 31
+  const m = today.getMonth(); //January is 0, December is 11
+  const y = today.getFullYear(); // four digit year
+  const longMonth = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][m];
+  const shortMonth = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'][m];
+  const longWeekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][w];
+  const shortWeekday = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'][w];
+  // comments below assume date of Friday, 1/4/2019
+  dateTemplate = dateTemplate.replace('[MMMM]', longMonth); // January
+  dateTemplate = dateTemplate.replace('[MMM]', shortMonth); // Jan
+  dateTemplate = dateTemplate.replace('[MM]', '0'.concat(m + 1).slice(-2)); // 01
+  dateTemplate = dateTemplate.replace('[M]', m + 1); // 1
+  dateTemplate = dateTemplate.replace('[WW]', longWeekday); // Friday
+  dateTemplate = dateTemplate.replace('[W]', shortWeekday); // Fri
+  dateTemplate = dateTemplate.replace(['[DDD]'], addOrdinalIndicator(d)); // 4th
+  dateTemplate = dateTemplate.replace(['[DD]'], '0'.concat(d).slice(-2)); // 04
+  dateTemplate = dateTemplate.replace('[D]', d); // 4
+  dateTemplate = dateTemplate.replace('[YYYY]', y); // 2019
+  dateTemplate = dateTemplate.replace('[YY]', y.toString().slice(-2)); // 19
+  if (dateTemplate == origTemplate){
+    // template passed in was unrecognized: return date in MM/DD/YYYY format
+    dateTemplate = `${'0'.concat(m + 1).slice(-2)}/${'0'.concat(d).slice(-2)}/${y}`;
+  }
+  return dateTemplate;
+}
+
+const addOrdinalIndicator = (num) => {
+  lastNum = num.toString().slice(-1);
+  if (lastNum == '1') {
+    return `${num}st`;
+  } else if (lastNum == '2') {
+    return `${num}nd`;
+  } else if (lastNum == '3') {
+    return `${num}rd`;
+  } else {
+    return `${num}th`;
+  }
+}
+
+
+
+
+
+
+
+
+
 // This code is for wrapping the TOC. It's not working yet.
 // const wrapGroup = (group, width) => {
 //   let runningTop = 0;
