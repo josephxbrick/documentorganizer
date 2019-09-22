@@ -282,9 +282,17 @@ Make sure the tops of each row of artboards are aligned perfectly and arranged l
 
 # To-dos
 
+## Error checking
+
+Make sure:
+
+* There are artboards on the current page (could be on the Symbols page)
+* Make sure the page number symbol, the section/page title symbols, and the TOC symbols exist (as well as the TOC group) before allowing the plugin to run.
+* Give error if no callout group exists on an artboard when callout markers do. Either that, or automatically create this group if it doesn't exist.
+
 ## TOC documentation
 
-Show images of both symbols that create the TOC instead of just the page-entry symbol
+Show images of both symbols that create the TOC instead of just the page-entry symbol.
 
 ## When not using section-numbering
 
