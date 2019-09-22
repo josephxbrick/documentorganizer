@@ -284,4 +284,4 @@ Make sure the tops of each row of artboards are aligned perfectly and arranged l
 
 # To-do
 
-## Figure out how auto-numbering of callouts should work when there is no section numbering.
+* Figure out how auto-numbering of callouts should work when there is no section numbering.
