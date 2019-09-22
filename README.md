@@ -259,15 +259,15 @@ Note that you can create groups of callouts on the given artboard if you want nu
 
 ---
 
-# AddCurrentDateToArtboards
+# Add the current date to an artboard
 
-A Sketch plugin that updates today's date on artboards in the current Sketch page that contain a symbol instance to display the page number. 
+To display a date, an artboard needs to include a symbol instance with a text override named `"<currentDate>"`. The name of the symbol instance itself does not matter. Note that this override cannot be in a nested symbol.
 
-To get a date, an artboard needs to include a symbol instance with a text override named `"<currentDate>"`. The name of the symbol instance itself does not matter. Note that this override cannot be in a nested symbol.
+The current date will be in the format specified in Settings.
 
 ---
 
-# Troubleshooting the document
+# Troubleshooting your document
 
 ## The TOC lists pages in the wrong order
 
