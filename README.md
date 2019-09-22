@@ -57,7 +57,7 @@ Here is the Settings dialog:
 
 ## Title of document
 
-The value in this Settings field updates all symbol instances that have a text override named '<documentTitle>'. 
+The value in this Settings field updates all symbol instances that have a text override named `<documentTitle>`. 
 
 ## TOC column spacing
 
