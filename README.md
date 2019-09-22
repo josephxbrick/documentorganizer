@@ -2,16 +2,19 @@
 
 Note: this plugin requires Sketch 53.2 or above.
 
-This plugin updates page numbers, section numbers, callout numbers, and a table of contents in your document. This readme describes how to set up your document to use this plugin.
+This plugin updates page numbers, section numbers, callout numbers, and creates a table of contents in your document. This readme describes how to set up your document to use this plugin.
 
 The plugin assumes the following about your document:
 
 * Each page of the document is represented by an artboard
 * All artboards for a document reside on a single Sketch page
-* The the document is divided into sections, and each section is led by a section-heading page
-* The order that pages appear in the document is determined by how the artboards are laid out in the Sketch page. The artboards are laid out either left to right in a single row, or with each document section on its own row. In either case the artboards of a row must have their tops aligned. 
-* At minimum, the document must contain five symbols
--- 
+* The the document is divided into sections, and each section is led by a section-heading page (artboard)
+* The order that pages appear in the document is determined the artboard layout in the Sketch page. The artboards must be laid out either left to right in a single row, or with each document section on its own left-to-right row. In either case the artboards of a row must have their tops aligned. 
+* At minimum, the document must contain five symbols, all of which will be discussed below
+** The page-number symbol
+** The section-title symbol (titles an artboard that represents a section-heading)
+** The page-title symbol (titles an artboard representing a page of a section)
+** The two symbols that are used by the TOC to create section-header entries and page entries
 
 ## Installing the plugin
 
