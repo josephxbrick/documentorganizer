@@ -279,3 +279,9 @@ The current date will be in the format specified in Settings.
 ## The TOC lists pages in the wrong order
 
 Make sure the tops of each row of artboards are aligned perfectly and arranged left-to right, whether your artboards are arranged in a single horizontal row, or if each section's artboards are arranged in their own row.
+
+---
+
+# To-do
+
+## Figure out how auto-numbering of callouts should work when there is no section numbering.
