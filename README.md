@@ -209,7 +209,7 @@ The symbol instances that the plug-in adds to the TOC will always remain same he
 
 Callouts are markers used to call out elements of a mockup. Callout descriptions live in a list off to the side. Each callout description is labeled using the number of the callout marker.
 
-<img src="/readme_images/calloutsOverview.png" width="872">
+<img src="/readme_images/calloutsOverview.png" width="670">
 
 The plugin will automatically number your callouts and organize your callout descriptions. When using section numbering, the callouts are automatically numbered based on their layout.
 
