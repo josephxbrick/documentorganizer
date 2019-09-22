@@ -4,6 +4,14 @@ Note: this plugin requires Sketch 53.2 or above.
 
 This plugin updates page numbers, section numbers, callout numbers, and a table of contents in your document. This readme describes how to set up your document to use this plugin.
 
+The plugin assumes the following about your document:
+
+* Each page of the document is represented by an artboard
+* All artboards for a document reside on a single Sketch page
+* The the document is divided into sections, and each section is led by a section-heading page
+* The order that pages appear in the document is determined by how the artboards are laid out in the Sketch page. The artboards are laid out either left to right in a single row, or with each document section on its own row. In either case the artboards of a row must have their tops aligned. 
+* At minimum, the document must contain five symbols
+-- 
 
 ## Installing the plugin
 
@@ -33,9 +41,64 @@ Choosing `Update Callouts on Current Artboard` will only renumber the callouts o
 
 ## Settings
 
-<img src="/readme_images/settings.png" width="566">
+This opens the Settings dialog. (See below)
 
-Settings brings up the Settings dialog, which hopefully is self-explanatory. Once the settings are set, they are saved, so choosing `Organize Document Now` will observe the settings.
+---
+
+# Settings
+
+Here is the Settings dialog:
+
+<img src="/readme_images/settings.png" width="581">
+
+
+## Title of document
+
+The value in this Settings field updates all symbol instances that have a text override named '<documentTitle>'. 
+
+## TOC column spacing
+
+If the group containing the table of contents is not tall enough to list TOC entries in a single column, the TOC will use multiple columns for its display. This specifies how many pixels will be between the columns.
+
+## Settings: Include all pages or section headings only in TOC
+
+Choose "All pages" if you want both section and page entries in the table of contents. Choose "Section headings only" to  display only the section headings.
+
+## Dash style
+
+A dash appears between section numbers and the name of the page that follows the section number. You can choose to use a dash, an ndash, or an mdash.
+
+## Date format
+
+You can between the formats mm/dd/yyyy and m/d/yyyy, or choose a custom date format. Use the elements below to construct a custom format. You can use either lower or upper case for the elements.
+
+### Month elements, assuming it's January:
+* [mmmm] – January
+* [mmm] – Jan
+* [mm]  – 01
+* [m] – 1
+
+Note that short [MMM] dates follow AP Style Guide recommendations, where March, April, May, June, and July are not abbrevieated, and September is abbreviated as Sept.
+
+### Weekday elements, assuming it's Friday
+* [ww] - Friday
+* [w] - Fri
+
+Note that short [W] weekdays follow AP Style Guide recommendations, where Tuesday is "Tues", Thursday is "Thurs", and all other weekdays are shortened to their first three letters.
+
+### Date elements, assiming it's the 3rd of the month:
+* [ddd] – 3rd
+* [dd] – 03
+* [d] – 3
+
+### Year elements, assuming it's 2025
+* [yyyy] – 2025
+* [yy] – 25
+
+### Examples templates, assuming it's January 3rd, 2025
+* Today is [ww], [mmmm] [dd], [yyyy] – Today is Sunday, January 3rd, 2025
+* [dd] [mmm] [yyyy] – 03 Jan 2025
+* [m].[d].[yyyy] – 1.3.2025
 
 ---
 
@@ -65,7 +128,6 @@ It doesn't matter how your artboards are ordered in the layer list. The plug-in 
 
 
 Note that all artboards must be on the same Sketch page. This plug-in does not span pages in the Sketch document.
-
 
 ### The TOC group
 
