@@ -11,10 +11,10 @@ The plugin assumes the following about your document:
 * The the document is divided into sections, and each section is led by a section-heading page (artboard)
 * The order that pages appear in the document is determined the artboard layout in the Sketch page. The artboards must be laid out either left to right in a single row, or with each document section on its own left-to-right row. In either case the artboards of a row must have their tops aligned. 
 * At minimum, the document must contain five symbols, all of which will be discussed below
-** The page-number symbol
-** The section-title symbol (titles an artboard that represents a section-heading)
-** The page-title symbol (titles an artboard representing a page of a section)
-** The two symbols that are used by the TOC to create section-header entries and page entries
+  * The page-number symbol
+  * The section-title symbol (titles an artboard that represents a section-heading)
+  * The page-title symbol (titles an artboard representing a page of a section)
+  * The two symbols that are used by the TOC to create section-header entries and page entries
 
 ## Installing the plugin
 
