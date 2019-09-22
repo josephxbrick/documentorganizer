@@ -83,19 +83,13 @@ _onLayersResizedFinish = (context, instance) => {
 
 //=======================================================================================================================
 //  Add section numbering to page/section title instances, name artboards after page/section title instances, update all
-//  doc-title symbol instances, update all current-date instances, return tocArray (used by createTOC() function)
+//  doc-title symbol instances, update all current-date instances, return tocArray which is used by createTOC() function
 //=======================================================================================================================
-
 const numberAndNameArtboards = (context, summary) => {
   // get stored useSections setting
   const tocArray = [];
-  let pageNumberTemplate = dateTemplate = symbol = undefined;
   const doc = context.document;
   const page = doc.currentPage();
-  symbol = symbolMasterWithOverrideName(doc, '<pageNumber>');
-  pageNumberTemplate = getOverrideLayerfromSymbol(symbol, '<pageNumber>').stringValue();
-  symbol = symbolMasterWithOverrideName(doc, '<currentDate>');
-  dateTemplate = (symbol != undefined) ? getOverrideLayerfromSymbol(symbol, '<currentDate>').stringValue() : undefined;
   let sectionNumber = sectionPageNumber = titlesAdded = 0;
   const startPageNum = 1;
   let curPage = startPageNum;
@@ -106,12 +100,7 @@ const numberAndNameArtboards = (context, summary) => {
     let curPageTitle = curSectionTitle = undefined;
     const instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
     for (const instance of instances) {
-      if (instanceHasOverride(instance, '<pageNumber>')){
-        if (pageNumberTemplate.indexOf('#') < 0) {
-          setOverrideText(instance, '<pageNumber>', curPage.toString());
-        } else {
-          setOverrideText(instance, '<pageNumber>', pageNumberTemplate.replace('#', curPage));
-        }
+      if (setOverrideText(instance, '<pageNumber>', curPage.toString())){
         firstPageFound = true;
       }
       // check if current instance contains override '<sectionTitle>'
@@ -131,18 +120,11 @@ const numberAndNameArtboards = (context, summary) => {
         artboard.setName(curPageTitle);
         titlesAdded++;
       };
-      // check if current instance contains override '<documentTitle>'
-      if (instanceHasOverride(instance, '<documentTitle>')){
-        setOverrideText(instance, '<documentTitle>', storedValue('docTitle'));
-      }
-      if (instanceHasOverride(instance, '<currentDate>')){
-        setOverrideText(instance, '<currentDate>', currentDate(dateTemplate));
-      }
+      setOverrideText(instance, '<documentTitle>', storedValue('docTitle'));
+      setOverrideText(instance, '<currentDate>', dateFromTemplate(storedValue('dateFormatTemplate')));
     }
-
     if (curSectionTitle !== undefined || curPageTitle !== undefined) {
       tocArray.push({
-        artboard: artboard,
         sectionTitle: (curSectionTitle === undefined) ? '<undefined>' : curSectionTitle,
         pageTitle: (curPageTitle === undefined) ? '<undefined>' : curPageTitle,
         pageNumber: (curPage === undefined) ? '<undefined>' : curPage

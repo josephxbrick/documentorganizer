@@ -133,13 +133,13 @@ function sortArtboards(page) {
   }
 }
 
-const currentDate = (dateTemplate = '[MM]/[DD]/[YYYY]') => {
+const dateFromTemplate = (dateTemplate, date = new Date()) => {
+  dateTemplate = dateTemplate.toUpperCase();
   const origTemplate = dateTemplate;
-  const today = new Date();
-  const w = today.getDay(); // Sunday is 0, Saturday is 6
-  const d = today.getDate(); // date of month: 1 to (max) 31
-  const m = today.getMonth(); //January is 0, December is 11
-  const y = today.getFullYear(); // four digit year
+  const w = date.getDay(); // Sunday is 0, Saturday is 6
+  const d = date.getDate(); // date of month: 1 to (max) 31
+  const m = date.getMonth(); //January is 0, December is 11
+  const y = date.getFullYear(); // four digit year
   const longMonth = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][m];
   const shortMonth = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'][m];
   const longWeekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][w];
@@ -175,13 +175,6 @@ const addOrdinalIndicator = (num) => {
     return `${num}th`;
   }
 }
-
-
-
-
-
-
-
 
 
 // This code is for wrapping the TOC. It's not working yet.

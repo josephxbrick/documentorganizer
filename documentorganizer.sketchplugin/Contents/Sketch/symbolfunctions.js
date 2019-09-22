@@ -1,4 +1,5 @@
 // assumes non-nested symbol
+
 const setOverrideText = (instance, overrideName, newText) => {
 	const children = instance.symbolMaster().children();
 	for (let i = 0; i < children.count(); i++){
