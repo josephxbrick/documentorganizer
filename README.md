@@ -169,27 +169,29 @@ Note that the table of contents does not yet suppport text wrapping for the TOC 
 
 ## Setting up the TOC
 
-To decide where to display the the table of contents, simply place a TOC group on an artboard. The plugin will find it and populate it with page entries.  It doesn't have to be selected in order to update it. 
+To display a table of contents, simply place the TOC group (see below) on an artboard. The plugin will find it and populate it with page entries.  It doesn't have to be selected – or even on the current artboard – in order to update it. 
 
 ## The TOC group
 
-The table of contents are created in a specific group on whichever artboard you wish.
-
-The plug-in will arrange the TOC into however many columns it needs depending on the height this group. You can specify the pixel spacing between these columns, which will be ignored if the TOC is a single column.
-
-Once the TOC is is created in this group, you can resize the group, and the TOC will rearrange itself into properly spaced columns **as you resize it**. 
+The table of contents is created in a specific group on whichever artboard you wish.
 
 This group must be called `<tocGroup>` This group must contain a rectangle named `<tocGroupRect>`.
 
 <img src="/readme_images/toc_group.png" width="200">
 
-Note that this needs to be an actual group and **not** an instance of a symbol containing this group, as this plugin does not support nested symbols.
+Once the TOC is is created in this group, you can resize the group, and the TOC will rearrange itself into properly spaced columns **as you resize it**. 
+
+Important: the TOC group needs to be an actual group and **not** an instance of a symbol containing this group, as this plugin does not support nested symbols.
 
 ## The symbols used to construct the TOC
 
-The TOC is constructed using instances of two symbols: one for the section-heading entries, and one for the page entries. Important: these symbols different from the symbols used to display section titles and page titles on artboards. When the TOC is constructed, its entries are stacked with no vertical spacing in between, so add any desired vertical padding to the symbols themselves.
+The TOC is constructed using instances of two symbols: one for the section-heading entries, and one for the page entries. Important: these symbols different from the symbols used to display section titles and page titles on artboards. 
+
+When the TOC is constructed, its entries are stacked with no vertical spacing in between, so add any desired vertical padding to the symbols themselves.
 
 The symbol used for section-heading entries in the TOC must have text overrides named `<tocSectionTitle>` and `<tocPageNumber>`. It doesn't matter what the symbol itself is called. Likewise, the symbol for page entries must have text  overrides named `<tocPageTitle>` and `<tocPageNumber>`. Here's an example of a page-entry symbol.
+
+| to do: show an example of a section-entry symbole
   
 <img src="/readme_images/page_entry_symbol.png" width="480">
 
@@ -199,21 +201,24 @@ You'll also need to design these symbols so that they appropriately lay themselv
 
 <img src="/readme_images/page_entry_pinning_2.png" width="380">
 
-The symbol instances that the plug-in adds to the TOC will always remain same height as the corresponding symbol.
+The symbol instances that the plug-in adds to the TOC will always remain same height as the corresponding symbol: their text does not wrap.
 
 ---
 
 # Callouts and the callout listing
 
-The plugin will automatically number your callouts and organize your callout descriptions. When using section numbering, the callouts are automatically numbered based on their layout.
+Callouts are markers used to call out elements of a mockup. Callout descriptions live in a list off to the side. Each callout description is labeled using the number of the callout marker.
 
 <img src="/readme_images/calloutsOverview.png" width="872">
 
-Callouts require that the document has two symbols defined: one whose instances point to locations in the mockups, and another that shows the callout descriptions in a vertical list. (See the image above.) 
+The plugin will automatically number your callouts and organize your callout descriptions. When using section numbering, the callouts are automatically numbered based on their layout.
 
-Note that when editing an artboard with mockups, you will modify only the callouts that point to locations in the mockup; the descriptions list is automatically generated when the plugin is run. (See details below.) Again, it will be helpful to refer to the [sample sketch file](tocsample.sketch) included in this repository.
+Important: when editing mockups, place the description in the `<calloutDescription>` override of the callout markers (pointing to the mockups). Do **not** add the descriptions to the callout-descriptions instances (in the list off to the side). All description instances in that list are deleted and regenerated when the plugin is run. (See details below.) Again, it will be helpful to refer to the [sample sketch file](tocsample.sketch) included in this repository.
 
-## The callout symbol
+
+Callouts require that the document has two symbols defined: one whose instances serve as markers pointing to elements in the mockups, and another the description of the callout markers in a vertical list. (See the image above.) 
+
+## The callout-marker symbol
 
 <img src="/readme_images/calloutOverrides.png" width="334">
 
@@ -222,7 +227,7 @@ Instances of this symbol are used to point out various elements of a mockup. The
 * `<calloutNumber>` This text override displays the callout number. There is no need to edit this override when the plugin uses section numbering; the callouts will be automatically numbered for you. 
 * `<calloutDescription>` This override is used to define the callout's description. Note that the text layer to create this override should have its opacity set to 0 (so it's not visible). Set its font size to 1px so that a long description will fit. This description is used by the plugin when creating the callout description listing. 
 
-## The callout description symbol
+## The callout-description symbol
 
 Instances of this symbol create the description listing, using the descriptions defined in the symbol instances above. Note that you will NOT be creating instances of this symbol; the plugin does that for you, just as the plugin automatically creates instances of the TOC elements. 
 
@@ -247,13 +252,13 @@ The plugin needs to know where you want the description listing for the callouts
 
 <img src="/readme_images/calloutListGroup.png" width="229">
 
-Each time the plugin is run, it will delete all callout-description elements from the group will popoulate the group with new instances. Again, see the [sample sketch file](tocsample.sketch) included in this repository for an example.
+Each time the plugin is run, it will delete all callout-description instance in the group and repopoulate the group with new instances. Again, see the [sample sketch file](tocsample.sketch) included in this repository for an example.
 
 ## Auto-numbering of the callouts
 
-The callouts (that point to elements in the mockups) are numbered in order vertically: the higher the callout on the artboard, the lower its number. If multiple callouts have the same `y` value, they will be numbered left to right.
+The callout markers (that point to elements in the mockups) are numbered in order vertically: the higher the callout on the artboard, the lower its number. If multiple callouts have the same `y` value, they will be numbered left to right.
 
-Note that you can create groups of callouts on the given artboard if you want numbering to be in group order. For example, say you have two mobile mockups on an artboard laid out left-to-right. If you group the callouts with the mockups, the callouts will first number the leftmost group's callouts vertically, and then number the callouts in the group to the right vertically. The image below shows how two sets of callouts will be numbered when each set is grouped with each callout.
+You can create groups of callouts on the given artboard if you want numbering to be in group order. For example, say you have two mobile mockups on an artboard laid out left-to-right. If you group the callout markers with the mockup they point to, the callouts will first number the leftmost group's callouts vertically, and then number the callouts in the group to the right vertically. The image below shows how two sets of callouts will be numbered when each set is grouped with each callout.
 
 <img src="/readme_images/multiMockupExample.png" width="675">
 
