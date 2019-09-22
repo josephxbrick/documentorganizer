@@ -282,6 +282,14 @@ Make sure the tops of each row of artboards are aligned perfectly and arranged l
 
 ---
 
-# To-do
+# To-dos
 
-* Figure out how auto-numbering of callouts should work when there is no section numbering.
+## When not using section-numbering
+
+Figure out how auto-numbering of callouts should work when there is no section numbering. Just give each callout a number? A letter?
+
+## Saving settings
+
+Currently settings are saved session-to-session at the plug-in level, meaning that the saved settings are the same no matter which document you are editing. (I put in a hack so document-title doesn't behave that way.) This is annoying.
+
+It would be better if settings were saved **per document**. An easy method might be saving them to a special symbol on the Symbols page. The symbol would not even need a to have an instance in the document: could just write to text layers of the symbol itself.
