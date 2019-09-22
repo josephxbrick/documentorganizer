@@ -40,7 +40,7 @@ Choosing `Organize Document Now` will update all artboards on the current Sketch
 
 ## Update Callouts on Current Artboard
 
-Choosing `Update Callouts on Current Artboard` will only renumber the callouts on the current artboard, which is a time saver when fiddling arround a given artboard callouts.
+Choosing `Update Callouts on Current Artboard` will only renumber the callouts on the current artboard, which is a time saver when fiddling arround with a given artboard's callouts.
 
 ## Settings
 
@@ -63,9 +63,13 @@ The value in this Settings field updates all symbol instances that have a text o
 
 If the group containing the table of contents is not tall enough to list TOC entries in a single column, the TOC will use multiple columns for its display. This specifies how many pixels will be between the columns.
 
-## Settings: Include all pages or section headings only in TOC
+## Include all pages or section headings only in TOC
 
 Choose "All pages" if you want both section and page entries in the table of contents. Choose "Section headings only" to  display only the section headings.
+
+## Use section numbering
+
+Assigns legal-style numbering to section headings and pages in the document
 
 ## Dash style
 
@@ -73,7 +77,7 @@ A dash appears between section numbers and the name of the page that follows the
 
 ## Date format
 
-You can between the formats mm/dd/yyyy and m/d/yyyy, or choose a custom date format. Use the elements below to construct a custom format. You can use either lower or upper case for the elements.
+You can between the formats mm/dd/yyyy and m/d/yyyy, or choose a custom date format. Use the elements below to construct a custom format. You can use either lowercase or uppercase for the elements.
 
 ### Month elements, assuming it's January:
 * [mmmm] – January
@@ -81,13 +85,13 @@ You can between the formats mm/dd/yyyy and m/d/yyyy, or choose a custom date for
 * [mm]  – 01
 * [m] – 1
 
-Note that short [MMM] dates follow AP Style Guide recommendations, where March, April, May, June, and July are not abbrevieated, and September is abbreviated as Sept.
+Note that short [mmm] dates follow AP Style Guide recommendations, where March, April, May, June, and July are not abbrevieated, and September is abbreviated as Sept.
 
 ### Weekday elements, assuming it's Friday
 * [ww] - Friday
 * [w] - Fri
 
-Note that short [W] weekdays follow AP Style Guide recommendations, where Tuesday is "Tues", Thursday is "Thurs", and all other weekdays are shortened to their first three letters.
+Note that short [w] weekdays follow AP Style Guide recommendations, where Tuesday is "Tues", Thursday is "Thurs", and all other weekdays are shortened to their first three letters.
 
 ### Date elements, assiming it's the 3rd of the month:
 * [ddd] – 3rd
