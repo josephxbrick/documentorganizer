@@ -105,7 +105,7 @@ Note that short [w] weekdays follow AP Style Guide recommendations, where Tuesda
 * [yy] – 25
 
 ### Examples templates, assuming it's January 3rd, 2025
-* Today is [ww], [mmmm] [dd], [yyyy] – "Today is Friday, January 3rd, 2025"
+* Today is [ww], [mmmm] [ddd], [yyyy] – "Today is Friday, January 3rd, 2025"
 * [dd] [mmm] [yyyy] – "03 Jan 2025"
 * [m].[d].[yyyy] – "1.3.2025"
 
