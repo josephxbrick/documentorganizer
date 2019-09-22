@@ -258,7 +258,7 @@ Each time the plugin is run, it will delete all callout-description instance in 
 
 The callout markers (that point to elements in the mockups) are numbered in order vertically: the higher the callout on the artboard, the lower its number. If multiple callouts have the same `y` value, they will be numbered left to right.
 
-You can create groups of callouts on the given artboard if you want numbering to be in group order. For example, say you have two mobile mockups on an artboard laid out left-to-right. If you group the callout markers with the mockup they point to, the callouts will first number the leftmost group's callouts vertically, and then number the callouts in the group to the right vertically. The image below shows how two sets of callouts will be numbered when each set is grouped with each callout.
+You can create groups of callouts on the given artboard if you want numbering to be in group order. For example, say you have two mobile mockups on an artboard laid out left-to-right. If you group the callout markers with the mockup they point to, the callouts will first number the leftmost group's callouts vertically, and then number the callouts in the group to the right vertically. The image below shows how two sets of callouts will be numbered when each set is grouped with each mockup.
 
 <img src="/readme_images/multiMockupExample.png" width="675">
 
