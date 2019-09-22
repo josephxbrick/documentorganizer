@@ -27,7 +27,7 @@ In addition to the documentation below, there is a `tocsample.sketch` file in th
 
 # The plugin menu
 
-<img src="/readme_images/calloutMenus.png" width="677">
+<img src="/readme_images/calloutMenus.png" width="517">
 
 After installing the plugin, the `Organize Document` menu item will appear in Sketch's plugin menu. 
 
@@ -49,7 +49,7 @@ This opens the Settings dialog. (See below)
 
 Here is the Settings dialog:
 
-<img src="/readme_images/settings.png" width="581">
+<img src="/readme_images/settings.png" width="582">
 
 
 ## Title of document
@@ -96,9 +96,9 @@ Note that short [W] weekdays follow AP Style Guide recommendations, where Tuesda
 * [yy] – 25
 
 ### Examples templates, assuming it's January 3rd, 2025
-* Today is [ww], [mmmm] [dd], [yyyy] – Today is Sunday, January 3rd, 2025
-* [dd] [mmm] [yyyy] – 03 Jan 2025
-* [m].[d].[yyyy] – 1.3.2025
+* Today is [ww], [mmmm] [dd], [yyyy] – "Today is Friday, January 3rd, 2025"
+* [dd] [mmm] [yyyy] – "03 Jan 2025"
+* [m].[d].[yyyy] – "1.3.2025"
 
 ---
 
