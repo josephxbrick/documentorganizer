@@ -192,8 +192,6 @@ The TOC is constructed using instances of two symbols: one for the section-headi
 When the TOC is constructed, its entries are stacked with no vertical spacing in between, so add any desired vertical padding to the symbols themselves.
 
 The symbol used for section-heading entries in the TOC must have text overrides named `<tocSectionTitle>` and `<tocPageNumber>`. It doesn't matter what the symbol itself is called. Likewise, the symbol for page entries must have text  overrides named `<tocPageTitle>` and `<tocPageNumber>`. Here's an example of a page-entry symbol.
-
-| to do: show an example of a section-entry symbole
   
 <img src="/readme_images/page_entry_symbol.png" width="480">
 
@@ -283,6 +281,10 @@ Make sure the tops of each row of artboards are aligned perfectly and arranged l
 ---
 
 # To-dos
+
+## TOC documentation
+
+Show images of both symbols that create the TOC instead of just the page-entry symbol
 
 ## When not using section-numbering
 
