@@ -54,6 +54,8 @@ Here is the Settings dialog:
 
 <img src="/readme_images/settings.png" width="582">
 
+Settings are saved from session to session. Below is a description of each setting.
+
 
 ## Title of document
 
@@ -77,7 +79,7 @@ A dash appears between section numbers and the name of the page that follows the
 
 ## Date format
 
-You can between the formats mm/dd/yyyy and m/d/yyyy, or choose a custom date format. Use the elements below to construct a custom format. You can use either lowercase or uppercase for the elements.
+You can choose between the formats mm/dd/yyyy and m/d/yyyy, or create a custom date format. Use the date elements below to construct a custom format. You can use either lowercase or uppercase for the elements.
 
 ### Month elements, assuming it's January:
 * [mmmm] – January
