@@ -15,7 +15,7 @@ const settingsDialog = (context) => {
     '[m]/[d]/[yyyy]'
   ]
   const alert =  NSAlert.alloc().init();
-  // alert.setIcon(NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path()));
+  alert.setIcon(NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path()));
   alert.setMessageText("Organize Document Settings");
   let curY = 0;
   const viewWidth = 360;
