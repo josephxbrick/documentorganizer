@@ -45,10 +45,10 @@
     ]
   },
   "identifier": "https://github.com/josephxbrick/organize-sketch-doc",
-  "homepage": "https://github.com/josephxbrick/organize-sketch-doc",
+  "homepage": "https://github.com/josephxbrick/documentorganizer",
   "version": "1.0",
   "icon" : "icon.png",
-  "description": "Various functions for tidying up a document",
+  "description": "Manage table-of-contents, page/section numbering, callouts, and current date for UX design documents.",
   "authorEmail": "jbrick@gmail.com",
   "name": "Organize Document"
 }

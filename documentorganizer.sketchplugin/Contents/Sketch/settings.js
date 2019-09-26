@@ -78,13 +78,10 @@ const settingsDialog = (context) => {
   curY = pushControlAndGetNewY(controls, controlDescription);
 
   // =============== Dash type label, dash-type dropdown, and help text ===============
-  const foo = (val) => {
-    console.log(val);
-  }
+
   label = createLabel("Dash style:", {x: 0, y: curY, width: viewWidth}, 6);
   controls.push(label);
-  const dashStyleSelect = createSelect(['-', '\u2013', '\u2014'], storedValue('dashType'), {x: 73, y: curY, width: 45}, foo);
-  console.log(dashStyleSelect.menu());
+  const dashStyleSelect = createSelect(['-', '\u2013', '\u2014'], storedValue('dashType'), {x: 73, y: curY, width: 45});
   dashStyleSelect.setEnabled(storedValue('useSections'));
   curY = pushControlAndGetNewY(controls, dashStyleSelect, 0);
   controlDescription = createDescription("Dashes appear between section numbers and page titles", NSColor.grayColor(), 11, {x: 73, y: curY, width: viewWidth - 73, height: textHeight(11, 2)});
@@ -178,7 +175,6 @@ const createDescription = (text, textColor, textSize, frame) => {
 // * The onSelectionChangedFunction can be passed in. It will be called (with the checkbox as a parameter) whenever the
 //   selected state of the checkbox changes. Here's a sample function you could pass in:
 //
-//   // DOES NOT WORK FOR UNKNOWN REASON
 //   const onCheckboxSelectionChanged = (checkbox) => {
 //     if (checkbox.getValue() == true) {
 //       console.log("checkbox is selected");
@@ -206,18 +202,9 @@ const createCheckbox = (title, checkState, frame, onSelectionChangedFunction = u
 // create select (combobox) control
 //
 // * The control's getValue() method returns the selected item's index.
-// * The onSelectionChangedFunction, if passed in, is called when the selection changes. Here's a sample function that you
-//    might pass in (when creating the select):
-//
-//   THIS DOESN'T WORK - NOT SURE WHY
-//   const onDropdownChanged = (combobox) => {
-//     if (combobox.getValue() == 0) {
-//       console.log('The first item was selected');
-//     }
-//   }
 // =====================================================================================================================
 
-const createSelect = (items, selectedItemIndex, frame, onSelectionChangedFunction = undefined) => {
+const createSelect = (items, selectedItemIndex, frame) => {
   frame.height = 30;
 	var comboBox = NSComboBox.alloc().initWithFrame(NSMakeRect(frame.x, frame.y, frame.width, frame.height)),
 		selectedItemIndex = (selectedItemIndex > -1) ? selectedItemIndex : 0;
@@ -225,10 +212,6 @@ const createSelect = (items, selectedItemIndex, frame, onSelectionChangedFunctio
 	comboBox.selectItemAtIndex(selectedItemIndex);
 	comboBox.setNumberOfVisibleItems(items.length);
 	comboBox.setCompletes(1);
-
-  if (onSelectionChangedFunction != undefined){
-    comboBox.setCOSJSTargetFunction(onSelectionChangedFunction);
-  }
   comboBox.getValue = () => comboBox.indexOfSelectedItem();
 	return comboBox;
 }

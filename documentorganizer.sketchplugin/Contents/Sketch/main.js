@@ -95,6 +95,7 @@ const numberAndNameArtboards = (context, summary) => {
   let curPage = startPageNum;
   let firstPageFound = false;
   const artboards = allArtboards(page);
+  let runningSectionTitle = undefined;
   // find index of first character that isn't part of an section number prefix
   for (const artboard of artboards) {
     let curPageTitle = curSectionTitle = undefined;
@@ -107,7 +108,7 @@ const numberAndNameArtboards = (context, summary) => {
       if (instanceHasOverride(instance, '<sectionTitle>')){
         sectionNumber++;
         sectionPageNumber = 0;
-        curSectionTitle = addSectionNumbers(getOverrideText(instance, '<sectionTitle>'), sectionNumber, sectionPageNumber);
+        curSectionTitle = runningSectionTitle = addSectionNumbers(getOverrideText(instance, '<sectionTitle>'), sectionNumber, sectionPageNumber);
         setOverrideText(instance, '<sectionTitle>', curSectionTitle);
         artboard.setName(curSectionTitle);
         titlesAdded++;
@@ -121,6 +122,7 @@ const numberAndNameArtboards = (context, summary) => {
         titlesAdded++;
       };
       setOverrideText(instance, '<documentTitle>', storedValue('docTitle'));
+      setOverrideText(instance, '<currentSection>', removeSectionNumbers(runningSectionTitle));
       setOverrideText(instance, '<currentDate>', dateFromTemplate(storedValue('dateFormatTemplate')));
     }
     if (curSectionTitle !== undefined || curPageTitle !== undefined) {
@@ -170,8 +172,10 @@ const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
 }
 
 const removeSectionNumbers = (text) => {
-  const endIndex = prefixEndIndex(text);
-  return `${text.substring(endIndex)}`
+  if (text){
+    const endIndex = prefixEndIndex(text);
+    return `${text.substring(endIndex)}`
+  }
 }
 
 const checkNameArtboardSetup = (doc, summary) => {
