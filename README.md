@@ -135,7 +135,7 @@ When the plugin is run, it will rename the artboard to the title of the section 
 
 ## The section-title symbol
 
-The section-title symbol displays the title of a section on an artboard. 
+Instances of the section-title symbol display the title of a section on an artboard and denote the beginning of a new section. **Important**: these instances are to be used *only* on section-heading pages. If you want to display the current section's name on each page belonging to a section, use instances of the current-section symbol. (See below.)
 
 The section-title symbol must contain a text override named `<sectionTitle>`. It doesn't matter what the symbol itself is named, nor what any instance of the symbol is named. Placing an instance of this symbol on an artboard will make it show up as a section in the TOC.
 
@@ -143,13 +143,21 @@ The section-title symbol must contain a text override named `<sectionTitle>`. It
 
 And of course, once you place the symbol instance on an artboard, you'll need to set its `<sectionTitle>` override text to the desired title. (The plug-in won't make up section names for you!)
 
-## The page title symbol
+## The page-title symbol
 
 Artboards that serve as pages of a section contain the page-title symbol instance, which displays the title of the page. The symbol must have a text override named `<pageTitle>`. It doesn't matter what the symbol itself is named. Placing this symbol on an artboard will make it show up as a page belonging to a section in the table of contents.
 
 <img src="/readme_images/page_title_symbol.png" width="380">
 
-## Section numbering
+## The current-section symbol
+
+Instances of the current-section symbol display the name of the current section. This can be placed on any page, but is intended to appear on pages belonging to a section to remind readers which section they are in. Unlike the section-title symbol above, instances of the current-section symbol do not denote the beginning of a new section. It also does not display section numbering, even if section numbering is turned on. (This is to avoid unneccessary clutter.)
+
+This symbol must contain the text override `<currentSection>`
+
+<img src="/readme_images/current_section_symbol.png" width="520">
+
+## About section numbering
 
 The plugin can prefix section titles and page titles with section numbering (e.g., 1.0, 1.1, 2.0, etc.) followed by a hyphen, which can be either a dash, an n-dash, or an m-dash. 
 
