@@ -29,7 +29,7 @@ const settingsDialog = (context) => {
   // ============================ Create controls that will appear in alert ============================
 
   // =============== Dialog heading ===============
-  const description = createDescription("Organize your document with page numbers, section/callout numbering, and a table of contents (TOC).", NSColor.darkGrayColor(), 12, {x: 0, y: curY, width: viewWidth, height: textHeight(12, 2)});
+  const description = createDescription("Organize your document with page numbers, section/callout numbering, and a table of contents (TOC). Documentation: https://github.com/josephxbrick/documentorganizer", NSColor.darkGrayColor(), 12, {x: 0, y: curY, width: viewWidth, height: textHeight(12, 3)});
   curY = pushControlAndGetNewY(controls, description);
 
   // =============== Divider line ===============
@@ -74,7 +74,7 @@ const settingsDialog = (context) => {
   }
   const useSectionsCheckbox = createCheckbox('Use section numbering', storedValue('useSections'), {x:0, y: curY, width: viewWidth}, onCheckboxSelectionChanged);
   curY = pushControlAndGetNewY(controls, useSectionsCheckbox, 5);
-  controlDescription = createDescription("Page titles will be numbered by section (1, 1.1, 1.2), as will callouts on an artboard (1.1.1, 1.1.2). Otherwise, callouts will use sequential lettering (A, B, C) on each artboard.", NSColor.grayColor(), 11, {x: 0, y: curY, width: viewWidth, height: textHeight(11, 3)});
+  controlDescription = createDescription("Page titles will be numbered by section (1, 1.1, 1.2), as will callouts on an artboard (1.1.1, 1.1.2). Otherwise, page titles are unnumbered and callouts will use sequential lettering (A, B, C).", NSColor.grayColor(), 11, {x: 0, y: curY, width: viewWidth, height: textHeight(11, 3)});
   curY = pushControlAndGetNewY(controls, controlDescription);
 
   // =============== Dash type label, dash-type dropdown, and help text ===============
@@ -164,7 +164,7 @@ const createDescription = (text, textColor, textSize, frame) => {
 	label.setBezeled(false);
 	label.setDrawsBackground(false);
 	label.setEditable(false);
-	label.setSelectable(false);
+	label.setSelectable(true);
 	return label;
 }
 
