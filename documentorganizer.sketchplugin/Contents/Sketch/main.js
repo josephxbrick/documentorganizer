@@ -24,7 +24,7 @@ _settings = (context) => {
     const tocArray = numberAndNameArtboards(context, summary);   //
     tableOfContents(context, tocArray, summary);
     if (storedValue('useSections')){
-      updateCalloutLists(doc);
+      // updateCalloutLists(doc);
     }
   }
   displaySummary(doc, summary);
@@ -47,7 +47,7 @@ _organizeDocument = (context) => {
   }
   displaySummary(doc, summary);
   if (storedValue('useSections')){
-    updateCalloutLists(doc);
+    // updateCalloutLists(doc);
   }
 }
 
@@ -135,6 +135,7 @@ const numberAndNameArtboards = (context, summary) => {
     if (firstPageFound) {
       curPage++;
     }
+    updateCalloutsOnArtboard(artboard, doc);
   }
   // summary
   summary.push(`${titlesAdded} artboards named`);
@@ -422,21 +423,25 @@ const updateCalloutLists = (doc) => {
 }
 
 const updateCalloutsOnArtboard = (artboard, doc) => {
+  const useSections = storedValue('useSections');
   const callouts = sortedCallouts(artboard));
+  let sectionNumber = '';
   let calloutCount = 0;
-  const sectionNumber = artboard.name().substring(0, artboard.name().indexOf(' '));
+  if (useSections) {
+    sectionNumber = artboard.name().substring(0, artboard.name().indexOf(' ')).concat('.');
+  }
   // get all symbol instances on the current artboard and find the ones that we care about
   const calloutListDescriptions = [];
   for (const callout of callouts) {
     calloutCount ++;
     let overrideText = getOverrideText(callout, '<calloutDescription>');
-    const calloutNumber = `${sectionNumber}.${calloutCount}`;
+    const calloutNumber = (useSections) ? `${sectionNumber}${calloutCount}` : numberToLetters(calloutCount);
     setOverrideText(callout, '<calloutNumber>', calloutNumber);
       // reset this to its normal value to avoid the bug where you can't change any override in the Sketch UI.
     setOverrideText(callout, '<calloutDescription>', '');
     setOverrideText(callout, '<calloutDescription>', overrideText);
     calloutListDescriptions.push({description: overrideText, calloutNumber: calloutNumber});
-    callout.setName(`${sectionNumber}.${calloutCount} - ${overrideText.substring(0,30)}...`);
+    callout.setName(`${calloutNumber} - ${overrideText.substring(0,30)}...`);
   }
   let calloutDescriptionsGroup = layerWithName(artboard, MSLayerGroup, '<calloutListGroup>');
   if (calloutDescriptionsGroup !== undefined && calloutListDescriptions.length > 0){
@@ -460,6 +465,12 @@ const updateCalloutsOnArtboard = (artboard, doc) => {
     }
     layoutCalloutDescriptions(calloutDescriptionsGroup, doc);
   }
+}
+
+const numberToLetters = (num) => {
+    const firstDigit = (num <= 26) ? '' : String.fromCharCode(Math.floor(num/26) + 64);
+    const secondDigit = String.fromCharCode(num % 26 + 64);
+    return `${firstDigit}${secondDigit}`;
 }
 
 // lays out the descriptions for callouts in the calloutDescriptionsGroup

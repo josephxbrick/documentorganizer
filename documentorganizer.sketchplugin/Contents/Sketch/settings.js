@@ -74,7 +74,7 @@ const settingsDialog = (context) => {
   }
   const useSectionsCheckbox = createCheckbox('Use section numbering', storedValue('useSections'), {x:0, y: curY, width: viewWidth}, onCheckboxSelectionChanged);
   curY = pushControlAndGetNewY(controls, useSectionsCheckbox, 5);
-  controlDescription = createDescription("Section and page titles can include section numbering. Without section numbering, you will need to manually number callouts.", NSColor.grayColor(), 11, {x: 0, y: curY, width: viewWidth, height: textHeight(11, 2)});
+  controlDescription = createDescription("Page titles will be numbered by section (1, 1.1, 1.2), as will callouts on an artboard (1.1.1, 1.1.2). Otherwise, callouts will use sequential lettering (A, B, C) on each artboard.", NSColor.grayColor(), 11, {x: 0, y: curY, width: viewWidth, height: textHeight(11, 3)});
   curY = pushControlAndGetNewY(controls, controlDescription);
 
   // =============== Dash type label, dash-type dropdown, and help text ===============
