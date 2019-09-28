@@ -256,7 +256,7 @@ The callout-description instances are stacked vertically with no space between i
 
 Callout descriptions support text wrapping. The plugin will automatically adjust the list's layout when you resize the containing group in Sketch.
 
-## The callout-descriptions list
+## The callout-descriptions group
 
 The plugin needs to know where you want the description listing for the callouts to appear in the artboard. It expects the artboard to contain a group called `<calloutListGroup>` that contains a rectangle called `<calloutGroupRect>`. 
 
