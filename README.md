@@ -4,17 +4,7 @@ Note: this plugin requires Sketch 53.2 or above.
 
 This plugin updates page numbers, section numbers, callout numbers, and creates a table of contents in your document. This readme describes how to set up your document to use this plugin.
 
-The plugin assumes the following about your document:
-
-* Each page of the document is represented by an artboard
-* All artboards for a document reside on a single Sketch page
-* The the document is divided into sections, and each section is led by a section-heading page (artboard)
-* The order that pages appear in the document is determined the artboard layout in the Sketch page. The artboards must be laid out either left to right in a single row, or with each document section on its own left-to-right row. In either case the artboards of a row must have their tops aligned. 
-* At minimum, the document must contain five symbols, all of which will be discussed below. If any of these symbols is absent, the plugin will stop execution and display an error message regarding the missing symbols.
-  * The page-number symbol
-  * The section-title symbol (titles an artboard that represents a section-heading)
-  * The page-title symbol (titles an artboard representing a page of a section)
-  * The two symbols that are used by the TOC to create section-header entries and page entries
+**IMPORTANT!** plugin is currently in Beta. Please add any bug reports, feature requests, or suggested refinements to the Issues section of this repo.
 
 ## Installing the plugin
 
@@ -25,6 +15,23 @@ The easiest way to  install this plugin is to choose `Download Zip` from the `Cl
 ## Downloading the sample file
 
 In addition to the documentation below, there is a `tocsample.sketch` file in the repository that's a sketch file designed to work with this plugin. It contains some explanations of how the plugin expects the document to be set up. Hit the download button [here](tocsample.sketch) to get the file.
+
+# Plugin requirements
+
+The plugin assumes the following about your document:
+
+* Each page of the document is represented by an artboard
+* All artboards for a document reside on a single Sketch page
+* The the document is divided into sections, and each section is led by a section-heading page (artboard)
+* The order that pages appear in the document is determined the artboard layout in the Sketch page. The artboards must be laid out either left to right in a single row, or with each document section on its own left-to-right row. In either case the artboards of a row must have their tops aligned. 
+* At minimum, the document must contain five symbols and one group, all of which will be discussed below. If any of these elements is absent, the plugin will stop execution and display an error message regarding the missing elements. Here is what your file must contain. 
+  * The page-number symbol
+  * The section-title symbol, which titles an artboard that represents a section-heading
+  * The page-title symbol, which titles an artboard representing a page of a given section
+  * The two symbols that are used by the TOC to create section-header entries and page entries
+  * The TOC group (named `<tocGroup>`), which is placed on the artboard that displays the TOC.
+  
+Again, refer to the documentation below for details on each of these required elements.
 
 ---
 
@@ -113,7 +120,7 @@ Note that short [w] weekdays follow AP Style Guide recommendations, where Tuesda
 
 # Page numbering
 
-This plugin automatically updates the page number on each artboard of the Sketch page. The first symbol instance found is assigned the number 1, and that number increases by 1 for each subsequent artboard, whether or not an artboard has a page-number instance on it.
+Page numbering is required by this plugin. This plugin automatically updates the page number on each artboard of the Sketch page. The first symbol instance found is assigned the number 1, and that number increases by 1 for each subsequent artboard, whether or not an artboard has a page-number instance on it.
 
 So if you want to start numbering your artboards at 1 on the second artboard, put the first page-number instance on the second artboard. If you want to start numbering at 2, put a page-number instance on the previous artboard and set its opacity to 0. (The transparent instance will contain the number 1.)
 
@@ -127,6 +134,20 @@ Place the page-number symbol instance on an artboard to assign it a page number.
 
 ---
 
+# Add the document title to an artboard
+
+The document title is specified in Settings (see above). To display a document title on a given artboard the artboard needs to include a symbol instance with a text override named `"<documentTitle>"`. The name of the symbol instance itself does not matter. Note that this override cannot be in a nested symbol.
+
+---
+
+# Add the current date to an artboard
+
+To display a date, an artboard needs to include a symbol instance with a text override named `"<currentDate>"`. The name of the symbol instance itself does not matter. Note that this override cannot be in a nested symbol.
+
+The current date will be in the format specified in Settings.
+
+---
+
 # Creating section headings and section pages in a document
 
 Section headings are artboards that are titled using section-title symbol instances. Pages belonging to sections are titled using a page-title instance. For an artboard to listed in the table of contents, it must contain either a section-title instance or a page-title instance.
@@ -135,7 +156,7 @@ When the plugin is run, it will rename the artboard to the title of the section 
 
 ## The section-title symbol
 
-Instances of the section-title symbol display the title of a section on an artboard and denote the beginning of a new section. **Important**: these instances are to be used *only* on section-heading pages. If you want to display the current section's name on each page belonging to a section, use instances of the current-section symbol. (See below.)
+Section titles are required by this plugin. Instances of the section-title symbol display the title of a section on an artboard and denote the beginning of a new section. **Important**: these instances are to be used *only* on section-heading pages. If you want to display the current section's name on each page belonging to a section, use instances of the current-section symbol. (See below.)
 
 The section-title symbol must contain a text override named `<sectionTitle>`. It doesn't matter what the symbol itself is named, nor what any instance of the symbol is named. Placing an instance of this symbol on an artboard will make it show up as a section in the TOC.
 
@@ -145,7 +166,7 @@ And of course, once you place the symbol instance on an artboard, you'll need to
 
 ## The page-title symbol
 
-Artboards that serve as pages of a section contain the page-title symbol instance, which displays the title of the page. The symbol must have a text override named `<pageTitle>`. It doesn't matter what the symbol itself is named. Placing this symbol on an artboard will make it show up as a page belonging to a section in the table of contents.
+Page titles are required by this plugin. Artboards that serve as pages of a section contain the page-title symbol instance, which displays the title of the page. The symbol must have a text override named `<pageTitle>`. It doesn't matter what the symbol itself is named. Placing this symbol on an artboard will make it show up as a page belonging to a section in the table of contents.
 
 <img src="/readme_images/page_title_symbol.png" width="380">
 
@@ -165,9 +186,9 @@ Important: the title of the page (after the prefix) cannot begin with a number, 
 
 ---
 
-# The table of contents
+# Table of contents
 
-The plugin creates a table of contents (TOC) for artboards on the current Sketch page, organized into sections. The image below shows a TOC that has both section headers and pages, but you can choose to list only section headers.
+A table of contents (TOC) is required by this plugin. *Issue: a TOC is overkill for a small doc. Consider making TOC optional.* The plugin creates a TOC for artboards on the current Sketch page, organized into sections. The image below shows a TOC that has both section headers and pages, but you can choose to list only section headers.
 
 <img src="/readme_images/toc_image_newest.png" width="900">
 
@@ -181,7 +202,7 @@ Note that the table of contents does not yet suppport text wrapping for the TOC 
 
 To display a table of contents, simply place the TOC group (see below) on an artboard. The plugin will find it and populate it with page entries.  It doesn't have to be selected – or even on the current artboard – in order to update it. 
 
-## The TOC group
+## The group that contains the table of contents
 
 The table of contents is created in a specific group on whichever artboard you wish.
 
@@ -283,14 +304,6 @@ You can create groups of callout markers on the given artboard if you want numbe
 The image below shows two mobile mockups, where each mockup has been grouped with its associated callout markers. Note the order of the numbering. (Section numbering is not used in this example.)
 
 <img src="/readme_images/multiMockupExample.png" width="600">
-
----
-
-# Add the current date to an artboard
-
-To display a date, an artboard needs to include a symbol instance with a text override named `"<currentDate>"`. The name of the symbol instance itself does not matter. Note that this override cannot be in a nested symbol.
-
-The current date will be in the format specified in Settings.
 
 ---
 
