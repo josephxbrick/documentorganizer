@@ -224,49 +224,27 @@ Note that the appearance of callouts can be completely customized, as discussed 
 
 ## Callout markers
 
-Callout markers are labeled pointers that refer to elements in a mockup. (See image above). These are symbol instances that you manually position on the mockup. 
-
-Don't worry about editing the marker's number: the plugin will do that for you. But you do need to put the description of what the marker is pointing at in the marker's `<calloutDescription>` text override.
+Callout markers are labeled pointers that refer to elements in a mockup. (See image above). These are symbol instances that you manually position on the mockup. Here is a sample, showing its required overrides.
 
 <img src="/readme_images/calloutOverrides.png" width="334">
 
-When updating the callouts on a given artboard, the plugin first deletes all callout-description instances from the description list. It then repopulates the description list with new description instances using each marker's '<calloutDescription>' value. When you edit a description, make sure you are editing a marker instance rather than a description instance, as the latter changes nothing in your document.
+Don't worry about the marker's `<calloutNumber>` override: the plugin will do that for you. But you do need to put the description of what the marker is pointing at in the marker's `<calloutDescription>` text override.
+
+Since you probably want all markers to be the same size, there is no need to point out any symbol resizing/pinning here. 
+
+Since you don't want the symbol's `calloutDescription` text layer to be visible in marker instances, set its opacity to 0, its size to the size of the symbol, and its text alignment to "wrap to width/height."
  
  ## Callout descriptions
 
-A callout description contains a graphic containing the callout marker's number and the descriptions. Callout descriptions live in a vertical list with the width and location of your choosing. 
+A callout description contains a graphic containing the callout marker's number and the descriptions. Callout descriptions live in a vertical list with the width and location of your choosing. Here is a sample, showing its required overrides.
 
 <img src="/readme_images/calloutDescriptionOverrides.png" width="626">
 
+When updating the callouts on a given artboard, the plugin first deletes all description instances from the description list. It then repopulates the list with new description instances, filling in each new instance's overrides using using its marker's `<calloutDescription>` value. 
+
 Note that the overrides above are filled in by the plugin using the the override values of the associated marker. Do edit these overrides as that will result in no change to the doucment.
 
-The callout-description instances are stacked vertically with no space between instances, so add padding to the symbol itself to change the spacing in the descriptions list.
-
-Callout descriptions support text wrapping. The plugin will automatically adjust the list's layout when you resize the containing group in Sketch.
-
-## Automatic numbering of callout markers
-
-Important: when editing mockups, place the description in the `<calloutDescription>` override of the callout markers (pointing to the mockups). Do **not** add the descriptions to the callout-descriptions instances (in the list off to the side). All description instances in that list are deleted and regenerated when the plugin is run. (See details below.) Again, it will be helpful to refer to the [sample sketch file](tocsample.sketch) included in this repository.
-
-
-Callouts require that the document has two symbols defined: one whose instances serve as markers pointing to elements in the mockups, and another the description of the callout markers in a vertical list. (See the image above.) 
-
-## The callout-marker symbol
-
-<img src="/readme_images/calloutOverrides.png" width="334">
-
-Instances of this symbol are used to point out various elements of a mockup. The symbol contains the graphics that define the look of the pointer, and two text overrides, which must have the names listed below:
-
-* `<calloutNumber>` This text override displays the callout number. There is no need to edit this override when the plugin uses section numbering; the callouts will be automatically numbered for you. 
-* `<calloutDescription>` This override is used to define the callout's description. Note that the text layer to create this override should have its opacity set to 0 (so it's not visible). Set its font size to 1px so that a long description will fit. This description is used by the plugin when creating the callout description listing. 
-
-## The callout-description symbol
-
-Instances of this symbol create the description listing, using the descriptions defined in the symbol instances above. Note that you will NOT be creating instances of this symbol; the plugin does that for you, just as the plugin automatically creates instances of the TOC elements. 
-
-This symbol allows for text wrapping to deal with longer descriptions. It is important that the symbol's pinning is defined appropriately, both of the graphical (numbered) indicator as well as of the descriptive text:
-
-The graphical (numbered) indicator should be pinned as follows:
+Below is an example symbol used to create description instances. The graphical (numbered) indicator should be pinned as follows:
 
 <img src="/readme_images/calloutListingIndicator.png" width="565">
 
@@ -274,24 +252,25 @@ The description (text) layer should be pinned and have its text attributes set a
 
 <img src="/readme_images/calloutListingIndicatorText.png" width="565">
 
-This symbol has two text overrides. Both will be populated by the plugin.
+The callout-description instances are stacked vertically with no space between instances, so add padding to the symbol itself to change the spacing in the descriptions list.
 
-* `<calloutListNumber>` This override displays the callout number
-* `<calloutListDescription>` This override displays the callout description
+Callout descriptions support text wrapping. The plugin will automatically adjust the list's layout when you resize the containing group in Sketch.
 
-## The callout descriptions list group
+## The callout-descriptions list
 
 The plugin needs to know where you want the description listing for the callouts to appear in the artboard. It expects the artboard to contain a group called `<calloutListGroup>` that contains a rectangle called `<calloutGroupRect>`. 
 
 <img src="/readme_images/calloutListGroup.png" width="229">
 
-Each time the plugin is run, it will delete all callout-description instance in the group and repopoulate the group with new instances. Again, see the [sample sketch file](tocsample.sketch) included in this repository for an example.
+Each time the plugin is run, it will delete all callout-description instance in the group and repopoulate the group with new instances. 
 
-## Auto-numbering of the callouts
+## Automatic numbering of callout markers
 
-The callout markers (that point to elements in the mockups) are numbered in order vertically: the higher the callout on the artboard, the lower its number. If multiple callouts have the same `y` value, they will be numbered left to right.
+If you are using section numbers, the callout markers on artboard 3.5 will be numbered as "3.5.1", "3.5.2", "3.5.3," etc. If you are not using section numbers, the markers be numbered as "A", "B", "C", etc, on each artboard.
 
-You can create groups of callouts on the given artboard if you want numbering to be in group order. For example, say you have two mobile mockups on an artboard laid out left-to-right. If you group the callout markers with the mockup they point to, the callouts will first number the leftmost group's callouts vertically, and then number the callouts in the group to the right vertically. The image below shows how two sets of callouts will be numbered when each set is grouped with each mockup.
+The plugin numbers marker instances based on their position in the mockup: the lower the marker's y position, the lower its number. If multiple callouts have the same `y` value, they will be numbered left to right.
+
+You can create groups of callouts on the given artboard if you want numbering to be in group order. For example, say you have two mobile mockups on an artboard, laid out left-to-right. If you group the callout markers with the mockup they refer to, the callouts will first number the leftmost group's callouts vertically, and then number the callouts in the group to the right vertically. The image below shows how two sets of callouts will be numbered when each set is grouped with each mockup.
 
 <img src="/readme_images/multiMockupExample.png" width="675">
 
