@@ -234,9 +234,11 @@ When updating the callouts on a given artboard, the plugin first deletes all cal
  
  ## Callout descriptions
 
-Callout descriptions share the same identifying label and include a description of what the marker is pointing at. Callout descriptions live in a vertical list with the width and location of your choosing. Each callout description is labeled using the number of the callout marker. It has two overrides that the plugin updates for you.
+A callout description contains a graphic containing the callout marker's number and the descriptions. Callout descriptions live in a vertical list with the width and location of your choosing. 
 
-<img src="/readme_images/calloutDescriptionOverrides.png" width="536">
+<img src="/readme_images/calloutDescriptionOverrides.png" width="626">
+
+Note that the overrides above are filled in by the plugin using the the override values of the associated marker. Do edit these overrides as that will result in no change to the doucment.
 
 The callout-description instances are stacked vertically with no space between instances, so add padding to the symbol itself to change the spacing in the descriptions list.
 
