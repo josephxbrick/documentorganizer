@@ -226,7 +226,7 @@ Note that the appearance of callouts can be completely customized, as discussed 
 
 Callout markers are labeled pointers that refer to elements in a mockup. (See image above). These are symbol instances that you manually position on the mockup. 
 
-Don't worry about editing the marker's number: the plugin will do that for you. But you do need to put the description of what the marker is pointing at in the marker's '<calloutDescription>' text override.
+Don't worry about editing the marker's number: the plugin will do that for you. But you do need to put the description of what the marker is pointing at in the marker's `<calloutDescription>` text override.
 
 <img src="/readme_images/calloutOverrides.png" width="334">
 
@@ -236,7 +236,7 @@ When updating the callouts on a given artboard, the plugin first deletes all cal
 
 Callout descriptions share the same identifying label and include a description of what the marker is pointing at. Callout descriptions live in a vertical list with the width and location of your choosing. Each callout description is labeled using the number of the callout marker. It has two overrides that the plugin updates for you.
 
-<img src="/readme_images/calloutListingIndicator.png" width="565">
+<img src="/readme_images/calloutDescriptionOverrides.png" width="536">
 
 The callout-description instances are stacked vertically with no space between instances, so add padding to the symbol itself to change the spacing in the descriptions list.
 
