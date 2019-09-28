@@ -72,7 +72,7 @@ The value in this Settings field updates all symbol instances that have a text o
 
 If the group containing the table of contents is not tall enough to list TOC entries in a single column, the TOC will use multiple columns for its display. This specifies how many pixels will be between the columns.
 
-## Include all pages or section headings only in TOC
+## What to include in the TOC
 
 Choose "All pages" if you want both section and page entries in the table of contents. Choose "Section headings only" to  display only the section headings.
 
