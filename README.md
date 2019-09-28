@@ -215,7 +215,7 @@ The symbol instances that the plug-in adds to the TOC will always remain same he
 
 # Callouts
 
-Callouts consist of callout markers and callout descriptions. 
+Callouts consist of *callout markers* and *callout descriptions*. 
 
 <img src="/readme_images/calloutsOverview.png" width="670">
 
