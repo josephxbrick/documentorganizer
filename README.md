@@ -293,7 +293,7 @@ If you are using section numbers (see Settings above), the callout markers on ar
 
 The plugin when run numbers the marker instances based on their position in the mockup: the higher-up the marker appears in the mockup, the lower its number. If multiple markers have the same `y` value, they will be numbered left to right. 
 
-Here's an example of callout numbering. Note how the numbering follows the vertical positions of the markers.
+Here's an example of callout numbering when using section numbering. Note how the numbering follows the vertical positions of the markers.
 
 <img src="/readme_images/calloutVerticalLayout.png" width="730">
 
