@@ -213,13 +213,36 @@ The symbol instances that the plug-in adds to the TOC will always remain same he
 
 ---
 
-# Callouts and the callout listing
+# Callouts
 
-Callouts are markers used to call out elements of a mockup. Callout descriptions live in a list off to the side. Each callout description is labeled using the number of the callout marker.
+Callouts consist of callout markers and callout descriptions. 
 
 <img src="/readme_images/calloutsOverview.png" width="670">
 
-The plugin will automatically number your callouts and organize your callout descriptions. When using section numbering, the callouts are automatically numbered based on their layout.
+Note that the appearance of callouts can be completely customized, as discussed below.
+
+
+## Callout markers
+
+Callout markers are labeled pointers that refer to elements in a mockup. (See image above). These are symbol instances that you manually position on the mockup. 
+
+Don't worry about editing the marker's number: the plugin will do that for you. But you do need to put the description of what the marker is pointing at in the marker's '<calloutDescription>' text override.
+
+<img src="/readme_images/calloutOverrides.png" width="334">
+
+When updating the callouts on a given artboard, the plugin first deletes all callout-description instances from the description list. It then repopulates the description list with new description instances using each marker's '<calloutDescription>' value. When you edit a description, make sure you are editing a marker instance rather than a description instance, as the latter changes nothing in your document.
+ 
+ ## Callout descriptions
+
+Callout descriptions share the same identifying label and include a description of what the marker is pointing at. Callout descriptions live in a vertical list with the width and location of your choosing. Each callout description is labeled using the number of the callout marker. It has two overrides that the plugin updates for you.
+
+<img src="/readme_images/calloutListingIndicator.png" width="565">
+
+The callout-description instances are stacked vertically with no space between instances, so add padding to the symbol itself to change the spacing in the descriptions list.
+
+Callout descriptions support text wrapping. The plugin will automatically adjust the list's layout when you resize the containing group in Sketch.
+
+## Automatic numbering of callout markers
 
 Important: when editing mockups, place the description in the `<calloutDescription>` override of the callout markers (pointing to the mockups). Do **not** add the descriptions to the callout-descriptions instances (in the list off to the side). All description instances in that list are deleted and regenerated when the plugin is run. (See details below.) Again, it will be helpful to refer to the [sample sketch file](tocsample.sketch) included in this repository.
 
