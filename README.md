@@ -232,7 +232,7 @@ Don't worry about the marker's `<calloutNumber>` override: the plugin will do th
 
 Since you probably want all markers to be the same size, there is no need to point out any symbol resizing/pinning here. 
 
-Since you don't want the symbol's `calloutDescription` text layer to be visible in marker instances, set its opacity to 0, its size to the size of the symbol, and its text alignment to "wrap to width/height."
+Since you don't want the symbol's `calloutDescription` text layer to be visible in marker instances, set its opacity to 0, its size to the size of the symbol, and its text alignment to "wrap to width/height." (I also set its font size to 1.)
  
  ## Callout descriptions
 
