@@ -268,11 +268,15 @@ Each time the plugin is run, it will delete all callout-description instance in 
 
 If you are using section numbers (see Settings above), the callout markers on artboard "3.4" will be numbered as "3.4.1", "3.4.2", "3.4.3," etc. If you are not using section numbers, the markers will be numbered as "A", "B", "C", etc, on each artboard.
 
-The plugin numbers the marker instances based on their position in the mockup: the higher-up the marker appears in the mockup, the lower its number. If multiple markers have the same `y` value, they will be numbered left to right. Here's an example of callout numbering. Note how the numbering follows the vertical positions of the markers.
+### Sequential order of callout markers
+
+The plugin when run numbers the marker instances based on their position in the mockup: the higher-up the marker appears in the mockup, the lower its number. If multiple markers have the same `y` value, they will be numbered left to right. Here's an example of callout numbering. Note how the numbering follows the vertical positions of the markers.
 
 <img src="/readme_images/calloutVerticalLayout.png" width="730">
 
-You can create groups of callout markers on the given artboard if you want numbering to be in group order. Say you have two mobile mockups on an artboard, laid out left-to-right. If you group the callout markers with the mockups they refer to, the plugin will first number the leftmost group's markers vertically, and then number the markers in the group to the right vertically. 
+### Numbering callouts in group order
+
+You can create groups of callout markers on the given artboard if you want numbering to be in group order. Example: you have two mobile mockups on an artboard, laid out left-to-right. If you group the callout markers with the mockups they refer to, the plugin will first number the leftmost group's markers vertically, and then number the markers in the group to the right vertically. 
 
 The image below shows two mobile mockups, where each mockup has been grouped with its associated callout markers. Note the order of the numbering. (Section numbering is not used in this example.)
 
