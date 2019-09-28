@@ -270,7 +270,9 @@ If you are using section numbers (see Settings above), the callout markers on ar
 
 The plugin numbers the marker instances based on their position in the mockup: the higher-up the marker appears in the mockup, the lower its number. If multiple makers have the same `y` value, they will be numbered left to right.
 
-You can create groups of callout markers on the given artboard if you want numbering to be in group order. Say you have two mobile mockups on an artboard, laid out left-to-right. If you group the callout markers with the mockups they refer to, the plugin will first number the leftmost group's markers vertically, and then number the markers in the group to the right vertically. The image below shows two mobile mockups, where each mockup has been grouped with its associated callout markers. Note the order of the numbering.
+You can create groups of callout markers on the given artboard if you want numbering to be in group order. Say you have two mobile mockups on an artboard, laid out left-to-right. If you group the callout markers with the mockups they refer to, the plugin will first number the leftmost group's markers vertically, and then number the markers in the group to the right vertically. 
+
+The image below shows two mobile mockups, where each mockup has been grouped with its associated callout markers. Note the order of the numbering.
 
 <img src="/readme_images/multiMockupExample.png" width="675">
 
