@@ -435,7 +435,7 @@ const updateCalloutsOnArtboard = (artboard, doc) => {
   for (const callout of callouts) {
     calloutCount ++;
     let overrideText = getOverrideText(callout, '<calloutDescription>');
-    const calloutNumber = (useSections) ? `${sectionNumber}${calloutCount}` : numberToLetters(calloutCount);
+    const calloutNumber = (useSections) ? `${sectionNumber}${calloutCount}` : numberToLetters(calloutCount - 1);
     setOverrideText(callout, '<calloutNumber>', calloutNumber);
       // reset this to its normal value to avoid the bug where you can't change any override in the Sketch UI.
     setOverrideText(callout, '<calloutDescription>', '');
@@ -468,8 +468,8 @@ const updateCalloutsOnArtboard = (artboard, doc) => {
 }
 
 const numberToLetters = (num) => {
-    const firstDigit = (num <= 26) ? '' : String.fromCharCode(Math.floor(num/26) + 64);
-    const secondDigit = String.fromCharCode(num % 26 + 64);
+    const firstDigit = (num <= 25) ? '' : String.fromCharCode(Math.floor(num/26) + 64);
+    const secondDigit = String.fromCharCode(num % 26 + 65);
     return `${firstDigit}${secondDigit}`;
 }
 
