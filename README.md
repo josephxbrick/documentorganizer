@@ -276,7 +276,7 @@ You can create groups of callout markers on the given artboard if you want numbe
 
 The image below shows two mobile mockups, where each mockup has been grouped with its associated callout markers. Note the order of the numbering.
 
-<img src="/readme_images/multiMockupExample.png" width="774">
+<img src="/readme_images/multiMockupExample.png" width="600">
 
 ---
 
