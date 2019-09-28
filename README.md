@@ -136,7 +136,7 @@ Place the page-number symbol instance on an artboard to assign it a page number.
 
 # Add the document title to an artboard
 
-The document title is specified in Settings (see above). To display a document title on a given artboard the artboard needs to include a symbol instance with a text override named `"<documentTitle>"`. The name of the symbol instance itself does not matter. Note that this override cannot be in a nested symbol.
+The document title is specified in Settings (see above). To display a document title on a given artboard, the artboard needs to include a symbol instance with a text override named `<documentTitle>`. The name of the symbol instance itself does not matter. Note that this override cannot be in a nested symbol.
 
 ---
 
