@@ -15,7 +15,7 @@ const settingsDialog = (context) => {
     '[m]/[d]/[yyyy]'
   ]
   const alert =  NSAlert.alloc().init();
-  alert.setIcon(NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path()));
+  // alert.setIcon(NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path()));
   alert.setMessageText("Organize Document Settings");
   let curY = 0;
   const viewWidth = 360;
@@ -74,7 +74,7 @@ const settingsDialog = (context) => {
   }
   const useSectionsCheckbox = createCheckbox('Use section numbering', storedValue('useSections'), {x:0, y: curY, width: viewWidth}, onCheckboxSelectionChanged);
   curY = pushControlAndGetNewY(controls, useSectionsCheckbox, 5);
-  controlDescription = createDescription("Page titles will be numbered by section (1, 1.1, 1.2), as will callouts on an artboard (1.1.1, 1.1.2). Otherwise, page titles are unnumbered and callouts will use sequential lettering (A, B, C).", NSColor.grayColor(), 11, {x: 0, y: curY, width: viewWidth, height: textHeight(11, 3)});
+  controlDescription = createDescription("Use section numbers for page titles and callout `numbering. If unchecked, page titles are unnumbered, and callouts on each artboard are numbered A, B, C, etc.", NSColor.grayColor(), 11, {x: 0, y: curY, width: viewWidth, height: textHeight(11, 3)});
   curY = pushControlAndGetNewY(controls, controlDescription);
 
   // =============== Dash type label, dash-type dropdown, and help text ===============
@@ -129,6 +129,7 @@ const settingsDialog = (context) => {
   			tocShowRadios,
   			useSectionsCheckbox,
   			dashStyleSelect,
+        dateFormatRadios,
         okButton,
         cancelButton
   		]);

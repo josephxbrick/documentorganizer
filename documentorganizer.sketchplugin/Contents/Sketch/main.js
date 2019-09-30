@@ -20,12 +20,8 @@ _settings = (context) => {
       return;
     }
     sortArtboards(page);
-    // pageNumberArtboards(context, summary);
     const tocArray = numberAndNameArtboards(context, summary);   //
     tableOfContents(context, tocArray, summary);
-    if (storedValue('useSections')){
-      // updateCalloutLists(doc);
-    }
   }
   displaySummary(doc, summary);
 }
@@ -39,16 +35,10 @@ _organizeDocument = (context) => {
   if (checkNameArtboardSetup(doc, summary) !== undefined) {
     tocArray = numberAndNameArtboards(context, summary);
   }
-  // if (checkDateSetup(doc, summary) !== undefined) {
-  //   addCurrentDate(context, summary);
-  // }
   if (checkTocSetup(doc, summary) !== undefined) {
     tableOfContents(context, tocArray, summary);
   }
   displaySummary(doc, summary);
-  if (storedValue('useSections')){
-    // updateCalloutLists(doc);
-  }
 }
 
 _updateCalloutsOnArtboard = (context) => {
@@ -413,14 +403,14 @@ const checkTocSetup = (doc, summary) => {
 //  Callouts
 //=======================================================================================================================
 
-const updateCalloutLists = (doc) => {
-  const page = doc.currentPage();
-  // get all artboards on the current page
-  const artboards = allArtboards(page);
-  for (const artboard of artboards) {
-    updateCalloutsOnArtboard(artboard, doc);
-  }
-}
+// const updateCalloutLists = (doc) => {
+//   const page = doc.currentPage();
+//   // get all artboards on the current page
+//   const artboards = allArtboards(page);
+//   for (const artboard of artboards) {
+//     updateCalloutsOnArtboard(artboard, doc);
+//   }
+// }
 
 const updateCalloutsOnArtboard = (artboard, doc) => {
   const useSections = storedValue('useSections');
@@ -435,23 +425,30 @@ const updateCalloutsOnArtboard = (artboard, doc) => {
   for (const callout of callouts) {
     calloutCount ++;
     let overrideText = getOverrideText(callout, '<calloutDescription>');
+    if (overrideText === null) {
+      overrideText = ''
+    }
     const calloutNumber = (useSections) ? `${sectionNumber}${calloutCount}` : numberToLetters(calloutCount - 1);
     setOverrideText(callout, '<calloutNumber>', calloutNumber);
       // reset this to its normal value to avoid the bug where you can't change any override in the Sketch UI.
-    setOverrideText(callout, '<calloutDescription>', '');
+    setOverrideText(callout, '<calloutDescription>', ' ');
     setOverrideText(callout, '<calloutDescription>', overrideText);
     calloutListDescriptions.push({description: overrideText, calloutNumber: calloutNumber});
     callout.setName(`${calloutNumber} - ${overrideText.substring(0,30)}...`);
   }
-  let calloutDescriptionsGroup = layerWithName(artboard, MSLayerGroup, '<calloutListGroup>');
-  if (calloutDescriptionsGroup !== undefined && calloutListDescriptions.length > 0){
+  if (calloutCount > 0) {
+    let calloutDescriptionsGroup = layerWithName(artboard, MSLayerGroup, '<calloutListGroup>');
+    if (calloutDescriptionsGroup == undefined) {
+      calloutDescriptionsGroup = createCalloutDescriptionGroup(artboard);
+    } else {
+      // remove existing groups from calloutDescriptionsGroup
+      const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() !== MSRectangleShape);
+      for (const instance of instances) {
+        calloutDescriptionsGroup.removeLayer(instance);
+      }
+    }
     // get reference to the listing symbol
     const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
-    // remove existing groups from calloutDescriptionsGroup
-    const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() === MSSymbolInstance || item.class() === MSTextLayer);
-    for (const instance of instances) {
-      calloutDescriptionsGroup.removeLayer(instance);
-    }
     // add one symbol to calloutDescriptionsGroup per string in array
     for (calloutListDescription of calloutListDescriptions){
       const instance = calloutDescriptionSymbol.newSymbolInstance();
@@ -518,4 +515,22 @@ const sortedCallouts = (artboard) => {
   sortByVerticalPosition(instances);
   callouts = callouts.concat(instances);
   return callouts;
+}
+
+// creates group for callout list
+const createCalloutDescriptionGroup = (artboard) => {
+  const group = MSLayerGroup.new()
+  const rect = MSRectangleShape.new()
+  group.setName('<calloutListGroup>');
+  rect.setName('<calloutGroupRect>');
+  rect.setConstrainProportions(0);
+  group.setConstrainProportions(0);
+  group.frame().setX(Math.round(artboard.frame().width() * 0.72));
+  group.frame().setY(Math.round(artboard.frame().height() * 0.07));
+  rect.frame().setWidth(Math.round(artboard.frame().width() * 0.25));
+  rect.frame().setHeight(artboard.frame().height());
+  artboard.addLayers([group]);
+  group.addLayers([rect]);
+  group.fixGeometryWithOptions(0);
+  return group;
 }
