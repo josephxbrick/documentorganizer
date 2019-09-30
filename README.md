@@ -279,7 +279,7 @@ Callout descriptions support text wrapping. The plugin will automatically adjust
 
 ## The callout-descriptions group
 
-The plugin needs to know where you want the description listing for the callouts to appear in the artboard. It expects the artboard to contain a group called `<calloutListGroup>` that contains a rectangle called `<calloutGroupRect>`. 
+The plugin needs to know where you want the description listing for the callouts to appear in the artboard. It expects the artboard to contain a group called `<calloutListGroup>` that contains a rectangle called `<calloutGroupRect>`. If this group does not exist on an artboard that contains callout markers, the plugin will create it.
 
 <img src="/readme_images/calloutListGroup.png" width="229">
 
