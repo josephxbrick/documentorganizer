@@ -475,13 +475,18 @@ const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
   const groupRect = layerWithName(calloutDescriptionsGroup, MSRectangleShape, '<calloutGroupRect>')
   const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
   const overrideLayer = getOverrideLayerfromSymbol(calloutDescriptionSymbol, '<calloutListDescription>')
+  // get horizontal and vertical space NOT occupied by the description text area
   const symbolPaddingVertical = calloutDescriptionSymbol.frame().height() - overrideLayer.frame().height();
   const symbolPaddingHorizonal = calloutDescriptionSymbol.frame().width() - overrideLayer.frame().width();
+  // get all symbols in the group
   const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() === MSSymbolInstance);
   let runningTop = 0;
   for (instance of instances){
     instance.frame().setWidth(calloutDescriptionsGroup.frame().width());
     instance.frame().setY(runningTop);
+    // Need to account for wrapping of text. Get copy of the description text area, set it to the width of the
+    // the field in the symbol, set its text to the same text, then check the text area's height.
+    // Use that height
     const overrideLayerCopy = overrideLayer.copy();
     calloutDescriptionsGroup.addLayers([overrideLayerCopy]);
     overrideLayerCopy.frame().setWidth(calloutDescriptionsGroup.frame().width() - symbolPaddingHorizonal);
@@ -523,14 +528,17 @@ const createCalloutDescriptionGroup = (artboard) => {
   const rect = MSRectangleShape.new()
   group.setName('<calloutListGroup>');
   rect.setName('<calloutGroupRect>');
+  // turn off constrain proportions
   rect.setConstrainProportions(0);
   group.setConstrainProportions(0);
+  // position group
   group.frame().setX(Math.round(artboard.frame().width() * 0.72));
   group.frame().setY(Math.round(artboard.frame().height() * 0.07));
   rect.frame().setWidth(Math.round(artboard.frame().width() * 0.25));
   rect.frame().setHeight(artboard.frame().height());
   artboard.addLayers([group]);
   group.addLayers([rect]);
+  // make group fit its content
   group.fixGeometryWithOptions(0);
   return group;
 }

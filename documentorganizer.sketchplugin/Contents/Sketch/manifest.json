@@ -2,7 +2,7 @@
   "author": "Joseph Brick",
   "commands": [{
       "script": "main.js",
-      "name": "Organize Document Now",
+      "name": "Organize Now",
       "identifier": "organizeDocument",
       "handlers": {
         "run": "_organizeDocument"
@@ -10,7 +10,7 @@
     },
     {
       "script": "main.js",
-      "name": "Update Callouts on Current Artboard",
+      "name": "Update Callouts on Artboard",
       "identifier": "updateCalloutsOnArtboard",
       "handlers": {
         "run": "_updateCalloutsOnArtboard"
@@ -36,7 +36,7 @@
     }
   ],
   "menu": {
-    "title": "Organize Document",
+    "title": "Organize Design Document",
     "items": [
       "organizeDocument",
       "updateCalloutsOnArtboard",
@@ -46,9 +46,9 @@
   },
   "identifier": "https://github.com/josephxbrick/organize-sketch-doc",
   "homepage": "https://github.com/josephxbrick/documentorganizer",
-  "version": "1.0",
+  "version": "1.2",
   "icon" : "icon.png",
-  "description": "Manage table-of-contents, page/section numbering, callouts, and current date for UX design documents.",
+  "description": "Organize design documents by creating a table of contents, adding page/section numbers, and managing callouts in mockups.",
   "authorEmail": "jbrick@gmail.com",
-  "name": "Organize Document"
+  "name": "Organize Design Document"
 }

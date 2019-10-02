@@ -1,4 +1,5 @@
 @import 'common.js';
+@import 'delegate.js'
 const Settings = require('sketch/settings');
 
 // =====================================================================================================================
@@ -16,9 +17,9 @@ const settingsDialog = (context) => {
   ]
   const alert =  NSAlert.alloc().init();
   // alert.setIcon(NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path()));
-  alert.setMessageText("Organize Document Settings");
+  alert.setMessageText("Settings");
   let curY = 0;
-  const viewWidth = 360;
+  const viewWidth = 410;
   const viewHeight = 240;
   const alertContent = NSView.alloc().init();
   alertContent.setFlipped(true);
@@ -29,38 +30,44 @@ const settingsDialog = (context) => {
   // ============================ Create controls that will appear in alert ============================
 
   // =============== Dialog heading ===============
-  const description = createDescription("Organize your document with page numbers, section/callout numbering, and a table of contents (TOC). Documentation: https://github.com/josephxbrick/documentorganizer", NSColor.darkGrayColor(), 12, {x: 0, y: curY, width: viewWidth, height: textHeight(12, 3)});
-  curY = pushControlAndGetNewY(controls, description);
+  const description = createDescription("Organize design documents by creating a table of contents, adding page/section numbers, and managing callouts in mockups.", NSColor.darkGrayColor(), 12, {x: 0, y: curY, width: viewWidth, height: textHeight(12, 2)});
+  curY = pushControlAndGetNewY(controls, description, 16);
 
-  // =============== Divider line ===============
-  divider = createDivider({x:0, y: curY, width: viewWidth});
-  curY = pushControlAndGetNewY(controls, divider);
-  //
+  // // =============== Divider line ===============
+  // divider = createDivider({x:0, y: curY, width: viewWidth});
+  // curY = pushControlAndGetNewY(controls, divider);
+
   // =============== Document title label, field, and help text ===============
   label = createLabel("Title of document:", {x: 0, y: curY, width: viewWidth});
   controls.push(label);
-  const titleField = createField( (docTitle != undefined) ? docTitle : storedValue('docTitle') , {x: 114, y: curY, width: viewWidth - 114});
-  curY = pushControlAndGetNewY(controls, titleField, 4);
-
-  controlDescription = createDescription("Used to populate the document title", NSColor.grayColor(), 11, {x: 114, y: curY, width: viewWidth - 114, height: textHeight(11, 1)});
-  curY = pushControlAndGetNewY(controls, controlDescription);
-
+  const fieldCallback = (notification) => {
+    console.log(notification.object().getValue())
+  }
+  const titleField = createField( (docTitle != undefined) ? docTitle : storedValue('docTitle') , {x: 114, y: curY, width: viewWidth - 114}, fieldCallback);
+  curY = pushControlAndGetNewY(controls, titleField);
   // =============== Divider line ===============
   divider = createDivider({x:0, y: curY, width: viewWidth});
-  curY = pushControlAndGetNewY(controls, divider);
+  curY = pushControlAndGetNewY(controls, divider, 10);
+
+
+  label = createInnerHeader("Table of contents", {x: 0, y: curY, width: viewWidth});
+  curY = pushControlAndGetNewY(controls, label);
+
 
   // =============== TOC column spacing ===============
-  label = createLabel("TOC column spacing:", {x: 0, y: curY, width: viewWidth});
+  label = createLabel("Column spacing:", {x: 0, y: curY, width: viewWidth});
   controls.push(label);
-  const spacingField = createField(storedValue('tocColumnSpacing'), {x: 130, y: curY, width: 34});
-  curY = pushControlAndGetNewY(controls, spacingField, 4);
-  controlDescription = createDescription("Applies when table of contents has multiple columns", NSColor.grayColor(), 11, {x: 130, y: curY, width: viewWidth - 130, height: textHeight(11, 2)});
-  curY = pushControlAndGetNewY(controls, controlDescription);
+  const spacingField = createField(storedValue('tocColumnSpacing'), {x: 104, y: curY, width: 35});
+  controls.push(spacingField);
+  curY += 4;
+  controlDescription = createDescription("Applies when table has multiple columns", NSColor.grayColor(), 11, {x: 145, y: curY, width: viewWidth - 145, height: textHeight(11, 1)});
+  curY = pushControlAndGetNewY(controls, controlDescription, 11);
+
 
   // =============== use sections radio buttons ===============
-  label = createLabel("Include in TOC:", {x: 0, y: curY, width: viewWidth}, 1);
+  label = createLabel("Include:", {x: 0, y: curY, width: viewWidth}, 1);
   controls.push(label);
-  const tocShowRadios = createRadioButtons(["All pages","Section headings only"], storedValue('tocShowColumnsOnly'), {x: 130, y: curY, width: viewWidth});  //
+  const tocShowRadios = createRadioButtons(["All pages","Section headings only"], storedValue('tocShowColumnsOnly'), {x: 54, y: curY, width: viewWidth - 54});  //
   curY = pushControlAndGetNewY(controls, tocShowRadios);
 
   // =============== divider line ===============
@@ -73,9 +80,9 @@ const settingsDialog = (context) => {
     dashStyleSelect.setEnabled(checkbox.getValue());
   }
   const useSectionsCheckbox = createCheckbox('Use section numbering', storedValue('useSections'), {x:0, y: curY, width: viewWidth}, onCheckboxSelectionChanged);
-  curY = pushControlAndGetNewY(controls, useSectionsCheckbox, 5);
-  controlDescription = createDescription("Use section numbers for page titles and callout `numbering. If unchecked, page titles are unnumbered, and callouts on each artboard are numbered A, B, C, etc.", NSColor.grayColor(), 11, {x: 0, y: curY, width: viewWidth, height: textHeight(11, 3)});
-  curY = pushControlAndGetNewY(controls, controlDescription);
+  curY = pushControlAndGetNewY(controls, useSectionsCheckbox, 4);
+  controlDescription = createDescription("Affects page titles and callouts. Turn this off and on to see what it does.", NSColor.grayColor(), 11, {x: 0, y: curY, width: viewWidth, height: textHeight(11, 1)});
+  curY = pushControlAndGetNewY(controls, controlDescription, 10);
 
   // =============== Dash type label, dash-type dropdown, and help text ===============
 
@@ -83,9 +90,10 @@ const settingsDialog = (context) => {
   controls.push(label);
   const dashStyleSelect = createSelect(['-', '\u2013', '\u2014'], storedValue('dashType'), {x: 73, y: curY, width: 45});
   dashStyleSelect.setEnabled(storedValue('useSections'));
-  curY = pushControlAndGetNewY(controls, dashStyleSelect, 0);
-  controlDescription = createDescription("Dashes appear between section numbers and page titles", NSColor.grayColor(), 11, {x: 73, y: curY, width: viewWidth - 73, height: textHeight(11, 2)});
-  curY = pushControlAndGetNewY(controls, controlDescription);
+  controls.push(dashStyleSelect);
+  curY += 8;
+  controlDescription = createDescription("Dashes separate section numbers and page titles", NSColor.grayColor(), 11, {x: 125, y: curY, width: viewWidth - 125, height: textHeight(11, 1)});
+  curY = pushControlAndGetNewY(controls, controlDescription, 16);
 
   // =============== divider line ===============
   divider = createDivider( {x:0, y: curY, width: viewWidth});
@@ -95,7 +103,7 @@ const settingsDialog = (context) => {
   label = createLabel("Date format:", {x: 0, y: curY, width: viewWidth}, 1);
   let customFormatField = undefined;
   controls.push(label);
-  const sampleDate = new Date(2025, 1, 3);
+  const sampleDate = new Date(2047, 0, 9);
   // this function is passed into createRadioButtons and is called when any radio button is selected
   const onRadioButtonSelected = (buttonMatrix) => {
     const buttonIndex = buttonMatrix.getValue();
@@ -104,16 +112,22 @@ const settingsDialog = (context) => {
   const dateFormatRadios = createRadioButtons([dateFromTemplate(stockDateFormats[0], sampleDate), dateFromTemplate(stockDateFormats[1], sampleDate), "Custom format:"], storedValue('dateFormatChoice'), {x: 78, y: curY, width: viewWidth - 78}, onRadioButtonSelected);  //
   curY = CGRectGetMaxY(dateFormatRadios.frame()) - 18;
   controls.push(dateFormatRadios);
-  customFormatField = createField(storedValue('lastEnteredFormatTemplate'), {x: 190, y: curY, width: viewWidth - 190});
+  // function updates the help text on the custom date field to show the entered format
+  const updateSampleDate = (notification) => {
+    sampleDateDisplay.setStringValue(dateFromTemplate(notification.object().getValue(), sampleDate));
+  }
+  customFormatField = createField(storedValue('lastEnteredFormatTemplate'), {x: 192, y: curY, width: viewWidth - 192}, updateSampleDate);
   customFormatField.setEnabled(storedValue('dateFormatChoice') == 2);
-  curY = pushControlAndGetNewY(controls, customFormatField);
+  curY = pushControlAndGetNewY(controls, customFormatField, 4);
+  const sampleDateDisplay = createDescription(dateFromTemplate(storedValue('lastEnteredFormatTemplate'), sampleDate), NSColor.grayColor(), 11, {x: 192, y: curY, width: viewWidth - 192, height: textHeight(11, 1)});
+  curY = pushControlAndGetNewY(controls, sampleDateDisplay);
+
 
   //  =============== divider line ===============
   divider = createDivider({x:0, y: curY, width: viewWidth});
   curY = pushControlAndGetNewY(controls, divider);
 
   // ==================================== All controls have been created ====================================
-
   addControls(alertContent, controls);
   // set height of alertContent based on bottom bounds of last control
 	alertContent.frame = NSMakeRect(0,0,viewWidth,CGRectGetMaxY(controls[controls.length - 1].frame()));
@@ -133,7 +147,7 @@ const settingsDialog = (context) => {
         okButton,
         cancelButton
   		]);
-  // run modal! 1000 means Okay button was pressed, so store values //
+  // run modal. 1000 means Okay button was pressed, so store values //
   if (alert.runModal() == 1000){
     setStoredValue('tocColumnSpacing', spacingField.getValue());
     setStoredValue('docTitle', titleField.getValue());
@@ -172,11 +186,11 @@ const createDescription = (text, textColor, textSize, frame) => {
 // =====================================================================================================================
 // create checkbox control
 //
-// * getValue() function will return true for checked, false for unchecked
-// * The onSelectionChangedFunction can be passed in. It will be called (with the checkbox as a parameter) whenever the
-//   selected state of the checkbox changes. Here's a sample function you could pass in:
+// * getValue() returns true for checked, false for unchecked
+// * onSelectionChangedFunction is a function that can be passed in. It will be called (with the checkbox as a parameter)
+//   when the selected state of the checkbox changes. Here's a sample function you could pass in:
 //
-//   const onCheckboxSelectionChanged = (checkbox) => {
+//   const checkboxCallback = (checkbox) => {
 //     if (checkbox.getValue() == true) {
 //       console.log("checkbox is selected");
 //     }
@@ -202,18 +216,30 @@ const createCheckbox = (title, checkState, frame, onSelectionChangedFunction = u
 // =====================================================================================================================
 // create select (combobox) control
 //
-// * The control's getValue() method returns the selected item's index.
+// * getValue() returns the selected item's index.
+// * onSelectionChangedFunction is a function that can be passed in. It will be called (with the notification message
+//   as its paramater) whenever the selected state of the checkbox changes. Here's a sample function you could pass in,
+//   where console.log displays the index of the selected item:
+//
+//   const selectCallback = (notification) => {
+//     console.log(notification.object().getValue());
+//   }
 // =====================================================================================================================
 
-const createSelect = (items, selectedItemIndex, frame) => {
+const createSelect = (items, selectedItemIndex, frame, onSelectionChangedFunction) => {
   frame.height = 30;
-	var comboBox = NSComboBox.alloc().initWithFrame(NSMakeRect(frame.x, frame.y, frame.width, frame.height)),
-		selectedItemIndex = (selectedItemIndex > -1) ? selectedItemIndex : 0;
+	const comboBox = NSComboBox.alloc().initWithFrame(NSMakeRect(frame.x, frame.y, frame.width, frame.height));
 	comboBox.addItemsWithObjectValues(items);
 	comboBox.selectItemAtIndex(selectedItemIndex);
 	comboBox.setNumberOfVisibleItems(items.length);
 	comboBox.setCompletes(1);
   comboBox.getValue = () => comboBox.indexOfSelectedItem();
+  if (onSelectionChangedFunction) {
+    const delegate = new MochaJSDelegate({
+  		"comboBoxSelectionDidChange:" : onSelectionChangedFunction
+  	});
+  	comboBox.setDelegate(delegate.getClassInstance());
+  }
 	return comboBox;
 }
 
@@ -221,12 +247,26 @@ const createSelect = (items, selectedItemIndex, frame) => {
 // create entry field
 //
 // * getValue() returns string in field
+// * onTextChangedFunction is a function that can be passed in. It will be called (with the notification message
+//   as its paramater) whenever the text in the field changes. Here's a sample function you could pass in,
+//   where console.log displays the text after the change:
+//
+//   const fieldCallback = (notification) => {
+//     console.log(notification.object().getValue());
+//   }
+
 // =====================================================================================================================
-const createField = (text, frame) => {
+const createField = (text, frame, onTextChangedFunction) => {
   frame.height = 22;
 	const field = NSTextField.alloc().initWithFrame(NSMakeRect(frame.x, frame.y, frame.width, frame.height));
 	field.setStringValue(text);
   field.getValue = () => field.stringValue();
+  if (onTextChangedFunction) {
+    const delegate = new MochaJSDelegate({
+  		"controlTextDidChange:" : onTextChangedFunction
+  	});
+  	field.setDelegate(delegate.getClassInstance());
+  }
 	return field;
 }
 
@@ -237,7 +277,7 @@ const createField = (text, frame) => {
 // * The onRadioButtonSelected function (if passed in) is called when any radio button is selected. Here's a sample
 //   function you might pass in:
 //
-//   const onRadioButtonSelected = (radioButtons) => {
+//   const radioButtonsCallback = (radioButtons) => {
 //     if (radioButtons.getValue() == 0){
 //       console.log("The first radio button was selected")
 //     }
@@ -285,6 +325,12 @@ const createLabel = (text, frame, topPadding = 2) => {
 	label.setEditable(false);
 	label.setSelectable(false);
 	return label;
+}
+
+const createInnerHeader = (text, frame, topPadding = 2) => {
+  const retval = createLabel(text, frame, topPadding);
+  retval.setFont(NSFont.systemFontOfSize(13.5));
+  return retval;
 }
 
 // =====================================================================================================================

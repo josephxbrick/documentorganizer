@@ -134,7 +134,7 @@ function sortArtboards(page) {
 }
 
 const dateFromTemplate = (dateTemplate, date = new Date()) => {
-  dateTemplate = dateTemplate.toUpperCase();
+  dateTemplate = dateTemplate.toLowerCase();
   const origTemplate = dateTemplate;
   const w = date.getDay(); // Sunday is 0, Saturday is 6
   const d = date.getDate(); // date of month: 1 to (max) 31
@@ -145,17 +145,17 @@ const dateFromTemplate = (dateTemplate, date = new Date()) => {
   const longWeekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][w];
   const shortWeekday = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'][w];
   // comments below assume date of Friday, 1/4/2019
-  dateTemplate = dateTemplate.replace('[MMMM]', longMonth); // January
-  dateTemplate = dateTemplate.replace('[MMM]', shortMonth); // Jan
-  dateTemplate = dateTemplate.replace('[MM]', '0'.concat(m + 1).slice(-2)); // 01
-  dateTemplate = dateTemplate.replace('[M]', m + 1); // 1
-  dateTemplate = dateTemplate.replace('[WW]', longWeekday); // Friday
-  dateTemplate = dateTemplate.replace('[W]', shortWeekday); // Fri
-  dateTemplate = dateTemplate.replace(['[DDD]'], addOrdinalIndicator(d)); // 4th
-  dateTemplate = dateTemplate.replace(['[DD]'], '0'.concat(d).slice(-2)); // 04
-  dateTemplate = dateTemplate.replace('[D]', d); // 4
-  dateTemplate = dateTemplate.replace('[YYYY]', y); // 2019
-  dateTemplate = dateTemplate.replace('[YY]', y.toString().slice(-2)); // 19
+  dateTemplate = dateTemplate.replace('[mmmm]', longMonth); // January
+  dateTemplate = dateTemplate.replace('[mmm]', shortMonth); // Jan
+  dateTemplate = dateTemplate.replace('[mm]', '0'.concat(m + 1).slice(-2)); // 01
+  dateTemplate = dateTemplate.replace('[m]', m + 1); // 1
+  dateTemplate = dateTemplate.replace('[ww]', longWeekday); // Friday
+  dateTemplate = dateTemplate.replace('[w]', shortWeekday); // Fri
+  dateTemplate = dateTemplate.replace(['[ddd]'], addOrdinalIndicator(d)); // 4th
+  dateTemplate = dateTemplate.replace(['[dd]'], '0'.concat(d).slice(-2)); // 04
+  dateTemplate = dateTemplate.replace('[d]', d); // 4
+  dateTemplate = dateTemplate.replace('[yyyy]', y); // 2019
+  dateTemplate = dateTemplate.replace('[yy]', y.toString().slice(-2)); // 19
   if (dateTemplate == origTemplate){
     // template passed in was unrecognized: return date in MM/DD/YYYY format
     dateTemplate = `${'0'.concat(m + 1).slice(-2)}/${'0'.concat(d).slice(-2)}/${y}`;
