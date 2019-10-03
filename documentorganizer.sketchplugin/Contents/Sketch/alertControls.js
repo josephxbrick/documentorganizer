@@ -101,9 +101,9 @@ const createField = (text, frame, onTextChangedFunction) => {
 //     }
 //   }
 // =====================================================================================================================
-const createRadioButtons = (options, selected, frame, onRadioButtonSelected = undefined) => {
+const createRadioButtons = (options, selected, frame, buttonHeight = 21, onRadioButtonSelected = undefined) => {
   const rows = options.length;
-  frame.height = rows * 20;
+  frame.height = rows * buttonHeight;
   const columns = 1;
 	const buttonCell = NSButtonCell.alloc().init();
   buttonCell.setButtonType(NSRadioButton);
@@ -114,7 +114,7 @@ const createRadioButtons = (options, selected, frame, onRadioButtonSelected = un
 		rows,
 		columns
 	);
-	buttonMatrix.setCellSize(NSMakeSize(frame.width,20));
+	buttonMatrix.setCellSize(NSMakeSize(frame.width, buttonHeight));
 	// Create a cell for each option
 	for (i = 0; i < options.length; i++) {
     const button = buttonMatrix.cells().objectAtIndex(i);

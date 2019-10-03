@@ -1,6 +1,5 @@
 const UI = require('sketch/ui');
 
-
 const allArtboards = (page) => {
   return toArray(page.layers()).filter(item => item.class() === MSArtboardGroup);
 }
