@@ -64,11 +64,13 @@ Here is the Settings dialog:
 Settings are saved from session to session. Below is a description of each setting.
 
 
-## Title of document
+### Title of document
 
 The value in this Settings field updates all symbol instances that have a text override named `<documentTitle>`. 
 
-## Create table of contents
+### Create table of contents
+
+Creates the table of contents
 
 ### TOC column spacing
 
@@ -78,19 +80,19 @@ If the group containing the table of contents is not tall enough to list TOC ent
 
 Choose "All pages" if you want both section and page entries in the table of contents. Choose "Section headings only" to  display only the section headings.
 
-## Use section numbering
+### Use section numbering
 
 Assigns legal-style numbering to section headings and pages in the document
 
-## Dash style
+### Dash style
 
 A dash appears between section numbers and the name of the page that follows the section number. You can choose to use a dash, an ndash, or an mdash.
 
-## Date format
+### Date format
 
 You can choose between the formats mm/dd/yyyy and m/d/yyyy, or create a custom date format. Use the date elements below to construct a custom format. You can use either lowercase or uppercase for the elements.
 
-### Month elements, assuming it's January:
+#### Month elements, assuming it's January:
 * [mmmm] – January
 * [mmm] – Jan
 * [mm]  – 01
@@ -98,18 +100,18 @@ You can choose between the formats mm/dd/yyyy and m/d/yyyy, or create a custom d
 
 Note that short [mmm] dates follow AP Style Guide recommendations, where March, April, May, June, and July are not abbrevieated, and September is abbreviated as Sept.
 
-### Weekday elements, assuming it's Friday
+#### Weekday elements, assuming it's Friday
 * [ww] - Friday
 * [w] - Fri
 
 Note that short [w] weekdays follow AP Style Guide recommendations, where Tuesday is "Tues", Thursday is "Thurs", and all other weekdays are shortened to their first three letters.
 
-### Date elements, assiming it's the 3rd of the month:
+#### Date elements, assiming it's the 3rd of the month:
 * [ddd] – 3rd
 * [dd] – 03
 * [d] – 3
 
-### Year elements, assuming it's 2025
+#### Year elements, assuming it's 2025
 * [yyyy] – 2025
 * [yy] – 25
 
