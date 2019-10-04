@@ -59,7 +59,7 @@ This opens the Settings dialog. (See below)
 
 Here is the Settings dialog:
 
-<img src="/readme_images/settings.png" width="577">
+<img src="/readme_images/settings.png" width="606">
 
 Settings are saved from session to session. Below is a description of each setting.
 
@@ -68,11 +68,13 @@ Settings are saved from session to session. Below is a description of each setti
 
 The value in this Settings field updates all symbol instances that have a text override named `<documentTitle>`. 
 
-## TOC column spacing
+## Create table of contents
+
+### TOC column spacing
 
 If the group containing the table of contents is not tall enough to list TOC entries in a single column, the TOC will use multiple columns for its display. This specifies how many pixels will be between the columns.
 
-## What to include in the TOC
+### What to include in the TOC
 
 Choose "All pages" if you want both section and page entries in the table of contents. Choose "Section headings only" to  display only the section headings.
 
