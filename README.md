@@ -37,17 +37,17 @@ Again, refer to the documentation below for details on each of these required el
 
 # The plugin menu
 
-<img src="/readme_images/calloutMenus.png" width="517">
+<img src="/readme_images/calloutMenus.png" width="512">
 
-After installing the plugin, the `Organize Document` menu item will appear in Sketch's plugin menu. 
+After installing the plugin, `Organize Design Document` item will appear in Sketch's plugin menu. 
 
-## Organize Document Now
+## Organize Now
 
 Choosing `Organize Document Now` will update all artboards on the current Sketch page, including the TOC, section numbering, page numbering, callouts, document-title instances, and current-date instances, in accordance with the current settings.
 
-## Update Callouts on Current Artboard
+## Update Callouts on Artboard
 
-Choosing `Update Callouts on Current Artboard` will only renumber the callouts on the current artboard, which is a time saver when fiddling arround with a given artboard's callouts.
+Choosing `Update Callouts on Artboard` will only update the callouts on the current artboard, which is a time saver when fiddling arround with a given artboard's callouts.
 
 ## Settings
 
@@ -78,7 +78,7 @@ If the group containing the table of contents is not tall enough to list TOC ent
 
 ### What to include in the TOC
 
-Choose "All pages" if you want both section and page entries in the table of contents. Choose "Section headings only" to  display only the section headings.
+Choose "All pages" if you want both section and page entries in the table of contents. Choose "Section headings only" to list only the section headings.
 
 ### Use section numbering
 
@@ -184,7 +184,7 @@ This symbol must contain the text override `<currentSection>`
 
 ## About section numbering
 
-The plugin can prefix section titles and page titles with section numbering (e.g., 1.0, 1.1, 2.0, etc.) followed by a hyphen, which can be either a dash, an n-dash, or an m-dash. 
+The plugin can prefix section titles and page titles with section numbering (e.g., 1.0, 1.1, 2.0, etc.) followed by a hyphen, which can be either a dash, an n-dash, or an m-dash. That table of contents pictured below is in a document that uses section numbering.
 
 Important: the title of the page (after the prefix) cannot begin with a number, a period, or any type of dash.
 
@@ -244,7 +244,7 @@ Callouts consist of *callout markers* and *callout descriptions*.
 
 <img src="/readme_images/calloutsOverview.png" width="670">
 
-Note that the appearance of callouts can be completely customized, as discussed below.
+Note that the appearance of callouts can be completely customized since they are based on symbols in your document.
 
 
 ## Callout markers
@@ -295,7 +295,7 @@ If you are using section numbers (see Settings above), the callout markers on ar
 
 ### Sequential order of callout markers
 
-The plugin when run numbers the marker instances based on their position in the mockup: the higher-up the marker appears in the mockup, the lower its number. If multiple markers have the same `y` value, they will be numbered left to right. 
+The plugin numbers the marker instances based on their position in the mockup: the higher-up the marker appears in the mockup, the lower its number. If multiple markers have the same `y` value, they will be numbered left to right. 
 
 Here's an example of callout numbering when using section numbering. Note how the numbering follows the vertical positions of the markers.
 
@@ -315,7 +315,7 @@ The image below shows two mobile mockups, where each mockup has been grouped wit
 
 ## The TOC lists pages in the wrong order
 
-Make sure the tops of each row of artboards are aligned perfectly and arranged left-to right, whether your artboards are arranged in a single horizontal row, or if each section's artboards are arranged in their own row.
+Make sure the tops of all artboards in arrow are aligned perfectly and arranged left-to right, whether your artboards are arranged in a single horizontal row, or if each section's artboards are arranged in their own row.
 
 ---
 
@@ -326,17 +326,19 @@ Make sure the tops of each row of artboards are aligned perfectly and arranged l
 Make sure:
 
 * There are artboards on the current page (could be on the Symbols page)
-* Make sure the page number symbol, the section/page title symbols, and the TOC symbols exist (as well as the TOC group) before allowing the plugin to run.
-  * *Issue: should TOC be required? On a short document, it might feel like overkill*
-* Give error if no callout group exists on an artboard when callout markers do. Either that, or automatically create this group if it doesn't exist.
+* Make sure the page number symbol and section/page title symbols exist. If creating a TOC, require the TOC symbols exist (as well as the TOC group) before allowing the plugin to run.
+
+## Table of contents
+
+Don't create TOC if "Create table of contents" setting is unchecked. (Currently it creates the TOC no matter what.)
+
+## Section numbering
+
+Instead of using 1.0, 2.0, 3.0, etc., for section headers, use 1, 2, 3, etc.
 
 ## TOC documentation
 
 Show images of both symbols that create the TOC instead of just the page-entry symbol.
-
-## When not using section-numbering
-
-Figure out how auto-numbering of callouts should work when there is no section numbering. Just give each callout a number? A letter?
 
 ## Saving settings
 
