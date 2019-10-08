@@ -93,7 +93,7 @@ const settingsDialog = (context) => {
   // SETTING CHECKBOX: create table of contents ================================
   // function (passed into createCheckbox) is called when checkbox's selected state changes
   const useTOCCallback = (checkbox) => {
-    const selected = checkbox.getValue(); //gets true or false
+    const selected = checkbox.value; //gets true or false
     spacingField.setEnabled(selected);
     tocShowRadios.setEnabled(selected);
   }
@@ -139,7 +139,7 @@ const settingsDialog = (context) => {
   // SETTING CHECKBOX: use section numbering ===================================
   // function (passed into createCheckbox) is called when checkbox's selected state changes
   const useSectionsCallback = (checkbox) => {
-    const selected = checkbox.getValue(); // gets true or false
+    const selected = checkbox.value; // gets true or false
     dashStyleSelect.setEnabled(selected);
   }
   const useSectionsCheckbox = createCheckbox('Use section numbering', storedValue('useSections'), {x:0, y: curY, width: viewWidth}, useSectionsCallback);
@@ -179,8 +179,8 @@ const settingsDialog = (context) => {
   // SETTING RADIO BUTTONS: date format ========================================
   // function (passed into createRadioButtons) is called when radio button is selected
   const radioSelectedCallback = (buttonMatrix) => {
-    const buttonIndex = buttonMatrix.getValue(); // gets index of selected button
-    customFormatField.setEnabled(buttonIndex == 2);
+    const buttonIndex = buttonMatrix.value; // gets index of selected button
+    customFormatField.setEnabled(buttonIndex == 2); // enables custom-format field if 3rd radio button is selected
   }
   const sampleDate = new Date(2047, 0, 5);
   const dateFormatRadios = createRadioButtons([dateFromTemplate(stockDateFormats[0], sampleDate), dateFromTemplate(stockDateFormats[1], sampleDate), "Custom format:"], storedValue('dateFormatChoice'), {x: 78, y: curY, width: viewWidth - 78}, 22, radioSelectedCallback);  //
@@ -198,9 +198,9 @@ const settingsDialog = (context) => {
   // SETTING FIELD: custom date format =========================================
   // function (passed into createField) called when field's text changes. Updates date in sample-date below field to reflect the format entered.
   const textChangedCallback = (notification) => {
-    const newText = notification.object().getValue(); // gets text of field
+    const newText = notification.object().value; // gets text of field
     const newDate = dateFromTemplate(newText, sampleDate);
-    sampleDateDisplay.setStringValue(newDate);
+    sampleDateDisplay.value = newDate;
   }
   const customFormatField = createField(storedValue('lastEnteredFormatTemplate'), {x: 192, y: curY, width: viewWidth - 192}, textChangedCallback);
   customFormatField.setEnabled(storedValue('dateFormatChoice') == 2);
@@ -249,21 +249,22 @@ const settingsDialog = (context) => {
   		]);
   // display alert
   if (alert.runModal() == 1000){
+
     // user pressed OK, so save settings
-    setStoredValue('useTOC', useTOCCheckbox.getValue());
-    setStoredValue('tocColumnSpacing', spacingField.getValue());
-    setStoredValue('docTitle', titleField.getValue());
-    setStoredValue('tocShowSectionsOnly', tocShowRadios.getValue());
-    setStoredValue('dashType', dashStyleSelect.getValue());
-    setStoredValue('useSections', useSectionsCheckbox.getValue());
-    setStoredValue('dateFormatChoice', dateFormatRadios.getValue());
-    if (dateFormatRadios.getValue() == 2){
+    setStoredValue('useTOC', useTOCCheckbox.value);
+    setStoredValue('tocColumnSpacing', spacingField.value);
+    setStoredValue('docTitle', titleField.value);
+    setStoredValue('tocShowSectionsOnly', tocShowRadios.value);
+    setStoredValue('dashType', dashStyleSelect.value);
+    setStoredValue('useSections', useSectionsCheckbox.value);
+    setStoredValue('dateFormatChoice', dateFormatRadios.value);
+    if (dateFormatRadios.value == 2){
       // custom date template chosen
-      setStoredValue('dateFormatTemplate', customFormatField.getValue());
-      setStoredValue('lastEnteredFormatTemplate', customFormatField.getValue());
+      setStoredValue('dateFormatTemplate', customFormatField.value);
+      setStoredValue('lastEnteredFormatTemplate', customFormatField.value);
     } else {
       // choose from stock formats
-      setStoredValue('dateFormatTemplate', stockDateFormats[dateFormatRadios.getValue()]);
+      setStoredValue('dateFormatTemplate', stockDateFormats[dateFormatRadios.value]);
     }
     return true;
   }
@@ -297,7 +298,7 @@ const setTabOrder = (alert, order) => {
 }
 
 // function: gets document title from instance (in document) rather than from stored value. (values are stored at the plugin-level, not the document level)
-// returns: value of the first '<documentTitle>' override found on an artboard
+// returns: value of the first '<documentTitle>' override found in document, or the stored/default value if not found in document.
 const docTitleFromDocument = (page) => {
   let docTitle = undefined;
   const artboards = allArtboards(page);

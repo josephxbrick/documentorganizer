@@ -15,13 +15,17 @@
 const createCheckbox = (title, checkState, frame, onSelectionChangedFunction = undefined) => {
   frame.height = textHeight(12, 1);
 	const checkbox = NSButton.alloc().initWithFrame(NSMakeRect(frame.x, frame.y, frame.width, frame.height));
-	const checkStateNS = (checkState == false) ? NSOffState : NSOnState;
+	const checkStateNS = (checkState == true) ? NSOnState : NSOffState;
 	checkbox.setButtonType(NSSwitchButton);
 	checkbox.setBezelStyle(0);
 	checkbox.setTitle(title);
 	checkbox.setTag(1);
 	checkbox.setState(checkStateNS);
-  checkbox.getValue = () => (checkbox.stringValue() == "1") ? true : false;
+  // define getter-setter for 'value'
+  Object.defineProperty(checkbox, 'value', {
+    get: () => (checkbox.state() == NSOnState) ? true : false,
+    set: (value) => checkbox.setState((value == true) ? NSOnState : NSOffState),
+  });
   if (onSelectionChangedFunction != undefined){
     checkbox.setAction("callAction:");
     checkbox.setCOSJSTargetFunction(onSelectionChangedFunction);
@@ -44,19 +48,23 @@ const createCheckbox = (title, checkState, frame, onSelectionChangedFunction = u
 // =====================================================================================================================
 const createSelect = (items, selectedItemIndex, frame, onSelectionChangedFunction) => {
   frame.height = 30;
-	const comboBox = NSComboBox.alloc().initWithFrame(NSMakeRect(frame.x, frame.y, frame.width, frame.height));
-	comboBox.addItemsWithObjectValues(items);
-	comboBox.selectItemAtIndex(selectedItemIndex);
-	comboBox.setNumberOfVisibleItems(items.length);
-	comboBox.setCompletes(1);
-  comboBox.getValue = () => comboBox.indexOfSelectedItem();
+	const combobox = NSComboBox.alloc().initWithFrame(NSMakeRect(frame.x, frame.y, frame.width, frame.height));
+	combobox.addItemsWithObjectValues(items);
+	combobox.selectItemAtIndex(selectedItemIndex);
+	combobox.setNumberOfVisibleItems(items.length);
+	combobox.setCompletes(1);
+  // define getter-setter for 'value'
+  Object.defineProperty(combobox, 'value', {
+    get: () => combobox.indexOfSelectedItem(),
+    set: (value) => combobox.selectItemAtIndex(value),
+  });
   if (onSelectionChangedFunction) {
     const delegate = new MochaJSDelegate({
   		"comboBoxSelectionDidChange:": onSelectionChangedFunction,
   	});
-  	comboBox.setDelegate(delegate.getClassInstance());
+  	combobox.setDelegate(delegate.getClassInstance());
   }
-	return comboBox;
+	return combobox;
 }
 
 // =====================================================================================================================
@@ -77,7 +85,11 @@ const createField = (text, frame, onTextChangedFunction) => {
   frame.height = 22;
 	const field = NSTextField.alloc().initWithFrame(NSMakeRect(frame.x, frame.y, frame.width, frame.height));
 	field.setStringValue(text);
-  field.getValue = () => field.stringValue();
+  // define getter-setter for 'value'
+  Object.defineProperty(field, 'value', {
+    get: () => field.stringValue(),
+    set: (value) => field.setStringValue(value),
+  });
   if (onTextChangedFunction) {
     const delegate = new MochaJSDelegate({
   		"controlTextDidChange:": onTextChangedFunction,
@@ -125,8 +137,12 @@ const createRadioButtons = (options, selected, frame, buttonHeight = 21, onRadio
     }
 	}
 	// Select the default cell
-	buttonMatrix.selectCellAtRow_column(selected,0);
-  buttonMatrix.getValue = () => buttonMatrix.selectedCell().tag();
+	buttonMatrix.selectCellAtRow_column(selected, 0);
+  // define getter-setter for 'value'
+  Object.defineProperty(buttonMatrix, 'value', {
+    get: () => buttonMatrix.selectedCell().tag(),
+    set: (value) => buttonMatrix.selectCellAtRow_column(value, 0),
+  });
 	return buttonMatrix;
 }
 
@@ -142,16 +158,12 @@ const createLabel = (text, frame) => {
 	label.setDrawsBackground(false);
 	label.setEditable(false);
 	label.setSelectable(false);
+  // define getter-setter for 'value'
+  Object.defineProperty(label, 'value', {
+    get: () => label.stringValue(),
+    set: (value) => label.setStringValue(value),
+  });
 	return label;
-}
-
-// =====================================================================================================================
-// create section header
-// =====================================================================================================================
-const createSectionHeader = (text, frame) => {
-  const retval = createLabel(text, frame);
-  retval.setFont(NSFont.systemFontOfSize(13.5));
-  return retval;
 }
 
 // =====================================================================================================================
@@ -166,6 +178,11 @@ const createDescription = (text, textColor, textSize, frame) => {
 	label.setDrawsBackground(false);
 	label.setEditable(false);
 	label.setSelectable(true);
+  // define getter-setter for 'value'
+  Object.defineProperty(label, 'value', {
+    get: () => label.stringValue(),
+    set: (value) => label.setStringValue(value),
+  });
 	return label;
 }
 

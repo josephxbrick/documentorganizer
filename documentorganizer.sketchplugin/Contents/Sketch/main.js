@@ -155,9 +155,13 @@ const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
   const index = Number(storedValue('dashType'));
   const desiredDash = dasharray[index];
   if (storedValue('useSections')){
+    if (sectionPageNumber == 0) {
+      retval = `${sectionNumber} ${desiredDash} ${text.substring(endIndex)}`
+    } else {
       retval = `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text.substring(endIndex)}`
+    }
   } else {
-      retval = `${text.substring(endIndex)}`
+    retval = `${text.substring(endIndex)}`
   }
   return retval
 }
@@ -233,7 +237,7 @@ const initializeTOC = (doc) => {
 
 // load the TOC with sectionTitle and pageTitle instances
 const createTOC = (doc, tocArray, summary) => {
-  const showSectionsOnly =  (storedValue('tocShowColumnsOnly') == 0) ? false: true;
+  const showSectionsOnly =  (storedValue('tocShowSectionsOnly') == 0) ? false: true;
 
   let tocItemCount = 0;``
   const page = doc.currentPage();
