@@ -13,32 +13,45 @@ _settings = (context) => {
   let summary = [];
   const doc = context.document;
   page = doc.currentPage();
-  // check if file is set up for creating a TOC
-  if (checkTocSetup(doc, summary) !== undefined) {
-    const val = settingsDialog(context);
-    if (val === undefined){
-      return;
-    }
-    sortArtboards(page);
-    const tocArray = numberAndNameArtboards(context, summary);   //
-    tableOfContents(context, tocArray, summary);
+
+  const val = settingsDialog(context);
+  if (val === undefined){
+    return;
   }
-  displaySummary(doc, summary);
+  // check if file is set up for creating a TOC
+  if (checkTocSetup(doc, summary)) {
+    setTimeout(() => {
+      sortArtboards(page);
+      const tocArray = numberAndNameArtboards(context, summary);
+      if (storedValue('useTOC')){
+        tableOfContents(context, tocArray, summary);
+      }
+      displaySummary(doc, summary);
+    }, 0);
+    doc.showMessage('Updating artboards. This may take a moment...');
+  } else {
+    displaySummary(doc, summary);
+  }
 }
 
+
 _organizeDocument = (context) => {
-  const doc = context.document;
-  let tocArray = undefined;
-  page = doc.currentPage();
-  sortArtboards(page);
   let summary = [];
-  if (checkNameArtboardSetup(doc, summary) !== undefined) {
-    tocArray = numberAndNameArtboards(context, summary);
+  const doc = context.document;
+  page = doc.currentPage();
+  if (checkTocSetup(doc, summary)) {
+    setTimeout(() => {
+      sortArtboards(page);
+      const tocArray = numberAndNameArtboards(context, summary);
+      if (storedValue('useTOC')){
+        tableOfContents(context, tocArray, summary);
+      }
+      displaySummary(doc, summary);
+    }, 0);
+    doc.showMessage('Updating artboards. This may take a moment...');
+  } else {
+    displaySummary(doc, summary);
   }
-  if (checkTocSetup(doc, summary) !== undefined) {
-    tableOfContents(context, tocArray, summary);
-  }
-  displaySummary(doc, summary);
 }
 
 _updateCalloutsOnArtboard = (context) => {
@@ -48,7 +61,9 @@ _updateCalloutsOnArtboard = (context) => {
   if (artboard == null){
     alert('No artboard selected', 'Select at least one layer on the artboard, or select the artboard itself.');
   } else {
-    updateCalloutsOnArtboard(artboard, doc);
+    const calloutsUpdated = updateCalloutsOnArtboard(artboard, doc);
+    const summary = [`${calloutsUpdated} callouts updated`];
+    displaySummary(doc, summary);
   }
 }
 
@@ -80,7 +95,7 @@ const numberAndNameArtboards = (context, summary) => {
   const tocArray = [];
   const doc = context.document;
   const page = doc.currentPage();
-  let sectionNumber = sectionPageNumber = titlesAdded = 0;
+  let sectionNumber = sectionPageNumber = titlesAdded = calloutsUpdated = 0;
   const startPageNum = 1;
   let curPage = startPageNum;
   let firstPageFound = false;
@@ -115,7 +130,7 @@ const numberAndNameArtboards = (context, summary) => {
       setOverrideText(instance, '<currentSection>', removeSectionNumbers(runningSectionTitle));
       setOverrideText(instance, '<currentDate>', dateFromTemplate(storedValue('dateFormatTemplate')));
     }
-    if (curSectionTitle !== undefined || curPageTitle !== undefined) {
+    if (curSectionTitle || curPageTitle) {
       tocArray.push({
         sectionTitle: (curSectionTitle === undefined) ? '<undefined>' : curSectionTitle,
         pageTitle: (curPageTitle === undefined) ? '<undefined>' : curPageTitle,
@@ -125,10 +140,11 @@ const numberAndNameArtboards = (context, summary) => {
     if (firstPageFound) {
       curPage++;
     }
-    updateCalloutsOnArtboard(artboard, doc);
+    calloutsUpdated += updateCalloutsOnArtboard(artboard, doc);
   }
   // summary
-  summary.push(`${titlesAdded} artboards named`);
+  summary.push(`${titlesAdded} artboards updated`);
+  summary.push(`${calloutsUpdated} callouts numbered`);
   return tocArray;
 }
 
@@ -149,11 +165,7 @@ const prefixEndIndex = (text) => {
 const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
   const endIndex = prefixEndIndex(text);
   let retval = undefined;
-  const ndash = '\u2013';
-  const mdash = '\u2014';
-  const dasharray = ['-', ndash, mdash];
-  const index = Number(storedValue('dashType'));
-  const desiredDash = dasharray[index];
+  const desiredDash = storedValue('dashType');
   if (storedValue('useSections')){
     if (sectionPageNumber == 0) {
       retval = `${sectionNumber} ${desiredDash} ${text.substring(endIndex)}`
@@ -171,25 +183,6 @@ const removeSectionNumbers = (text) => {
     const endIndex = prefixEndIndex(text);
     return `${text.substring(endIndex)}`
   }
-}
-
-const checkNameArtboardSetup = (doc, summary) => {
-  const pageTitle = symbolMasterWithOverrideName(doc, '<pageTitle>');
-  if (pageTitle === undefined) {
-    summary.push('[ERROR]Name artboards: No symbol with override <pageTitle> found.');
-    return undefined;
-  }
-  const sectionTitle = symbolMasterWithOverrideName(doc, '<sectionTitle>');
-  if (sectionTitle === undefined) {
-    summary.push('[ERROR]Name artboards: No symbol with override <sectionTitle> found.');
-    return undefined;
-  }
-  const pageNumber = symbolMasterWithOverrideName(doc, '<pageNumber>');
-  if (pageNumber === undefined) {
-    summary.push('[ERROR]Page-number artboards: No symbol with override <pageNumber> found.');
-    return undefined;
-  }
-  return 'success';
 }
 
 //=======================================================================================================================
@@ -223,7 +216,7 @@ const tableOfContents = (context, tocArray, summary) => {
 const initializeTOC = (doc) => {
   const page = doc.currentPage();
   const tocGroup = layerWithName(page, MSLayerGroup, '<tocGroup>');
-  if (tocGroup !== undefined) {
+  if (tocGroup) {
     // remove all TOC groups.
     const groups = toArray(tocGroup.layers()).filter(item => item.class() === MSLayerGroup);
     for (const group of groups) {
@@ -237,9 +230,8 @@ const initializeTOC = (doc) => {
 
 // load the TOC with sectionTitle and pageTitle instances
 const createTOC = (doc, tocArray, summary) => {
-  const showSectionsOnly =  (storedValue('tocShowSectionsOnly') == 0) ? false: true;
-
-  let tocItemCount = 0;``
+  const showSectionsOnly =  (storedValue('tocShowSectionsOnly') == 0) ? true: false;
+  let tocItemCount = 0;
   const page = doc.currentPage();
   const tocSectionMaster = symbolMasterWithOverrideName(doc, '<tocSectionTitle>');
   const tocPageMaster = symbolMasterWithOverrideName(doc, '<tocPageTitle>');
@@ -303,7 +295,7 @@ const createTOC = (doc, tocArray, summary) => {
   }
   // now that all instances reside in the document, we can update their overrides
   instances = toArray(tocGroup.children()).filter(item => item.class() === MSSymbolInstance);
-  for (instance of instances) {
+  for (const instance of instances) {
     setOverrideText(instance, '<tocPageNumber>', instance.pageNumber.toString());
     setOverrideText(instance, '<tocPageTitle>', instance.pageTitle.toString());
     setOverrideText(instance, '<tocSectionTitle>', instance.pageTitle.toString());
@@ -343,7 +335,7 @@ const layoutTOC = (doc) => {
   for (let i = 0; i < numColumns; i++) {
     let column = columns[i];
     let x = i * (colWidth + colSpacing);
-    for (j = 0; j < column.length; j++) {
+    for (let j = 0; j < column.length; j++) {
       const group = column[j];
       // set all pinning to false
       group.setFixed_forEdge_(false, 32) //pin top
@@ -376,29 +368,54 @@ const layoutTOC = (doc) => {
 // make sure user is set up for TOC
 const checkTocSetup = (doc, summary) => {
   let retval = 'success';
+  const page = doc.currentPage();
+  const artboards = allArtboards(page);
+  // make sure page contains artboards. Return error immediately in not
+  if (artboards.length == 0) {
+    summary.push('[ERROR]The current page contains no artboards.');
+    return undefined;
+  }
+  // check for page numbers, section titles and page titles;
   const pageNumber = symbolMasterWithOverrideName(doc, '<pageNumber>');
   if (pageNumber === undefined) {
-    summary.push('[ERROR]Table of contents: No symbol with override <pageNumber> found.');
+    summary.push('[ERROR]No symbol with override <pageNumber> found.');
+    retval = undefined;
+  }
+  const sectionTitle = symbolMasterWithOverrideName(doc, '<sectionTitle>');
+  if (sectionTitle === undefined) {
+    summary.push('[ERROR]No symbol with override <sectionTitle> found.');
     retval = undefined;
   }
   const pageTitle = symbolMasterWithOverrideName(doc, '<pageTitle>');
   if (pageTitle === undefined) {
-    summary.push('[ERROR]Table of contents: No symbol with override <pageTitle> found.');
+    summary.push('[ERROR]No symbol with override <pageTitle> found.');
     retval = undefined;
   }
-  const tocPageTitle = symbolMasterWithOverrideName(doc, '<tocPageTitle>');
-  if (tocPageTitle === undefined) {
-    summary.push('[ERROR]Table of contents: No symbol with override <tocPageTitle> found.');
-    retval = undefined;
+  if (retval === undefined){
+    // page numbers, section titles and/or page titles are absent
+    return retval
   }
-  const tocGroup = layerWithName(doc.currentPage(), MSLayerGroup, '<tocGroup>');
-  if (tocGroup === undefined) {
-    summary.push('[ERROR]Table of contents: No group named <tocGroup> found on this Sketch page.');
-    retval = undefined;
-  }
-  if (tocGroup !== undefined && layerWithName(tocGroup, MSRectangleShape, '<tocGroupRect>') === undefined) {
-    summary.push('[ERROR]Table of contents: <tocGroup> must contain a rectangle named <tocGroupRect>.');
-    retval = undefined;
+  // check for TOC stuff
+  if (storedValue('useTOC')){
+    const tocSectionTitle = symbolMasterWithOverrideName(doc, '<tocSectionTitle>');
+    if (tocSectionTitle === undefined) {
+      summary.push('[ERROR]Table of contents: No symbol with override <tocSectionTitle> found.');
+      retval = undefined;
+    }
+    const tocPageTitle = symbolMasterWithOverrideName(doc, '<tocPageTitle>');
+    if (tocPageTitle === undefined) {
+      summary.push('[ERROR]Table of contents: No symbol with override <tocPageTitle> found.');
+      retval = undefined;
+    }
+    const tocGroup = layerWithName(page, MSLayerGroup, '<tocGroup>');
+    if (tocGroup === undefined) {
+      summary.push('[ERROR]Table of contents: Group named <tocGroup> not found on any artboard.');
+      retval = undefined;
+    }
+    if (tocGroup && layerWithName(tocGroup, MSRectangleShape, '<tocGroupRect>') === undefined) {
+      summary.push('[ERROR]Table of contents: <tocGroup> must contain a rectangle named <tocGroupRect>.');
+      retval = undefined;
+    }
   }
   return retval;
 }
@@ -407,14 +424,6 @@ const checkTocSetup = (doc, summary) => {
 //  Callouts
 //=======================================================================================================================
 
-// const updateCalloutLists = (doc) => {
-//   const page = doc.currentPage();
-//   // get all artboards on the current page
-//   const artboards = allArtboards(page);
-//   for (const artboard of artboards) {
-//     updateCalloutsOnArtboard(artboard, doc);
-//   }
-// }
 
 const updateCalloutsOnArtboard = (artboard, doc) => {
   const useSections = storedValue('useSections');
@@ -454,7 +463,7 @@ const updateCalloutsOnArtboard = (artboard, doc) => {
     // get reference to the listing symbol
     const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
     // add one symbol to calloutDescriptionsGroup per string in array
-    for (calloutListDescription of calloutListDescriptions){
+    for (const calloutListDescription of calloutListDescriptions){
       const instance = calloutDescriptionSymbol.newSymbolInstance();
       instance.setConstrainProportions(0); // unlock the aspect ratio
       instance.setFixed_forEdge_(true, 4); // pin left
@@ -466,6 +475,7 @@ const updateCalloutsOnArtboard = (artboard, doc) => {
     }
     layoutCalloutDescriptions(calloutDescriptionsGroup, doc);
   }
+  return calloutCount;
 }
 
 const numberToLetters = (num) => {
@@ -485,7 +495,7 @@ const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
   // get all symbols in the group
   const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() === MSSymbolInstance);
   let runningTop = 0;
-  for (instance of instances){
+  for (const instance of instances){
     instance.frame().setWidth(calloutDescriptionsGroup.frame().width());
     instance.frame().setY(runningTop);
     // Need to account for wrapping of text. Get copy of the description text area, set it to the width of the
@@ -512,7 +522,7 @@ const sortedCallouts = (artboard) => {
   // get all top-level layer groups
   const groups = toArray(artboard.layers()).filter(item => item.class() === MSLayerGroup);
   sortByHorizontalPosition(groups);
-  for (group of groups){
+  for (const group of groups){
     const symbols = toArray(group.children()).filter(item => item.class() === MSSymbolInstance);
     const instances = symbolsWithOverride(symbols, '<calloutDescription>');
     sortLayersByRows(instances);

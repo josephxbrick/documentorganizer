@@ -4,6 +4,10 @@ const allArtboards = (page) => {
   return toArray(page.layers()).filter(item => item.class() === MSArtboardGroup);
 }
 
+const isNumeric = (value) => {
+  return !isNaN(value - parseFloat(value));
+}
+
 //get string from user. defaultValue is ignored if value is stored in key
 const getStringFromUser = (prompt, defaultValue, key)  => {
   let storedValue = Settings.settingForKey(key);
@@ -55,13 +59,13 @@ const getSelectionFromUser = (prompt, possibleValues, defaultValue, key) => {
   return retval;
 }
 
-
 const displaySummary = (doc, summary)  => {
+  console.log('got here');
   const br = String.fromCharCode(13);
   const slash = String.fromCharCode(47);
   let errorMessage = '';
   let successMessage = '';
-  for (let val of summary) {
+  for (var val of summary) {
     if (val.indexOf('[ERROR]') >= 0) {
       val = val.replace('[ERROR]', '');
       errorMessage = errorMessage.concat(`${val}${br}${br}`);
@@ -72,11 +76,11 @@ const displaySummary = (doc, summary)  => {
   if (successMessage != '') {
     // get rid of trailing comma and space
     successMessage = successMessage.substr(0, successMessage.length - 2);
-    doc.showMessage(successMessage);
+    doc.showMessage(`${successMessage}`);
   }
   if (errorMessage != '') {
-    errorMessage = errorMessage.concat(`Plugin and documentation:${br}https:${slash}${slash}github.com${slash}josephxbrick${slash}tidyupdocument${br}`);
-    UI.alert('Update error', errorMessage );
+    errorMessage = errorMessage.concat(`Plugin and documentation:${br}https:${slash}${slash}github.com${slash}josephxbrick${slash}documentorganizer${br}`);
+    UI.alert('Error', errorMessage );
   }
 
 }
@@ -107,13 +111,15 @@ const layersWithName = (container, className, name) => {
 // sort layers laid out in horizontal rows
 const sortLayersByRows = (layers) => {
   let minX = minY = Number.MAX_SAFE_INTEGER;
-  for (let layer of layers){
+  for (const layer of layers){
     minX = Math.min(minX, layer.frame().x())
     minY = Math.min(minY, layer.frame().y())
   }
   layers.sort( (a, b) => sortVal(a, minX, minY) - sortVal(b, minX, minY) );
 }
-const sortVal = (layer, minX, minY) =>  {return (layer.frame().y() - minY) * 100 + (layer.frame().x())}
+const sortVal = (layer, minX, minY) =>  {
+  return (layer.frame().y() - minY) * 100 + (layer.frame().x())
+}
 
 const sortByHorizontalPosition = (layers) => {
   layers.sort((a, b) => a.frame().x() - b.frame().x());
@@ -123,12 +129,12 @@ const sortByVerticalPosition = (layers) => {
   layers.sort((a, b) => a.frame().y() - b.frame().y());
 }
 
-function sortArtboards(page) {
+const sortArtboards = (page) => {
   artboards = allArtboards(page);
   sortLayersByRows(artboards);
-	for (artboard of artboards){
-    artboard.moveToLayer_beforeLayer(page,nil);
-		artboard.select_byExtendingSelection(false,true);
+	for (const artboard of artboards){
+    artboard.moveToLayer_beforeLayer(page, nil);
+		artboard.select_byExtendingSelection(false, true);
   }
 }
 
@@ -156,7 +162,7 @@ const dateFromTemplate = (dateTemplate, date = new Date()) => {
   dateTemplate = dateTemplate.replace('[yyyy]', y); // 2019
   dateTemplate = dateTemplate.replace('[yy]', y.toString().slice(-2)); // 19
   if (dateTemplate == origTemplate){
-    // template passed in was unrecognized: return date in MM/DD/YYYY format
+    // no segment of the date template was recognized, so return date in MM/DD/YYYY format
     dateTemplate = `${'0'.concat(m + 1).slice(-2)}/${'0'.concat(d).slice(-2)}/${y}`;
   }
   return dateTemplate;

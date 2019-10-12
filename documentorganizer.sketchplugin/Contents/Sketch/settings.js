@@ -13,7 +13,7 @@ const settingsObjectFromName = (name) => {
     {name: 'useTOC', key: 'organize_document_useTOC', default: true},
     {name: 'tocColumnSpacing', key: 'organize_document_columnSpacing', default: 50},
     {name: 'tocShowSectionsOnly', key: 'organize_document_showTOCSectionsOnly', default: 0},
-    {name: 'dashType', key: 'organize_document_dashType', default: 1},
+    {name: 'dashType', key: 'organize_document_dashType', default: '\u2013'},
     {name: 'useSections', key: 'organize_document_useSections', default: 1},
     {name: 'docTitle', key: 'organize_document_docTitle', default: 'Document title'},
     {name: 'dateFormatChoice', key: 'organize_document_dateFormatChoice', default: 0},
@@ -27,7 +27,7 @@ const settingsObjectFromName = (name) => {
 // returns: stored value, or default value if nothing is stored, or undefined if name is invalid
 const storedValue = (name) => {
   const settingsObject = settingsObjectFromName(name);
-  if (settingsObject !== undefined){
+  if (settingsObject){
     const retVal = Settings.settingForKey(settingsObject.key)
     if (retVal == undefined){
       // no value stored; return default value for setting
@@ -43,7 +43,7 @@ const storedValue = (name) => {
 // returns: stored setting value, or undefined if name parameter is invalid
 const setStoredValue = (name, value) => {
   const settingsObject = settingsObjectFromName(name);
-  if (settingsObject !== undefined){
+  if (settingsObject){
     Settings.setSettingForKey(settingsObject.key, value);
     return value;
   }
@@ -56,10 +56,9 @@ const settingsDialog = (context) => {
   const doc = context.document;
   const page = doc.currentPage();
   const docTitle = docTitleFromDocument(page);
-  const stockDateFormats = [
-    '[mm]/[dd]/[yyyy]',
-    '[m]/[d]/[yyyy]'
-  ]
+  const stockDateFormats = ['[mm]/[dd]/[yyyy]','[m]/[d]/[yyyy]'];
+  const stockDashes = ['-', '\u2013', '\u2014']; // dash, ndash, mdash
+  // set up alert window
   const alert =  NSAlert.alloc().init();
   alert.setIcon(NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path()));
   alert.setMessageText('Settings');
@@ -67,6 +66,13 @@ const settingsDialog = (context) => {
   const controls = [];
   let curY = 0;
   let control = undefined;
+
+  // backward compatibility: dash type was once stored as the index, not the character
+  const possibleOldDashType = storedValue('dashType');
+  if (isNumeric(possibleOldDashType)) {
+    // it's an index, so convert it to the corresponding character
+    setStoredValue('dashType', stockDashes[possibleOldDashType]);
+  }
 
   // ===========================================================================
   // ======         Create controls that will appear in alert             ======
@@ -93,9 +99,8 @@ const settingsDialog = (context) => {
   // SETTING CHECKBOX: create table of contents ================================
   // function (passed into createCheckbox) is called when checkbox's selected state changes
   const useTOCCallback = (checkbox) => {
-    const selected = checkbox.value; //gets true or false
-    spacingField.setEnabled(selected);
-    tocShowRadios.setEnabled(selected);
+    spacingField.setEnabled(checkbox.value);
+    tocShowRadios.setEnabled(checkbox.value);
   }
   const useTOCCheckbox = createCheckbox('Create table of contents', storedValue('useTOC'), {x:0, y: curY, width: viewWidth}, useTOCCallback);
   curY = addControlWithBottomPadding(useTOCCheckbox, controls, 3);
@@ -128,7 +133,7 @@ const settingsDialog = (context) => {
   curY -= 1;
 
   // SETTING RADIO BUTTONS: pages to include in TOC ============================
-  const tocShowRadios = createRadioButtons(["All pages","Section headings only"], storedValue('tocShowSectionsOnly'), {x: 54, y: curY, width: viewWidth - 54});  //
+  const tocShowRadios = createRadioButtonsHorizontal(["Section headings only", "All pages"], storedValue('tocShowSectionsOnly'), {x: 54, y: curY, width: viewWidth - 54}, 155);  //
   tocShowRadios.setEnabled(storedValue('useTOC'));
   curY = addControlWithBottomPadding(tocShowRadios, controls, 14);
 
@@ -161,8 +166,8 @@ const settingsDialog = (context) => {
   controls.push(control);
   curY -= 7;
 
-  // SETTING DROPDOWN: dash style ==============================================
-  const dashStyleSelect = createSelect(['-', '\u2013', '\u2014'], storedValue('dashType'), {x: 73, y: curY, width: 45});
+  // SETTING COMBOBOX: dash style ==============================================
+  const dashStyleSelect = createSelect(stockDashes, stockDashes.indexOf(storedValue('dashType')), {x: 73, y: curY, width: 45});
   dashStyleSelect.setEnabled(storedValue('useSections'));
   curY = addControlWithBottomPadding(dashStyleSelect, controls, 14);
 
@@ -177,13 +182,13 @@ const settingsDialog = (context) => {
   curY -=2;
 
   // SETTING RADIO BUTTONS: date format ========================================
-  // function (passed into createRadioButtons) is called when radio button is selected
+  // function (passed into createRadioButtonsVertical) is called when radio button is selected
   const radioSelectedCallback = (buttonMatrix) => {
     const buttonIndex = buttonMatrix.value; // gets index of selected button
     customFormatField.setEnabled(buttonIndex == 2); // enables custom-format field if 3rd radio button is selected
   }
   const sampleDate = new Date(2047, 0, 5);
-  const dateFormatRadios = createRadioButtons([dateFromTemplate(stockDateFormats[0], sampleDate), dateFromTemplate(stockDateFormats[1], sampleDate), "Custom format:"], storedValue('dateFormatChoice'), {x: 78, y: curY, width: viewWidth - 78}, 22, radioSelectedCallback);  //
+  const dateFormatRadios = createRadioButtonsVertical([dateFromTemplate(stockDateFormats[0], sampleDate), dateFromTemplate(stockDateFormats[1], sampleDate), "Custom format:"], storedValue('dateFormatChoice'), {x: 78, y: curY, width: viewWidth - 78}, 22, radioSelectedCallback);  //
   controls.push(dateFormatRadios);
   curY += 4;
 
@@ -234,6 +239,7 @@ const settingsDialog = (context) => {
   // Add OK and cancel buttons. These automatically appear at the bottom of the alert (below accessoryView area)
   const okButton = alert.addButtonWithTitle("Save Settings");
   const cancelButton = alert.addButtonWithTitle("Cancel");
+  const viewDocs = alert.addButtonWithTitle("View Documentation");
   // set the tab order
   setTabOrder(alert,[
   			titleField,
@@ -248,14 +254,14 @@ const settingsDialog = (context) => {
         cancelButton
   		]);
   // display alert
-  if (alert.runModal() == 1000){
-
+  const alertValue = alert.runModal();
+  if (alertValue == 1000){
     // user pressed OK, so save settings
     setStoredValue('useTOC', useTOCCheckbox.value);
     setStoredValue('tocColumnSpacing', spacingField.value);
     setStoredValue('docTitle', titleField.value);
     setStoredValue('tocShowSectionsOnly', tocShowRadios.value);
-    setStoredValue('dashType', dashStyleSelect.value);
+    setStoredValue('dashType', stockDashes[dashStyleSelect.value]);
     setStoredValue('useSections', useSectionsCheckbox.value);
     setStoredValue('dateFormatChoice', dateFormatRadios.value);
     if (dateFormatRadios.value == 2){
@@ -267,12 +273,14 @@ const settingsDialog = (context) => {
       setStoredValue('dateFormatTemplate', stockDateFormats[dateFormatRadios.value]);
     }
     return true;
+  } else if (alertValue == 1002) {
+      NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString("https://github.com/josephxbrick/documentorganizer"));
   }
   return undefined;
 }
 
-// function: Adds a control to controls array
-// returns: bottom bound of control + padding
+// function: adds a control to controls array
+// returns: bottom bound of added control + padding
 const addControlWithBottomPadding = (control, controls, padding = 0) => {
   controls.push(control);
   return CGRectGetMaxY(control.frame()) + padding;
@@ -286,14 +294,17 @@ const textHeight = (fontSize, lines) => {
 
 // function: sets tab order of controls in alert as well as initial focus
 // returns: true
-const setTabOrder = (alert, order) => {
-	for (var i = 0; i < order.length; i++) {
-		var thisItem = order[i],
-			nextItem = order[i+1];
-		if (nextItem) thisItem.setNextKeyView(nextItem);
-	}
+const setTabOrder = (alert, controls) => {
   // set initial focus
-	alert.window().setInitialFirstResponder(order[0]);
+	alert.window().setInitialFirstResponder(controls[0]);
+  let nextItem = undefined;
+  controls.reverse();
+	for (const control of controls) {
+    if (nextItem) {
+      control.setNextKeyView(nextItem);
+    }
+    nextItem = control;
+	}
   return true;
 }
 
@@ -302,9 +313,9 @@ const setTabOrder = (alert, order) => {
 const docTitleFromDocument = (page) => {
   let docTitle = undefined;
   const artboards = allArtboards(page);
-  for (artboard of artboards) {
+  for (const artboard of artboards) {
     const instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance)
-    for (instance of instances) {
+    for (const instance of instances) {
       docTitle = getOverrideText(instance, '<documentTitle>');
       if (docTitle != undefined) {
         return docTitle;
