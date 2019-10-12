@@ -321,21 +321,6 @@ Make sure the tops of all artboards in arrow are aligned perfectly and arranged 
 
 # To-dos
 
-## Error checking
-
-Make sure:
-
-* There are artboards on the current page (could be on the Symbols page)
-* Make sure the page number symbol and section/page title symbols exist. If creating a TOC, require the TOC symbols exist (as well as the TOC group) before allowing the plugin to run.
-
-## Table of contents
-
-Don't create TOC if "Create table of contents" setting is unchecked. (Currently it creates the TOC no matter what.)
-
-## Section numbering
-
-Instead of using 1.0, 2.0, 3.0, etc., for section headers, use 1, 2, 3, etc.
-
 ## TOC documentation
 
 Show images of both symbols that create the TOC instead of just the page-entry symbol.
