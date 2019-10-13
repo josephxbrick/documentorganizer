@@ -169,12 +169,13 @@ const dateFromTemplate = (dateTemplate, date = new Date()) => {
 }
 
 const addOrdinalIndicator = (num) => {
-  lastNum = num.toString().slice(-1);
-  if (lastNum == '1') {
+  const lastNum = num.toString().slice(-1);
+  const lastTwoNums = num.toString().slice(-2);
+  if (lastNum == '1' && lastTwoNums != '11') {
     return `${num}st`;
-  } else if (lastNum == '2') {
+  } else if (lastNum == '2' && lastTwoNums != '12') {
     return `${num}nd`;
-  } else if (lastNum == '3') {
+  } else if (lastNum == '3' && lastTwoNums != '13') {
     return `${num}rd`;
   } else {
     return `${num}th`;
