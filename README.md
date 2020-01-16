@@ -37,7 +37,7 @@ Again, refer to the documentation below for details on each of these required el
 
 # The plugin menu
 
-<img src="/readme_images/calloutMenus.png" width="582">
+<img src="/readme_images/calloutMenus.png" width="571">
 
 After installing the plugin, `Organize Design Document` item will appear in Sketch's plugin menu. 
 
