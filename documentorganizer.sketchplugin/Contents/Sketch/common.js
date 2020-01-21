@@ -9,7 +9,7 @@ const isNumeric = (value) => {
 }
 
 //get string from user. defaultValue is ignored if value is stored in key
-const getStringFromUser = (prompt, defaultValue, key)  => {
+const getStringFromUser = (prompt, defaultValue, key) => {
   let storedValue = Settings.settingForKey(key);
   if (storedValue === undefined) {
     storedValue = defaultValue;
@@ -59,7 +59,7 @@ const getSelectionFromUser = (prompt, possibleValues, defaultValue, key) => {
   return retval;
 }
 
-const displaySummary = (doc, summary)  => {
+const displaySummary = (doc, summary) => {
   console.log('got here');
   const br = String.fromCharCode(13);
   const slash = String.fromCharCode(47);
@@ -80,7 +80,7 @@ const displaySummary = (doc, summary)  => {
   }
   if (errorMessage != '') {
     errorMessage = errorMessage.concat(`Plugin and documentation:${br}https:${slash}${slash}github.com${slash}josephxbrick${slash}documentorganizer${br}`);
-    UI.alert('Error', errorMessage );
+    UI.alert('Error', errorMessage);
   }
 
 }
@@ -111,13 +111,13 @@ const layersWithName = (container, className, name) => {
 // sort layers laid out in horizontal rows
 const sortLayersByRows = (layers) => {
   let minX = minY = Number.MAX_SAFE_INTEGER;
-  for (const layer of layers){
+  for (const layer of layers) {
     minX = Math.min(minX, layer.frame().x())
     minY = Math.min(minY, layer.frame().y())
   }
-  layers.sort( (a, b) => sortVal(a, minX, minY) - sortVal(b, minX, minY) );
+  layers.sort((a, b) => sortVal(a, minX, minY) - sortVal(b, minX, minY));
 }
-const sortVal = (layer, minX, minY) =>  {
+const sortVal = (layer, minX, minY) => {
   return (layer.frame().y() - minY) * 100 + (layer.frame().x())
 }
 
@@ -129,12 +129,16 @@ const sortByVerticalPosition = (layers) => {
   layers.sort((a, b) => a.frame().y() - b.frame().y());
 }
 
-const sortArtboards = (page) => {
+const sortArtboards = (doc, page) => {
   artboards = allArtboards(page);
   sortLayersByRows(artboards);
-	for (const artboard of artboards){
+  for (const artboard of artboards) {
     artboard.moveToLayer_beforeLayer(page, nil);
-		artboard.select_byExtendingSelection(false, true);
+    artboard.select_byExtendingSelection(false, true);
+  }
+  const action = doc.actionsController().actionForID("MSCollapseAllGroupsAction");
+  if (action.validate()) {
+    action.doPerformAction(nil);
   }
 }
 
@@ -161,7 +165,7 @@ const dateFromTemplate = (dateTemplate, date = new Date()) => {
   dateTemplate = dateTemplate.replace('[d]', d); // 4
   dateTemplate = dateTemplate.replace('[yyyy]', y); // 2019
   dateTemplate = dateTemplate.replace('[yy]', y.toString().slice(-2)); // 19
-  if (dateTemplate == origTemplate){
+  if (dateTemplate == origTemplate) {
     // no segment of the date template was recognized, so return date in MM/DD/YYYY format
     dateTemplate = `${'0'.concat(m + 1).slice(-2)}/${'0'.concat(d).slice(-2)}/${y}`;
   }

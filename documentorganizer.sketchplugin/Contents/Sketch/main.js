@@ -15,15 +15,15 @@ _settings = (context) => {
   page = doc.currentPage();
 
   const val = settingsDialog(context);
-  if (val === undefined){
+  if (val === undefined) {
     return;
   }
   // check if file is set up for creating a TOC
   if (checkTocSetup(doc, summary)) {
     setTimeout(() => {
-      sortArtboards(page);
+      sortArtboards(doc, page);
       const tocArray = numberAndNameArtboards(context, summary);
-      if (storedValue('useTOC')){
+      if (storedValue('useTOC')) {
         tableOfContents(context, tocArray, summary);
       }
       displaySummary(doc, summary);
@@ -41,9 +41,9 @@ _organizeDocument = (context) => {
   page = doc.currentPage();
   if (checkTocSetup(doc, summary)) {
     setTimeout(() => {
-      sortArtboards(page);
+      sortArtboards(doc, page);
       const tocArray = numberAndNameArtboards(context, summary);
-      if (storedValue('useTOC')){
+      if (storedValue('useTOC')) {
         tableOfContents(context, tocArray, summary);
       }
       displaySummary(doc, summary);
@@ -58,7 +58,7 @@ _updateCalloutsOnArtboard = (context) => {
   const doc = context.document;
   const page = doc.currentPage();
   artboard = page.currentArtboard();
-  if (artboard == null){
+  if (artboard == null) {
     alert('No artboard selected', 'Select at least one layer on the artboard, or select the artboard itself.');
   } else {
     const calloutsUpdated = updateCalloutsOnArtboard(artboard, doc);
@@ -87,8 +87,9 @@ _onLayersResizedFinish = (context, instance) => {
 }
 
 //=======================================================================================================================
-//  Add section numbering to page/section title instances, name artboards after page/section title instances, update all
-//  doc-title symbol instances, update all current-date instances, return tocArray which is used by createTOC() function
+//  Add section numbering to page/section title instances, name artboards after page/section/document title instances,
+//  update all doc-title symbol instances, update all current-date instances, update all callouts, return tocArray which
+//  is used by createTOC() function
 //=======================================================================================================================
 const numberAndNameArtboards = (context, summary) => {
   // get stored useSections setting
@@ -106,11 +107,11 @@ const numberAndNameArtboards = (context, summary) => {
     let curPageTitle = curSectionTitle = undefined;
     const instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
     for (const instance of instances) {
-      if (setOverrideText(instance, '<pageNumber>', curPage.toString())){
+      if (setOverrideText(instance, '<pageNumber>', curPage.toString())) {
         firstPageFound = true;
       }
       // check if current instance contains override '<sectionTitle>'
-      if (instanceHasOverride(instance, '<sectionTitle>')){
+      if (instanceHasOverride(instance, '<sectionTitle>')) {
         sectionNumber++;
         sectionPageNumber = 0;
         curSectionTitle = runningSectionTitle = addSectionNumbers(getOverrideText(instance, '<sectionTitle>'), sectionNumber, sectionPageNumber);
@@ -119,7 +120,7 @@ const numberAndNameArtboards = (context, summary) => {
         titlesAdded++;
       }
       // check if current instance contains override '<pageTitle>'
-      if (instanceHasOverride(instance, '<pageTitle>')){
+      if (instanceHasOverride(instance, '<pageTitle>')) {
         sectionPageNumber++;
         curPageTitle = addSectionNumbers(getOverrideText(instance, '<pageTitle>'), sectionNumber, sectionPageNumber);
         setOverrideText(instance, '<pageTitle>', curPageTitle);
@@ -144,7 +145,7 @@ const numberAndNameArtboards = (context, summary) => {
   }
   // summary
   summary.push(`${titlesAdded} artboards updated`);
-  summary.push(`${calloutsUpdated} callouts numbered`);
+  summary.push(`${calloutsUpdated} callouts updated`);
   return tocArray;
 }
 
@@ -153,9 +154,9 @@ const prefixEndIndex = (text) => {
   const mdash = '\u2014';
   const possibleIndexChars = '1234567890 .-'.concat(ndash).concat(mdash);
   const charArray = text.trim().split('');
-  for (let i = 0; i < charArray.length; i++){
+  for (let i = 0; i < charArray.length; i++) {
     const char = charArray[i];
-    if (possibleIndexChars.indexOf(char) < 0){
+    if (possibleIndexChars.indexOf(char) < 0) {
       return i;
     }
   }
@@ -166,7 +167,7 @@ const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
   const endIndex = prefixEndIndex(text);
   let retval = undefined;
   const desiredDash = storedValue('dashType');
-  if (storedValue('useSections')){
+  if (storedValue('useSections')) {
     if (sectionPageNumber == 0) {
       retval = `${sectionNumber} ${desiredDash} ${text.substring(endIndex)}`
     } else {
@@ -179,7 +180,7 @@ const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
 }
 
 const removeSectionNumbers = (text) => {
-  if (text){
+  if (text) {
     const endIndex = prefixEndIndex(text);
     return `${text.substring(endIndex)}`
   }
@@ -230,7 +231,7 @@ const initializeTOC = (doc) => {
 
 // load the TOC with sectionTitle and pageTitle instances
 const createTOC = (doc, tocArray, summary) => {
-  const showSectionsOnly =  (storedValue('tocShowSectionsOnly') == 0) ? true: false;
+  const showSectionsOnly = (storedValue('tocShowSectionsOnly') == 0) ? true : false;
   let tocItemCount = 0;
   const page = doc.currentPage();
   const tocSectionMaster = symbolMasterWithOverrideName(doc, '<tocSectionTitle>');
@@ -248,7 +249,7 @@ const createTOC = (doc, tocArray, summary) => {
   let initColWidth = 100; // this is to make sure that sections are same width as pages
   for (let i = 0; i < tocArray.length; i++) {
     let tocItem = tocArray[i];
-    if (showSectionsOnly == true && tocItem.sectionTitle != '<undefined>' || !showSectionsOnly){
+    if (showSectionsOnly == true && tocItem.sectionTitle != '<undefined>' || !showSectionsOnly) {
       tocItemCount++;
       if (curGroup.length == 0) {
         curGroupName = `TOC group: ${(tocItem.sectionTitle != '<undefined>') ? tocItem.sectionTitle : tocItem.pageTitle}`;
@@ -267,7 +268,7 @@ const createTOC = (doc, tocArray, summary) => {
       instance.setConstrainProportions(0); // unlock the aspect ratio
       // store text values into object properties, because we can't set the overrides
       // yet as the instances are not part of the document
-      instance.pageTitle = (tocItem.sectionTitle != '<undefined>') ?  tocItem.sectionTitle: tocItem.pageTitle;
+      instance.pageTitle = (tocItem.sectionTitle != '<undefined>') ? tocItem.sectionTitle : tocItem.pageTitle;
       instance.setName(`TOC item: ${tocItem.pageTitle}`);
       instance.pageNumber = tocItem.pageNumber;
       instance.frame().setX(0);
@@ -391,12 +392,12 @@ const checkTocSetup = (doc, summary) => {
     summary.push('[ERROR]No symbol with override <pageTitle> found.');
     retval = undefined;
   }
-  if (retval === undefined){
+  if (retval === undefined) {
     // page numbers, section titles and/or page titles are absent
     return retval
   }
   // check for TOC stuff
-  if (storedValue('useTOC')){
+  if (storedValue('useTOC')) {
     const tocSectionTitle = symbolMasterWithOverrideName(doc, '<tocSectionTitle>');
     if (tocSectionTitle === undefined) {
       summary.push('[ERROR]Table of contents: No symbol with override <tocSectionTitle> found.');
@@ -428,60 +429,63 @@ const checkTocSetup = (doc, summary) => {
 const updateCalloutsOnArtboard = (artboard, doc) => {
   const useSections = storedValue('useSections');
   const callouts = sortedCallouts(artboard));
-  let sectionNumber = '';
-  let calloutCount = 0;
-  if (useSections) {
-    sectionNumber = artboard.name().substring(0, artboard.name().indexOf(' ')).concat('.');
+let sectionNumber = '';
+let calloutCount = 0;
+if (useSections) {
+  sectionNumber = artboard.name().substring(0, artboard.name().indexOf(' ')).concat('.');
+}
+// get all symbol instances on the current artboard and find the ones that we care about
+const calloutListDescriptions = [];
+for (const callout of callouts) {
+  calloutCount++;
+  let overrideText = getOverrideText(callout, '<calloutDescription>');
+  if (overrideText === null) {
+    overrideText = ''
   }
-  // get all symbol instances on the current artboard and find the ones that we care about
-  const calloutListDescriptions = [];
-  for (const callout of callouts) {
-    calloutCount ++;
-    let overrideText = getOverrideText(callout, '<calloutDescription>');
-    if (overrideText === null) {
-      overrideText = ''
+  const calloutNumber = (useSections) ? `${sectionNumber}${calloutCount}` : numberToLetters(calloutCount - 1);
+  setOverrideText(callout, '<calloutNumber>', calloutNumber);
+  // reset this to its normal value to avoid the bug where you can't change any override in the Sketch UI.
+  setOverrideText(callout, '<calloutDescription>', ' ');
+  setOverrideText(callout, '<calloutDescription>', overrideText);
+  calloutListDescriptions.push({
+    description: overrideText,
+    calloutNumber: calloutNumber
+  });
+  callout.setName(`${calloutNumber} - ${overrideText.substring(0,30)}...`);
+}
+if (calloutCount > 0) {
+  let calloutDescriptionsGroup = layerWithName(artboard, MSLayerGroup, '<calloutListGroup>');
+  if (calloutDescriptionsGroup == undefined) {
+    calloutDescriptionsGroup = createCalloutDescriptionGroup(artboard);
+  } else {
+    // remove existing groups from calloutDescriptionsGroup
+    const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() !== MSRectangleShape);
+    for (const instance of instances) {
+      calloutDescriptionsGroup.removeLayer(instance);
     }
-    const calloutNumber = (useSections) ? `${sectionNumber}${calloutCount}` : numberToLetters(calloutCount - 1);
-    setOverrideText(callout, '<calloutNumber>', calloutNumber);
-      // reset this to its normal value to avoid the bug where you can't change any override in the Sketch UI.
-    setOverrideText(callout, '<calloutDescription>', ' ');
-    setOverrideText(callout, '<calloutDescription>', overrideText);
-    calloutListDescriptions.push({description: overrideText, calloutNumber: calloutNumber});
-    callout.setName(`${calloutNumber} - ${overrideText.substring(0,30)}...`);
   }
-  if (calloutCount > 0) {
-    let calloutDescriptionsGroup = layerWithName(artboard, MSLayerGroup, '<calloutListGroup>');
-    if (calloutDescriptionsGroup == undefined) {
-      calloutDescriptionsGroup = createCalloutDescriptionGroup(artboard);
-    } else {
-      // remove existing groups from calloutDescriptionsGroup
-      const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() !== MSRectangleShape);
-      for (const instance of instances) {
-        calloutDescriptionsGroup.removeLayer(instance);
-      }
-    }
-    // get reference to the listing symbol
-    const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
-    // add one symbol to calloutDescriptionsGroup per string in array
-    for (const calloutListDescription of calloutListDescriptions){
-      const instance = calloutDescriptionSymbol.newSymbolInstance();
-      instance.setConstrainProportions(0); // unlock the aspect ratio
-      instance.setFixed_forEdge_(true, 4); // pin left
-      instance.setFixed_forEdge_(true, 32); // pin top
-      calloutDescriptionsGroup.addLayers([instance]);
-      setOverrideText(instance, '<calloutListDescription>', calloutListDescription.description);
-      setOverrideText(instance, '<calloutListNumber>', calloutListDescription.calloutNumber);
-      instance.setName(calloutListDescription.calloutNumber);
-    }
-    layoutCalloutDescriptions(calloutDescriptionsGroup, doc);
+  // get reference to the listing symbol
+  const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
+  // add one symbol to calloutDescriptionsGroup per string in array
+  for (const calloutListDescription of calloutListDescriptions) {
+    const instance = calloutDescriptionSymbol.newSymbolInstance();
+    instance.setConstrainProportions(0); // unlock the aspect ratio
+    instance.setFixed_forEdge_(true, 4); // pin left
+    instance.setFixed_forEdge_(true, 32); // pin top
+    calloutDescriptionsGroup.addLayers([instance]);
+    setOverrideText(instance, '<calloutListDescription>', calloutListDescription.description);
+    setOverrideText(instance, '<calloutListNumber>', calloutListDescription.calloutNumber);
+    instance.setName(calloutListDescription.calloutNumber);
   }
-  return calloutCount;
+  layoutCalloutDescriptions(calloutDescriptionsGroup, doc);
+}
+return calloutCount;
 }
 
 const numberToLetters = (num) => {
-    const firstDigit = (num <= 25) ? '' : String.fromCharCode(Math.floor(num/26) + 64);
-    const secondDigit = String.fromCharCode(num % 26 + 65);
-    return `${firstDigit}${secondDigit}`;
+  const firstDigit = (num <= 25) ? '' : String.fromCharCode(Math.floor(num / 26) + 64);
+  const secondDigit = String.fromCharCode(num % 26 + 65);
+  return `${firstDigit}${secondDigit}`;
 }
 
 // lays out the descriptions for callouts in the calloutDescriptionsGroup
@@ -495,7 +499,7 @@ const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
   // get all symbols in the group
   const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() === MSSymbolInstance);
   let runningTop = 0;
-  for (const instance of instances){
+  for (const instance of instances) {
     instance.frame().setWidth(calloutDescriptionsGroup.frame().width());
     instance.frame().setY(runningTop);
     // Need to account for wrapping of text. Get copy of the description text area, set it to the width of the
@@ -522,7 +526,7 @@ const sortedCallouts = (artboard) => {
   // get all top-level layer groups
   const groups = toArray(artboard.layers()).filter(item => item.class() === MSLayerGroup);
   sortByHorizontalPosition(groups);
-  for (const group of groups){
+  for (const group of groups) {
     const symbols = toArray(group.children()).filter(item => item.class() === MSSymbolInstance);
     const instances = symbolsWithOverride(symbols, '<calloutDescription>');
     sortLayersByRows(instances);
