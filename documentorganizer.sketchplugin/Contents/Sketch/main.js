@@ -26,6 +26,9 @@ _settings = (context) => {
       if (storedValue('useTOC')) {
         tableOfContents(context, tocArray, summary);
       }
+      if (storedValue('roundToNearestPixel')) {
+        roundToNearestPixel(context, summary);
+      }
       displaySummary(doc, summary);
     }, 0);
     doc.showMessage('Updating artboards. This may take a moment...');
@@ -45,6 +48,9 @@ _organizeDocument = (context) => {
       const tocArray = numberAndNameArtboards(context, summary);
       if (storedValue('useTOC')) {
         tableOfContents(context, tocArray, summary);
+      }
+      if (storedValue('roundToNearestPixel')) {
+        roundToNearestPixel(context, summary);
       }
       displaySummary(doc, summary);
     }, 0);
@@ -559,4 +565,54 @@ const createCalloutDescriptionGroup = (artboard) => {
   // make group fit its content
   group.fixGeometryWithOptions(0);
   return group;
+}
+
+const roundToNearestPixel = (context, summary) => {
+  const doc = context.document;
+  const page = doc.currentPage();
+  let roundToValue = undefined;
+  const settingValue = storedValue('nearestPixelToRoundTo');
+  if (settingValue.indexOf('0.1') >= 0) {
+    roundToValue = 0.1;
+  } else if (settingValue.indexOf('0.5') >= 0) {
+    roundToValue = 0.5;
+  } else if (settingValue.indexOf('1.0') >= 0) {
+    roundToValue = 1.0;
+  } else {
+    return undefined;
+  }
+
+  const artboards = allArtboards(page);
+  let fixCount = 0;
+  for (const artboard of artboards) {
+
+    const layers = toArray(artboard.children()).filter(item => item.class() != MSLayerGroup);
+
+    for (const layer of layers) {
+      if (layer.parentGroup() !== undefined && layer.parentGroup().name() != '<calloutListGroup>' && layer.parentGroup().name() != '<tocGroup>') {
+        const frame = layer.frame();
+        const x = frame.x();
+        const y = frame.y();
+        const w = frame.width();
+        const h = frame.height();
+        if (x % roundToValue != 0) {
+          fixCount++;
+          frame.setX(Math.round(x / roundToValue) * roundToValue);
+        }
+        if (y % roundToValue != 0) {
+          fixCount++;
+          frame.setY(Math.round(y / roundToValue) * roundToValue);
+        }
+        if (w % roundToValue != 0) {
+          fixCount++;
+          frame.setWidth(Math.round(w / roundToValue) * roundToValue);
+        }
+        if (h % roundToValue != 0) {
+          fixCount++;
+          frame.setHeight(Math.round(h / roundToValue) * roundToValue);
+        }
+      }
+    }
+  }
+  summary.push(`${fixCount} dimensions rounded to nearest ${roundToValue.toFixed(1)} pixels`);
 }

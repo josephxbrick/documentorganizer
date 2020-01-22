@@ -3,6 +3,7 @@
   "commands": [{
       "script": "main.js",
       "name": "Organize Now",
+			"shortcut" : "cmd shift option d",
       "identifier": "organizeDocument",
       "handlers": {
         "run": "_organizeDocument"
@@ -11,6 +12,7 @@
     {
       "script": "main.js",
       "name": "Update Callouts on Artboard",
+			"shortcut" : "cmd option control d",
       "identifier": "updateCalloutsOnArtboard",
       "handlers": {
         "run": "_updateCalloutsOnArtboard"

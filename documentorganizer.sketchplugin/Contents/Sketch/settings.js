@@ -5,63 +5,80 @@
 @import 'alertControls.js';
 const Settings = require('sketch/settings');
 
-// function: contains an array of objects, each representing a setting to store
+// all stored settings for the settings dialog
+const settingsObjects = [{
+    name: 'useTOC',
+    key: 'organize_document_useTOC',
+    default: true
+  },
+  {
+    name: 'tocColumnSpacing',
+    key: 'organize_document_columnSpacing',
+    default: 50
+  },
+  {
+    name: 'tocShowSectionsOnly',
+    key: 'organize_document_showTOCSectionsOnly',
+    default: 0
+  },
+  {
+    name: 'dashType',
+    key: 'organize_document_dashType',
+    default: '\u2013'
+  },
+  {
+    name: 'useSections',
+    key: 'organize_document_useSections',
+    default: 1
+  },
+  {
+    name: 'docTitle',
+    key: 'organize_document_docTitle',
+    default: 'Document title'
+  },
+  {
+    name: 'dateFormatChoice',
+    key: 'organize_document_dateFormatChoice',
+    default: 0
+  },
+  {
+    name: 'dateFormatTemplate',
+    key: 'organize_document_dateFormatTemplate',
+    default: '[ww], [mmmm] [ddd], [yyyy]'
+  },
+  {
+    name: 'lastEnteredFormatTemplate',
+    key: 'organize_document_lastEnteredFormatTemplate',
+    default: '[ww], [mmmm] [ddd], [yyyy]'
+  },
+  {
+    name: 'roundToNearestPixel',
+    key: 'organize_document_roundToNearestPixel',
+    default: 0
+  },
+  {
+    name: 'nearestPixelToRoundTo',
+    key: 'organize_document_nearestPixelToRoundTo',
+    default: '0.5 pixels (recommended)'
+  }
+];
+
+const stockDateFormats = ['[mm]/[dd]/[yyyy]', '[m]/[d]/[yyyy]'];
+const stockDashes = ['-', '\u2013', '\u2014']; // dash, ndash, mdash
+const stockRoundedPixels = ['0.1 pixels', '0.5 pixels (recommended)', '1.0 pixels'];
+
+// function that gets a setting object from settingsObjects[]
+// receives: setting name
 // returns: a settings object given the 'name' key
 const settingsObjectFromName = (name) => {
-  // all stored settings for the settings dialog
-  const settingsObjects = [{
-      name: 'useTOC',
-      key: 'organize_document_useTOC',
-      default: true
-    },
-    {
-      name: 'tocColumnSpacing',
-      key: 'organize_document_columnSpacing',
-      default: 50
-    },
-    {
-      name: 'tocShowSectionsOnly',
-      key: 'organize_document_showTOCSectionsOnly',
-      default: 0
-    },
-    {
-      name: 'dashType',
-      key: 'organize_document_dashType',
-      default: '\u2013'
-    },
-    {
-      name: 'useSections',
-      key: 'organize_document_useSections',
-      default: 1
-    },
-    {
-      name: 'docTitle',
-      key: 'organize_document_docTitle',
-      default: 'Document title'
-    },
-    {
-      name: 'dateFormatChoice',
-      key: 'organize_document_dateFormatChoice',
-      default: 0
-    },
-    {
-      name: 'dateFormatTemplate',
-      key: 'organize_document_dateFormatTemplate',
-      default: '[ww], [mmmm] [ddd], [yyyy]'
-    },
-    {
-      name: 'lastEnteredFormatTemplate',
-      key: 'organize_document_lastEnteredFormatTemplate',
-      default: '[ww], [mmmm] [ddd], [yyyy]'
-    }
-  ];
-  return settingsObjects.find(settingsObject => {
-    return settingsObject.name == name
+  return settingsObjects.find((settingsObject) => {
+    return settingsObject.name == name;
   });
 }
 
-// function: gets stored value by its name
-// returns: stored value, or default value if nothing is stored, or undefined if name is invalid
+// function that returns a stored value
+// receives: setting name
+// returns: stored value of setting, or default value of setting if nothing is stored, or undefined if name is invalid
 const storedValue = (name) => {
   const settingsObject = settingsObjectFromName(name);
   if (settingsObject) {
@@ -69,14 +86,14 @@ const storedValue = (name) => {
     if (retVal == undefined) {
       // no value stored; return default value for setting
       return settingsObject.default;
-    } else {
-      return retVal;
     }
+    return retVal;
   }
   return undefined;
 }
 
-// function: stores setting value
+// function that sets a stored values
+// receives: setting name and value to store
 // returns: stored setting value, or undefined if name parameter is invalid
 const setStoredValue = (name, value) => {
   const settingsObject = settingsObjectFromName(name);
@@ -87,19 +104,69 @@ const setStoredValue = (name, value) => {
   return undefined;
 }
 
-// function: creates and displays the settings dialog, stores settings
+// function that adds a control to controls array
+// receives: the control, the controls array, and the amount of padding to place below control
+// returns: bottom bound of added control + padding
+const addControlWithBottomPadding = (control, controls, padding = 0) => {
+  controls.push(control);
+  return CGRectGetMaxY(control.frame()) + padding;
+}
+
+// function that  converts point of font to height in pixels
+// receives: font size in points, number of lines that will display
+// returns: height in pixels multiplied by number of lines
+const textHeight = (fontSize, lines) => {
+  return lines * fontSize * (96 / 72);
+}
+
+// function that sets tab order of controls in alert as well as initial focus
+// receives: the alert window and the controls array
+// returns: true
+const setTabOrder = (alert, controls) => {
+  // set initial focus
+  alert.window().setInitialFirstResponder(controls[0]);
+  let nextItem = undefined;
+  controls.reverse();
+  for (const control of controls) {
+    if (nextItem) {
+      control.setNextKeyView(nextItem);
+    }
+    nextItem = control;
+  }
+  return true;
+}
+
+// function that gets document title from instance (in document) rather than from stored value. (values are stored at the plugin-level, not the document level)
+// receives: the current Sketch page
+// returns: value of the first '<documentTitle>' override found in document, or the stored/default value if not found in document.
+const docTitleFromDocument = (page) => {
+  let docTitle = undefined;
+  const artboards = allArtboards(page);
+  for (const artboard of artboards) {
+    const instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance)
+    for (const instance of instances) {
+      docTitle = getOverrideText(instance, '<documentTitle>');
+      if (docTitle != undefined) {
+        return docTitle;
+      }
+    }
+  }
+  // no override found; return stored value
+  return storedValue('docTitle');
+}
+
+// function that creates and displays the settings dialog and stores settings
+// receives: Sketch context
 // returns: true if dialog is not canceled, or undefined if it is
 const settingsDialog = (context) => {
   const doc = context.document;
   const page = doc.currentPage();
   const docTitle = docTitleFromDocument(page);
-  const stockDateFormats = ['[mm]/[dd]/[yyyy]', '[m]/[d]/[yyyy]'];
-  const stockDashes = ['-', '\u2013', '\u2014']; // dash, ndash, mdash
   // set up alert window
   const alert = NSAlert.alloc().init();
   alert.setIcon(NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path()));
   alert.setMessageText('Settings');
-  const viewWidth = 415;
+  const viewWidth = 418;
   const controls = [];
   let curY = 0;
   let control = undefined;
@@ -264,7 +331,7 @@ const settingsDialog = (context) => {
   // description: dash style
   curY += 7;
   control = createDescription("A dash separates section numbers and page titles", NSColor.grayColor(), 11, {
-    x: 123,
+    x: 130,
     y: curY,
     width: viewWidth - 123,
     height: textHeight(11, 1)
@@ -273,10 +340,10 @@ const settingsDialog = (context) => {
   curY -= 7;
 
   // SETTING COMBOBOX: dash style ==============================================
-  const dashStyleSelect = createSelect(stockDashes, stockDashes.indexOf(storedValue('dashType')), {
+  const dashStyleSelect = createDropdown(stockDashes, stockDashes.indexOf(storedValue('dashType')), {
     x: 73,
     y: curY,
-    width: 45
+    width: 50
   });
   dashStyleSelect.setEnabled(storedValue('useSections'));
   curY = addControlWithBottomPadding(dashStyleSelect, controls, 14);
@@ -312,7 +379,7 @@ const settingsDialog = (context) => {
     width: viewWidth - 78
   }, 22, radioSelectedCallback); //
   controls.push(dateFormatRadios);
-  curY += 4;
+  curY += 3;
 
   // description: sample date for first radio button
   control = createDescription(stockDateFormats[0], NSColor.grayColor(), 11, {
@@ -362,11 +429,53 @@ const settingsDialog = (context) => {
     y: curY,
     width: viewWidth
   });
+  curY = addControlWithBottomPadding(control, controls, 12);
+
+  // SETTING CHECKBOX: round to nearest pixel =================================
+  // function (passed into createCheckbox) is called when checkbox's selected state changes
+  const roundToPixelCallback = (checkbox) => {
+    roundToPixelSelect.setEnabled(checkbox.value);
+  }
+  const roundToPixelCheckbox = createCheckbox('Round layer dimensions to nearest', storedValue('roundToNearestPixel'), {
+    x: 0,
+    y: curY,
+    width: viewWidth
+  }, roundToPixelCallback);
+  controls.push(roundToPixelCheckbox);
+  curY -= 6;
+
+  // SETTING COMBOBOX: dash style ==============================================
+
+  const roundToPixelSelect = createDropdown(stockRoundedPixels, stockRoundedPixels.indexOf(storedValue('nearestPixelToRoundTo')), {
+    x: 220,
+    y: curY,
+    width: viewWidth - 220
+  });
+  roundToPixelSelect.setEnabled(storedValue('roundToNearestPixel'));
+  curY = addControlWithBottomPadding(roundToPixelSelect, controls, 0);
+
+
+  // description
+  control = createDescription("Round each layer's x, y, width and height to nearest [n] pixels.", NSColor.grayColor(), 11, {
+    x: 0,
+    y: curY,
+    width: viewWidth,
+    height: textHeight(11, 1)
+  });
+  curY = addControlWithBottomPadding(control, controls, 12);
+
+
+  // divider line
+  control = createDivider({
+    x: 0,
+    y: curY,
+    width: viewWidth
+  });
   curY = addControlWithBottomPadding(control, controls, 6);
 
 
   // ===========================================================================
-  // ======                Done creating controls in alert                 =====
+  // ======      Done creating controls in alert: now finalize             =====
   // ===========================================================================
 
   //create view for alert controls
@@ -392,8 +501,11 @@ const settingsDialog = (context) => {
     dashStyleSelect,
     dateFormatRadios,
     customFormatField,
+    roundToPixelCheckbox,
+    roundToPixelSelect,
     okButton,
-    cancelButton
+    cancelButton,
+    viewDocs
   ]);
   // display alert
   const alertValue = alert.runModal();
@@ -406,8 +518,11 @@ const settingsDialog = (context) => {
     setStoredValue('dashType', stockDashes[dashStyleSelect.value]);
     setStoredValue('useSections', useSectionsCheckbox.value);
     setStoredValue('dateFormatChoice', dateFormatRadios.value);
+    setStoredValue('roundToNearestPixel', roundToPixelCheckbox.value);
+    setStoredValue('nearestPixelToRoundTo', stockRoundedPixels[roundToPixelSelect.value]);
+
     if (dateFormatRadios.value == 2) {
-      // custom date template chosen
+      // custom date templatehosen
       setStoredValue('dateFormatTemplate', customFormatField.value);
       setStoredValue('lastEnteredFormatTemplate', customFormatField.value);
     } else {
@@ -419,52 +534,6 @@ const settingsDialog = (context) => {
     // user chose to view documentation
     NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString("https://github.com/josephxbrick/documentorganizer"));
   }
+  // user chose cancel
   return undefined;
-}
-
-// function: adds a control to controls array
-// returns: bottom bound of added control + padding
-const addControlWithBottomPadding = (control, controls, padding = 0) => {
-  controls.push(control);
-  return CGRectGetMaxY(control.frame()) + padding;
-}
-
-// function: converts point of font to height in pixels
-// returns: height in pixels multiplied by number of lines
-const textHeight = (fontSize, lines) => {
-  return lines * fontSize * (96 / 72);
-}
-
-// function: sets tab order of controls in alert as well as initial focus
-// returns: true
-const setTabOrder = (alert, controls) => {
-  // set initial focus
-  alert.window().setInitialFirstResponder(controls[0]);
-  let nextItem = undefined;
-  controls.reverse();
-  for (const control of controls) {
-    if (nextItem) {
-      control.setNextKeyView(nextItem);
-    }
-    nextItem = control;
-  }
-  return true;
-}
-
-// function: gets document title from instance (in document) rather than from stored value. (values are stored at the plugin-level, not the document level)
-// returns: value of the first '<documentTitle>' override found in document, or the stored/default value if not found in document.
-const docTitleFromDocument = (page) => {
-  let docTitle = undefined;
-  const artboards = allArtboards(page);
-  for (const artboard of artboards) {
-    const instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance)
-    for (const instance of instances) {
-      docTitle = getOverrideText(instance, '<documentTitle>');
-      if (docTitle != undefined) {
-        return docTitle;
-      }
-    }
-  }
-  // no override found; return stored value
-  return storedValue('docTitle');
 }

@@ -1,8 +1,54 @@
 const UI = require('sketch/ui');
 
+
 const allArtboards = (page) => {
   return toArray(page.layers()).filter(item => item.class() === MSArtboardGroup);
 }
+
+const layerWithName = (container, className, name) => {
+  const layers = container.children();
+  for (let i = 0; i < layers.count(); i++) {
+    let layer = layers[i];
+    if (layer.class() === className && layer.name() == name) {
+      return layer;
+    }
+  }
+  return undefined;
+}
+
+const layersWithName = (container, className, name) => {
+  const layers = container.children();
+  const retval = [];
+  for (let i = 0; i < layers.count(); i++) {
+    let layer = layers[i];
+    if (layer.class() === className && layer.name() == name) {
+      retval.push(layer)
+    }
+  }
+  return retval;
+}
+
+let debugTextLayer = undefined;
+const logit = (page, args, clear = false) => {
+  if (debugTextLayer === undefined) {
+    debugTextLayer = layerWithName(page, MSTextLayer, 'debug_output');
+  }
+  if (debugTextLayer === undefined) {
+    return undefined;
+  }
+  if (clear) {
+    debugTextLayer.setStringValue('Debug output:');
+  }
+  let debugString = ''
+  for (arg of args) {
+    debugString = debugString.concat(arg.toString()).concat(' | ');
+  }
+  if (debugString != '') {
+    debugString = debugString.substring(0, debugString.length - 3);
+    debugTextLayer.setStringValue(`${debugTextLayer.stringValue()}\n${debugString}`);
+  }
+}
+
 
 const isNumeric = (value) => {
   return !isNaN(value - parseFloat(value));
@@ -85,28 +131,6 @@ const displaySummary = (doc, summary) => {
 
 }
 
-const layerWithName = (container, className, name) => {
-  const layers = container.children();
-  for (let i = 0; i < layers.count(); i++) {
-    let layer = layers[i];
-    if (layer.class() === className && layer.name() == name) {
-      return layer;
-    }
-  }
-  return undefined;
-}
-
-const layersWithName = (container, className, name) => {
-  const layers = container.children();
-  const retval = [];
-  for (let i = 0; i < layers.count(); i++) {
-    let layer = layers[i];
-    if (layer.class() === className && layer.name() == name) {
-      retval.push(layer)
-    }
-  }
-  return retval;
-}
 
 // sort layers laid out in horizontal rows
 const sortLayersByRows = (layers) => {
