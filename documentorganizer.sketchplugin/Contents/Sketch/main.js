@@ -595,19 +595,19 @@ const roundToNearestPixel = (context, summary) => {
         const y = frame.y();
         const w = frame.width();
         const h = frame.height();
-        if (x % roundToValue != 0) {
+        if (floatingPointModulo(x, roundToValue) != 0) {
           fixCount++;
           frame.setX(Math.round(x / roundToValue) * roundToValue);
         }
-        if (y % roundToValue != 0) {
+        if (floatingPointModulo(y, roundToValue) != 0) {
           fixCount++;
           frame.setY(Math.round(y / roundToValue) * roundToValue);
         }
-        if (w % roundToValue != 0) {
+        if (floatingPointModulo(w, roundToValue) != 0) {
           fixCount++;
           frame.setWidth(Math.round(w / roundToValue) * roundToValue);
         }
-        if (h % roundToValue != 0) {
+        if (floatingPointModulo(h, roundToValue) != 0) {
           fixCount++;
           frame.setHeight(Math.round(h / roundToValue) * roundToValue);
         }

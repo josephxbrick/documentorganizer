@@ -1,5 +1,15 @@
 const UI = require('sketch/ui');
 
+// javascript's modulo operator does not support floating-point numbers
+// source: https://stackoverflow.com/questions/3966484/why-does-modulus-operator-return-fractional-number-in-javascript
+const floatingPointModulo = (val, modulus) => {
+  const valDecCount = (val.toString().split('.')[1] || '').length;
+  const stepDecCount = (modulus.toString().split('.')[1] || '').length;
+  const decCount = valDecCount > stepDecCount ? valDecCount : stepDecCount;
+  const valInt = parseInt(val.toFixed(decCount).replace('.', ''));
+  const stepInt = parseInt(modulus.toFixed(decCount).replace('.', ''));
+  return (((valInt % stepInt) + stepInt) % stepInt) / Math.pow(10, decCount)
+}
 
 const allArtboards = (page) => {
   return toArray(page.layers()).filter(item => item.class() === MSArtboardGroup);
@@ -29,6 +39,7 @@ const layersWithName = (container, className, name) => {
 }
 
 let debugTextLayer = undefined;
+
 const logit = (page, args, clear = false) => {
   if (debugTextLayer === undefined) {
     debugTextLayer = layerWithName(page, MSTextLayer, 'debug_output');
@@ -48,7 +59,6 @@ const logit = (page, args, clear = false) => {
     debugTextLayer.setStringValue(`${debugTextLayer.stringValue()}\n${debugString}`);
   }
 }
-
 
 const isNumeric = (value) => {
   return !isNaN(value - parseFloat(value));
