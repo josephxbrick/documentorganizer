@@ -311,6 +311,20 @@ The image below shows two mobile mockups, where each mockup has been grouped wit
 
 ---
 
+# Round dimensions to nearest pixel
+
+This option will round each layer's x, y, width and height to the nearest pixel specified. Use this if you are anal about this sort of thing.
+
+## To nearest 0.5 pixels
+
+This is highly recommended, as upon resizing groups some objects might be moved or sized to a non-integer pixel value. Keeping such an object to the nearest half pixel will be more likely not to change the appearance. 
+
+## To nearest 1.0 pixels
+
+This rounds each dimension to the nearest whole number.
+
+---
+
 # Troubleshooting your document
 
 ## The TOC lists pages in the wrong order
