@@ -570,6 +570,7 @@ const createCalloutDescriptionGroup = (artboard) => {
 const roundToNearestPixel = (context, summary) => {
   const doc = context.document;
   const page = doc.currentPage();
+
   let roundToValue = undefined;
   const settingValue = storedValue('nearestPixelToRoundTo');
   if (settingValue.indexOf('0.1') >= 0) {
@@ -581,6 +582,7 @@ const roundToNearestPixel = (context, summary) => {
   } else {
     return undefined;
   }
+
 
   const artboards = allArtboards(page);
   let fixCount = 0;

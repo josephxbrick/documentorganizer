@@ -16,39 +16,25 @@ const allArtboards = (page) => {
 }
 
 const layerWithName = (container, className, name) => {
-  const layers = container.children();
-  for (let i = 0; i < layers.count(); i++) {
-    let layer = layers[i];
-    if (layer.class() === className && layer.name() == name) {
-      return layer;
-    }
-  }
-  return undefined;
+  return toArray(container.children()).filter(item => item.class() === className && item.name() == name)[0];
 }
 
 const layersWithName = (container, className, name) => {
-  const layers = container.children();
-  const retval = [];
-  for (let i = 0; i < layers.count(); i++) {
-    let layer = layers[i];
-    if (layer.class() === className && layer.name() == name) {
-      retval.push(layer)
-    }
-  }
-  return retval;
+  return toArray(container.children()).filter(item => item.class() === className && item.name() == name);
 }
 
-let debugTextLayer = undefined;
+const leadingZeroes = (val, desiredLength) => {
+  return '0'.repeat(desiredLength).concat(val).slice(-desiredLength);
+}
 
 const logit = (page, args, clear = false) => {
-  if (debugTextLayer === undefined) {
-    debugTextLayer = layerWithName(page, MSTextLayer, 'debug_output');
-  }
+  const debugTextLayer = layerWithName(page, MSTextLayer, 'debug_output');
   if (debugTextLayer === undefined) {
     return undefined;
   }
   if (clear) {
-    debugTextLayer.setStringValue('Debug output:');
+    const d = new Date();
+    debugTextLayer.setStringValue(`Debug output (${leadingZeroes(d.getHours(), 2)}:${leadingZeroes(d.getMinutes(), 2)}:${leadingZeroes(d.getSeconds(), 2)})`);
   }
   let debugString = ''
   for (arg of args) {
@@ -56,6 +42,38 @@ const logit = (page, args, clear = false) => {
   }
   if (debugString != '') {
     debugString = debugString.substring(0, debugString.length - 3);
+    debugTextLayer.setStringValue(`${debugTextLayer.stringValue()}\n${debugString}`);
+  }
+}
+// returns a timestamp
+const timeStamp = () => {
+  const now = new Date();
+  return `${'0'.concat(now.getHours()).slice(-2)}:${'0'.concat(now.getMinutes()).slice(-2)}:${'0'.concat(now.getSeconds()).slice(-2)}.${now.getMilliseconds().toString().concat('000').slice(0,3)}`;
+
+}
+// assumes an existing text layer called 'debug_output' on the current page that's NOT in a group or artboard
+// parameters: the Sketch page object, the thing (or an array of things) to log, whether or not to clear previous logs
+const logit2 = (page, args, clear = false) => {
+  // converts args to array if it's not already an array
+  args = [].concat(args || []);
+  // find the 'debug_output' layer on page
+  const debugTextLayer = toArray(page.layers()).filter(item => item.name() == 'debug_output')[0];
+  if (debugTextLayer === undefined) {
+    return undefined;
+  }
+  // clear out previous logs
+  if (clear) {
+    debugTextLayer.setStringValue("Debug output:");
+  }
+  // construct debug string from args[], delimited by the pipe character
+  if (args.length > 0) {
+    let debugString = `(${timeStamp()}): `;
+    for (arg of args) {
+      debugString = `${debugString}${arg.toString()} | `;
+    }
+    // get rid of trailing pipe delimiter
+    debugString = debugString.slice(0, debugString.length - 3);
+    // add debug string to debug_output text layer
     debugTextLayer.setStringValue(`${debugTextLayer.stringValue()}\n${debugString}`);
   }
 }
