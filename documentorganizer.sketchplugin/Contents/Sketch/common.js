@@ -64,59 +64,7 @@ const isNumeric = (value) => {
   return !isNaN(value - parseFloat(value));
 }
 
-//get string from user. defaultValue is ignored if value is stored in key
-const getStringFromUser = (prompt, defaultValue, key) => {
-  let storedValue = Settings.settingForKey(key);
-  if (storedValue === undefined) {
-    storedValue = defaultValue;
-  }
-  let retval = undefined;
-  const ui = UI.getInputFromUser(
-    prompt, {
-      type: UI.INPUT_TYPE.string,
-      initialValue: storedValue,
-    },
-    (err, value) => {
-      if (!err) {
-        // user did not cancel
-        retval = value;
-      }
-    }
-  );
-  ui.setIcon(NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path()));
-  if (retval !== undefined) {
-    Settings.setSettingForKey(key, retval);
-  }
-  return retval;
-}
-
-const getSelectionFromUser = (prompt, possibleValues, defaultValue, key) => {
-  let storedValue = Settings.settingForKey(key);
-  if (storedValue === undefined) {
-    storedValue = defaultValue;
-  }
-  let retval = undefined;
-  UI.getInputFromUser(
-    prompt, {
-      type: UI.INPUT_TYPE.selection,
-      possibleValues: possibleValues,
-      initialValue: storedValue,
-    },
-    (err, value) => {
-      if (!err) {
-        // user did not cancel
-        retval = value;
-      }
-    }
-  );
-  if (retval !== undefined) {
-    Settings.setSettingForKey(key, retval);
-  }
-  return retval;
-}
-
 const displaySummary = (doc, summary) => {
-  console.log('got here');
   const br = String.fromCharCode(13);
   const slash = String.fromCharCode(47);
   let errorMessage = '';
@@ -138,9 +86,7 @@ const displaySummary = (doc, summary) => {
     errorMessage = errorMessage.concat(`Plugin and documentation:${br}https:${slash}${slash}github.com${slash}josephxbrick${slash}documentorganizer${br}`);
     UI.alert('Error', errorMessage);
   }
-
 }
-
 
 // sort layers laid out in horizontal rows
 const sortLayersByRows = (layers) => {
@@ -219,31 +165,3 @@ const addOrdinalIndicator = (num) => {
     return `${num}th`;
   }
 }
-
-
-// This code is for wrapping the TOC. It's not working yet.
-// const wrapGroup = (group, width) => {
-//   let runningTop = 0;
-//   const instances = group.layers());
-//   for (let i = 0; i < instances.count(); i++){
-//     const instance = instances[i];
-//     let overrideName = undefined;
-//     instance.frame().setY(runningTop);
-//     if (instanceHasOverride(instance, '<tocSectionTitle>')){
-//       overrideName = '<tocSectionTitle>';
-//     } else {
-//       overrideName = '<tocPageTitle>';
-//     }
-//     const master = instance.symbolMaster();
-//     const override = getOverrideLayerfromMaster(master, overrideName);
-//     const overrideCopy = override.copy();
-//     group.addLayers([overrideCopy]);
-//     const horizontalPadding = master.frame().width() - override.frame().width();
-//     const verticalPadding = master.frame().height() - override.frame().height();
-//     overrideCopyframe().setWidth(width - horizontalPadding);
-//     overrideCopy.setStringValue(getOverrideText(instance, overrideName));
-//     runningTop += verticalPadding + overrideCopy.frame().height();
-//     group.removeLayer(overrideCopy);
-//   }
-//   return runningTop;
-// }
