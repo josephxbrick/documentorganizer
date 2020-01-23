@@ -194,7 +194,7 @@ Important: the title of the page (after the prefix) cannot begin with a number, 
 
 # Table of contents
 
-A table of contents (TOC) is required by this plugin. *Issue: a TOC is overkill for a small doc. Consider making TOC optional.* The plugin creates a TOC for artboards on the current Sketch page, organized into sections. The image below shows a TOC that has both section headers and pages, but you can choose to list only section headers.
+A table of contents (TOC) is optional and can be enabled in Settings. The plugin creates a TOC for artboards on the current Sketch page, organized into sections. The image below shows a TOC that has both section headers and pages, but you can choose to list only section headers.
 
 <img src="/readme_images/toc_image_newest.png" width="900">
 
