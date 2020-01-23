@@ -183,7 +183,7 @@ const settingsDialog = (context) => {
   // ===========================================================================
 
   // description: dialog heading
-  control = createDescription("Organize design documents by creating a table of contents, adding page/section numbers, and managing callouts in mockups.", NSColor.darkGrayColor(), 12, {
+  control = createDescription("Organize design documents by creating a table of contents, adding page/section numbers, and managing callouts in mockups.", NSColor.labelColor(), 12, {
     x: 0,
     y: curY,
     width: viewWidth,
@@ -231,7 +231,7 @@ const settingsDialog = (context) => {
   curY = addControlWithBottomPadding(useTOCCheckbox, controls, 3);
 
   // description: use table of contents
-  control = createDescription("Place in group \"<tocGroup>\" containing rectangle \"<tocGroupRect>\"", NSColor.grayColor(), 11, {
+  control = createDescription("Place in group \"<tocGroup>\" containing rectangle \"<tocGroupRect>\"", NSColor.secondaryLabelColor(), 11, {
     x: 0,
     y: curY,
     width: viewWidth,
@@ -251,7 +251,7 @@ const settingsDialog = (context) => {
 
   // description: column spacing
   curY += 4;
-  control = createDescription("Applies when table has multiple columns", NSColor.grayColor(), 11, {
+  control = createDescription("Applies when table has multiple columns", NSColor.secondaryLabelColor(), 11, {
     x: 145,
     y: curY,
     width: viewWidth - 145,
@@ -310,7 +310,7 @@ const settingsDialog = (context) => {
   curY = addControlWithBottomPadding(useSectionsCheckbox, controls, 3);
 
   // description: use section numbering
-  control = createDescription("Number page titles and callouts. Turn this off and on to see what it does.", NSColor.grayColor(), 11, {
+  control = createDescription("Number page titles and callouts. Turn this off and on to see what it does.", NSColor.secondaryLabelColor(), 11, {
     x: 0,
     y: curY,
     width: viewWidth,
@@ -330,7 +330,7 @@ const settingsDialog = (context) => {
 
   // description: dash style
   curY += 7;
-  control = createDescription("A dash separates section numbers and page titles", NSColor.grayColor(), 11, {
+  control = createDescription("A dash separates section numbers and page titles", NSColor.secondaryLabelColor(), 11, {
     x: 130,
     y: curY,
     width: viewWidth - 123,
@@ -382,7 +382,7 @@ const settingsDialog = (context) => {
   curY += 3;
 
   // description: sample date for first radio button
-  control = createDescription(stockDateFormats[0], NSColor.grayColor(), 11, {
+  control = createDescription(stockDateFormats[0], NSColor.secondaryLabelColor(), 11, {
     x: 170,
     y: curY,
     width: viewWidth - 170,
@@ -391,7 +391,7 @@ const settingsDialog = (context) => {
   curY = addControlWithBottomPadding(control, controls, 8);
 
   // description: sample date for second radio button
-  control = createDescription(stockDateFormats[1], NSColor.grayColor(), 11, {
+  control = createDescription(stockDateFormats[1], NSColor.secondaryLabelColor(), 11, {
     x: 155,
     y: curY,
     width: viewWidth - 155,
@@ -415,7 +415,7 @@ const settingsDialog = (context) => {
   curY = addControlWithBottomPadding(customFormatField, controls, 3);
 
   // description: dynamic sample date display
-  const sampleDateDisplay = createDescription(dateFromTemplate(storedValue('lastEnteredFormatTemplate'), sampleDate), NSColor.grayColor(), 11, {
+  const sampleDateDisplay = createDescription(dateFromTemplate(storedValue('lastEnteredFormatTemplate'), sampleDate), NSColor.secondaryLabelColor(), 11, {
     x: 192,
     y: curY,
     width: viewWidth - 192,
@@ -456,7 +456,7 @@ const settingsDialog = (context) => {
 
 
   // description
-  control = createDescription("Round each layer's x, y, width and height to nearest [n] pixels.", NSColor.grayColor(), 11, {
+  control = createDescription("Round each layer's x, y, width and height to nearest [n] pixels.", NSColor.secondaryLabelColor(), 11, {
     x: 0,
     y: curY,
     width: viewWidth,

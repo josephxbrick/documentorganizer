@@ -279,6 +279,6 @@ const createDivider = (frame) => {
   frame.height = 1;
   const divider = NSView.alloc().initWithFrame(NSMakeRect(frame.x, frame.y, frame.width, frame.height));
   divider.setWantsLayer(1);
-  divider.layer().setBackgroundColor(CGColorCreateGenericRGB(204 / 255, 204 / 255, 204 / 255, 1.0));
+  divider.setBackgroundColor(NSColor.separatorColor());
   return divider;
 }
