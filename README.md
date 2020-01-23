@@ -130,7 +130,7 @@ Page numbering is required by this plugin. This plugin automatically updates the
 
 So if you want to start numbering your artboards at 1 on the second artboard, put the first page-number instance on the second artboard. If you want to start numbering at 2, put a page-number instance on the previous artboard and set its opacity to 0. (The transparent instance will contain the number 1.)
 
-You can skip page-numbering an artboard, but once the first instance has been encountered, skipped artboards contribute to the page count. If the first page-number instance is on artboard 1 and the next instance is on artboard 5, these artboards will be numbered 1 and 5 respectively, with no page numbers appearing on artboards 2, 3, and 4.
+You can opt not to page-number an artboard, but once the first page-number instance has been encountered, skipped artboards contribute to the page count. If the first page-number instance is on artboard 1 and the next instance is on artboard 5, these artboards will be numbered 1 and 5 respectively, with no page numbers appearing on artboards 2, 3, and 4.
 
 ## The page-number symbol instance
 
