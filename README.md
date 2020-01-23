@@ -24,10 +24,12 @@ The plugin assumes the following about your document:
 * All artboards for a document reside on a single Sketch page
 * The the document is divided into sections, and each section is led by a section-heading page (artboard)
 * The order that pages appear in the document is determined the artboard layout in the Sketch page. The artboards must be laid out either left to right in a single row, or with each document section on its own left-to-right row. In either case the artboards of a row must have their tops aligned. 
-* At minimum, the document must contain five symbols and one group, all of which will be discussed below. If any of these elements is absent, the plugin will stop execution and display an error message regarding the missing elements. Here is what your file must contain. 
+* At minimum, the document must contain the following, all of which is detailed below. If any of these elements is absent, the plugin will stop execution and display an error message regarding the missing elements. Here is what your file must contain. 
   * The page-number symbol
   * The section-title symbol, which titles an artboard that represents a section-heading
   * The page-title symbol, which titles an artboard representing a page of a given section
+  
+  If opting (in Settings) to create a table of contents:
   * The two symbols that are used by the TOC to create section-header entries and page entries
   * The TOC group (named `<tocGroup>`), which is placed on the artboard that displays the TOC.
   
