@@ -231,11 +231,11 @@ const settingsDialog = (context) => {
   curY = addControlWithBottomPadding(useTOCCheckbox, controls, 3);
 
   // description: use table of contents
-  control = createDescription("Place in group \"<tocGroup>\" containing rectangle \"<tocGroupRect>\"", NSColor.secondaryLabelColor(), 11, {
+  control = createDescription("Place in group \"<tocGroup>\" containing rectangle \"<tocGroupRect>\"", NSColor.secondaryLabelColor(), 12, {
     x: 0,
     y: curY,
     width: viewWidth,
-    height: textHeight(11, 1)
+    height: textHeight(12, 1)
   });
   curY = addControlWithBottomPadding(control, controls, 12);
 
@@ -250,15 +250,15 @@ const settingsDialog = (context) => {
   curY -= 2;
 
   // description: column spacing
-  curY += 4;
-  control = createDescription("Applies when table has multiple columns", NSColor.secondaryLabelColor(), 11, {
+  curY += 3;
+  control = createDescription("Applies when table has multiple columns", NSColor.secondaryLabelColor(), 12, {
     x: 145,
     y: curY,
     width: viewWidth - 145,
-    height: textHeight(11, 1)
+    height: textHeight(12, 1)
   });
   controls.push(control);
-  curY -= 4;
+  curY -= 3;
 
   // SETTING FIELD: column spacing =============================================
   const spacingField = createField(storedValue('tocColumnSpacing'), {
@@ -310,11 +310,11 @@ const settingsDialog = (context) => {
   curY = addControlWithBottomPadding(useSectionsCheckbox, controls, 3);
 
   // description: use section numbering
-  control = createDescription("Number page titles and callouts. Turn this off and on to see what it does.", NSColor.secondaryLabelColor(), 11, {
+  control = createDescription("Number page titles and callouts. Turn this off and on to see what it does.", NSColor.secondaryLabelColor(), 12, {
     x: 0,
     y: curY,
     width: viewWidth,
-    height: textHeight(11, 1)
+    height: textHeight(12, 1)
   });
   curY = addControlWithBottomPadding(control, controls, 12);
 
@@ -329,17 +329,17 @@ const settingsDialog = (context) => {
   curY -= 4;
 
   // description: dash style
-  curY += 7;
-  control = createDescription("A dash separates section numbers and page titles", NSColor.secondaryLabelColor(), 11, {
+  curY += 5;
+  control = createDescription("Separates section numbers and page titles", NSColor.secondaryLabelColor(), 12, {
     x: 130,
     y: curY,
     width: viewWidth - 123,
-    height: textHeight(11, 1)
+    height: textHeight(12, 1)
   });
   controls.push(control);
-  curY -= 7;
+  curY -= 5;
 
-  // SETTING COMBOBOX: dash style ==============================================
+  // SETTING DROPDOWN: dash style ==============================================
   const dashStyleSelect = createDropdown(stockDashes, stockDashes.indexOf(storedValue('dashType')), {
     x: 73,
     y: curY,
@@ -379,23 +379,23 @@ const settingsDialog = (context) => {
     width: viewWidth - 78
   }, 22, radioSelectedCallback); //
   controls.push(dateFormatRadios);
-  curY += 3;
+  curY += 2;
 
   // description: sample date for first radio button
-  control = createDescription(stockDateFormats[0], NSColor.secondaryLabelColor(), 11, {
+  control = createDescription(stockDateFormats[0], NSColor.secondaryLabelColor(), 12, {
     x: 170,
     y: curY,
     width: viewWidth - 170,
-    height: textHeight(11, 1)
+    height: textHeight(12, 1)
   });
-  curY = addControlWithBottomPadding(control, controls, 8);
+  curY = addControlWithBottomPadding(control, controls, 7);
 
   // description: sample date for second radio button
-  control = createDescription(stockDateFormats[1], NSColor.secondaryLabelColor(), 11, {
+  control = createDescription(stockDateFormats[1], NSColor.secondaryLabelColor(), 12, {
     x: 155,
     y: curY,
     width: viewWidth - 155,
-    height: textHeight(11, 1)
+    height: textHeight(12, 1)
   });
   curY = addControlWithBottomPadding(control, controls, 6);
 
@@ -412,14 +412,14 @@ const settingsDialog = (context) => {
     width: viewWidth - 192
   }, textChangedCallback);
   customFormatField.setEnabled(storedValue('dateFormatChoice') == 2);
-  curY = addControlWithBottomPadding(customFormatField, controls, 3);
+  curY = addControlWithBottomPadding(customFormatField, controls, 2);
 
   // description: dynamic sample date display
-  const sampleDateDisplay = createDescription(dateFromTemplate(storedValue('lastEnteredFormatTemplate'), sampleDate), NSColor.secondaryLabelColor(), 11, {
+  const sampleDateDisplay = createDescription(dateFromTemplate(storedValue('lastEnteredFormatTemplate'), sampleDate), NSColor.secondaryLabelColor(), 12, {
     x: 192,
     y: curY,
     width: viewWidth - 192,
-    height: textHeight(11, 1)
+    height: textHeight(12, 1)
   });
   curY = addControlWithBottomPadding(sampleDateDisplay, controls, 14);
 
@@ -444,7 +444,7 @@ const settingsDialog = (context) => {
   controls.push(roundToPixelCheckbox);
   curY -= 6;
 
-  // SETTING COMBOBOX: dash style ==============================================
+  // SETTING DROPDOWN: round to pixel ==============================================
 
   const roundToPixelSelect = createDropdown(stockRoundedPixels, stockRoundedPixels.indexOf(storedValue('nearestPixelToRoundTo')), {
     x: 220,
@@ -452,15 +452,14 @@ const settingsDialog = (context) => {
     width: viewWidth - 220
   });
   roundToPixelSelect.setEnabled(storedValue('roundToNearestPixel'));
-  curY = addControlWithBottomPadding(roundToPixelSelect, controls, 0);
-
+  curY = addControlWithBottomPadding(roundToPixelSelect, controls, -1);
 
   // description
-  control = createDescription("Round each layer's x, y, width and height to nearest [n] pixels.", NSColor.secondaryLabelColor(), 11, {
+  control = createDescription("Round each layer's x, y, width and height to nearest [n] pixels.", NSColor.secondaryLabelColor(), 12, {
     x: 0,
     y: curY,
     width: viewWidth,
-    height: textHeight(11, 1)
+    height: textHeight(12, 1)
   });
   curY = addControlWithBottomPadding(control, controls, 12);
 
