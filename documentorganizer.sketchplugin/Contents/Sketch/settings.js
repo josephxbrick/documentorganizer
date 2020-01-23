@@ -377,9 +377,9 @@ const settingsDialog = (context) => {
     x: 78,
     y: curY,
     width: viewWidth - 78
-  }, 22, radioSelectedCallback); //
+  }, 23, radioSelectedCallback); //
   controls.push(dateFormatRadios);
-  curY += 2;
+  curY += 3;
 
   // description: sample date for first radio button
   control = createDescription(stockDateFormats[0], NSColor.secondaryLabelColor(), 12, {
@@ -388,7 +388,7 @@ const settingsDialog = (context) => {
     width: viewWidth - 170,
     height: textHeight(12, 1)
   });
-  curY = addControlWithBottomPadding(control, controls, 7);
+  curY = addControlWithBottomPadding(control, controls, 8);
 
   // description: sample date for second radio button
   control = createDescription(stockDateFormats[1], NSColor.secondaryLabelColor(), 12, {
@@ -397,7 +397,7 @@ const settingsDialog = (context) => {
     width: viewWidth - 155,
     height: textHeight(12, 1)
   });
-  curY = addControlWithBottomPadding(control, controls, 6);
+  curY = addControlWithBottomPadding(control, controls, 7);
 
   // SETTING FIELD: custom date format =========================================
   // function (passed into createField) called when field's text changes. Updates date in sample-date below field to reflect the format entered.
