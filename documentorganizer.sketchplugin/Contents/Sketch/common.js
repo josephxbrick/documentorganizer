@@ -27,24 +27,6 @@ const leadingZeroes = (val, desiredLength) => {
   return '0'.repeat(desiredLength).concat(val).slice(-desiredLength);
 }
 
-const logit = (page, args, clear = false) => {
-  const debugTextLayer = layerWithName(page, MSTextLayer, 'debug_output');
-  if (debugTextLayer === undefined) {
-    return undefined;
-  }
-  if (clear) {
-    const d = new Date();
-    debugTextLayer.setStringValue(`Debug output (${leadingZeroes(d.getHours(), 2)}:${leadingZeroes(d.getMinutes(), 2)}:${leadingZeroes(d.getSeconds(), 2)})`);
-  }
-  let debugString = ''
-  for (arg of args) {
-    debugString = debugString.concat(arg.toString()).concat(' | ');
-  }
-  if (debugString != '') {
-    debugString = debugString.substring(0, debugString.length - 3);
-    debugTextLayer.setStringValue(`${debugTextLayer.stringValue()}\n${debugString}`);
-  }
-}
 // returns a timestamp
 const timeStamp = () => {
   const now = new Date();
@@ -53,7 +35,7 @@ const timeStamp = () => {
 }
 // assumes an existing text layer called 'debug_output' on the current page that's NOT in a group or artboard
 // parameters: the Sketch page object, the thing (or an array of things) to log, whether or not to clear previous logs
-const logit2 = (page, args, clear = false) => {
+const logit = (page, args, clear = false) => {
   // converts args to array if it's not already an array
   args = [].concat(args || []);
   // find the 'debug_output' layer on page
