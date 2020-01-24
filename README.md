@@ -61,7 +61,7 @@ This opens the Settings dialog. (See below)
 
 Here is the Settings dialog:
 
-<img src="/readme_images/settings.png" width="638">
+<img src="/readme_images/settings.png" width="720">
 
 Settings are saved from session to session. Below is a description of each setting.
 
