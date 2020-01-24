@@ -159,7 +159,7 @@ const docTitleFromDocument = (page) => {
 // ====================================================================================================
 // function that creates and displays the settings dialog and stores settings
 // receives: Sketch context
-// returns: true if dialog is not canceled, or undefined if it is
+// returns: true if settings are saved, or undefined if they aren't
 // ====================================================================================================
 
 const settingsDialog = (context) => {
@@ -169,9 +169,9 @@ const settingsDialog = (context) => {
   // set up alert window
   const alert = NSAlert.alloc().init();
   alert.setIcon(NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path()));
-  alert.setMessageText('Settings');
-  const viewWidth = 422;
-  const controlMaxWidth = 422;
+  alert.setMessageText('Settings – Organize Design Document');
+  const viewWidth = 485;
+  const controlMaxWidth = 472;
   const controls = [];
   let curY = 0;
   let control = undefined;
@@ -187,14 +187,16 @@ const settingsDialog = (context) => {
   // ======         Create controls that will appear in alert             ======
   // ===========================================================================
 
+  // ====================SETTING: document title ===============================
+
   // description: dialog heading
-  control = createDescription("Organize design documents by creating a table of contents, adding page/section numbers, and managing callouts in mockups.", NSColor.labelColor(), 13, {
+  control = createDescription("This plugin creates a table of contents, numbers pages and sections, and manages callouts in mockups.", NSColor.labelColor(), 13, {
     x: 0,
     y: curY,
     width: controlMaxWidth,
     height: textHeight(13, 2)
   });
-  curY = addControlWithBottomPadding(control, controls, 22);
+  curY = addControlWithBottomPadding(control, controls, 18);
 
   // label: document title
   curY += 2;
@@ -206,13 +208,13 @@ const settingsDialog = (context) => {
   controls.push(control);
   curY -= 2;
 
-  // SETTING FIELD: document title =============================================
+  // field: docment title
   const titleField = createField(docTitle, {
     x: 114,
     y: curY,
-    width: controlMaxWidth - 114
+    width: 300
   });
-  curY = addControlWithBottomPadding(titleField, controls, 18);
+  curY = addControlWithBottomPadding(titleField, controls, 14);
 
   // divider line
   control = createDivider({
@@ -220,14 +222,17 @@ const settingsDialog = (context) => {
     y: curY,
     width: controlMaxWidth
   });
-  curY = addControlWithBottomPadding(control, controls, 16);
+  curY = addControlWithBottomPadding(control, controls, 12);
 
-  // SETTING CHECKBOX: create table of contents ================================
-  // function (passed into createCheckbox) is called when checkbox's selected state changes
+  // ======================SETTING: Table of contents ==========================
+
+  // function (passed into createCheckbox below) is called when checkbox's selected state changes
   const useTOCCallback = (checkbox) => {
     spacingField.setEnabled(checkbox.value);
     tocShowRadios.setEnabled(checkbox.value);
   }
+
+  // checkbox: use TOC
   const useTOCCheckbox = createCheckbox('Create table of contents', storedValue('useTOC'), {
     x: 0,
     y: curY,
@@ -236,13 +241,13 @@ const settingsDialog = (context) => {
   curY = addControlWithBottomPadding(useTOCCheckbox, controls, 6);
 
   // description: use table of contents
-  control = createDescription("Place in group \"<tocGroup>\" containing rectangle \"<tocGroupRect>\"", NSColor.secondaryLabelColor(), 12, {
+  control = createDescription("Placed in group \"<tocGroup>\" containing rectangle \"<tocGroupRect>\"", NSColor.secondaryLabelColor(), 12, {
     x: 0,
     y: curY,
     width: controlMaxWidth,
     height: textHeight(12, 1)
   });
-  curY = addControlWithBottomPadding(control, controls, 12);
+  curY = addControlWithBottomPadding(control, controls, 10);
 
   // label: column spacing
   curY += 2
@@ -265,7 +270,7 @@ const settingsDialog = (context) => {
   controls.push(control);
   curY -= 2;
 
-  // SETTING FIELD: column spacing =============================================
+  // field: column spacing
   const spacingField = createField(storedValue('tocColumnSpacing'), {
     x: 104,
     y: curY,
@@ -284,14 +289,13 @@ const settingsDialog = (context) => {
   controls.push(control);
   curY -= 1;
 
-  // SETTING RADIO BUTTONS: pages to include in TOC ============================
   const tocShowRadios = createRadioButtonsHorizontal(["Section headings only", "All pages"], storedValue('tocShowSectionsOnly'), {
     x: 54,
     y: curY,
     width: controlMaxWidth - 54
   }, 155); //
   tocShowRadios.setEnabled(storedValue('useTOC'));
-  curY = addControlWithBottomPadding(tocShowRadios, controls, 14);
+  curY = addControlWithBottomPadding(tocShowRadios, controls, 12);
 
   // divider line
   control = createDivider({
@@ -299,9 +303,10 @@ const settingsDialog = (context) => {
     y: curY,
     width: controlMaxWidth
   });
-  curY = addControlWithBottomPadding(control, controls, 16);
+  curY = addControlWithBottomPadding(control, controls, 10);
 
-  // SETTING CHECKBOX: use section numbering ===================================
+  // =================SETTING: legal style numbering ===========================
+
   // function (passed into createCheckbox) is called when checkbox's selected state changes
   const useSectionsCallback = (checkbox) => {
     const selected = checkbox.value; // gets true or false
@@ -315,28 +320,28 @@ const settingsDialog = (context) => {
   curY = addControlWithBottomPadding(useSectionsCheckbox, controls, 6);
 
   // description: use section numbering
-  control = createDescription("The first page of section 5 will be numbered 5.1, and the first callout on page 5.1 will be numbered 5.1.1", NSColor.secondaryLabelColor(), 12, {
+  control = createDescription("Page 1 of section 5 is numbered 5.1; the first callout on page 5.1 is numbered 5.1.1", NSColor.secondaryLabelColor(), 12, {
     x: 0,
     y: curY,
     width: controlMaxWidth,
-    height: textHeight(12, 2)
+    height: textHeight(12, 1)
   });
-  curY = addControlWithBottomPadding(control, controls, 10);
+  curY = addControlWithBottomPadding(control, controls, 8);
 
   // label: dash style
-  curY += 4;
+  curY += 5;
   control = createLabel("Dash style:", {
     x: 0,
     y: curY,
     width: controlMaxWidth
   }, 6);
   controls.push(control);
-  curY -= 4;
+  curY -= 5;
 
   // description: dash style
   curY += 5;
   control = createDescription("Separates section numbers and page titles", NSColor.secondaryLabelColor(), 12, {
-    x: 130,
+    x: 128,
     y: curY,
     width: controlMaxWidth - 130,
     height: textHeight(12, 1)
@@ -344,24 +349,108 @@ const settingsDialog = (context) => {
   controls.push(control);
   curY -= 5;
 
-
-  // SETTING DROPDOWN: dash style ==============================================
   const dashStyleSelect = createDropdown(stockDashes, stockDashes.indexOf(storedValue('dashType')), {
     x: 73,
     y: curY,
     width: 50
   });
   dashStyleSelect.setEnabled(storedValue('useSections'));
-  curY = addControlWithBottomPadding(dashStyleSelect, controls, 6);
+  curY = addControlWithBottomPadding(dashStyleSelect, controls, 3);
 
   // description: use section numbering
-  control = createDescription("If numbering isn't used, callouts will be lettered. (A, B, C, etc.)", NSColor.secondaryLabelColor(), 12, {
+  control = createDescription("If legal-style numbering isn't used, callouts will be lettered. (A, B, C, etc.)", NSColor.secondaryLabelColor(), 12, {
     x: 0,
     y: curY,
     width: controlMaxWidth,
     height: textHeight(12, 1)
   });
-  curY = addControlWithBottomPadding(control, controls, 16);
+  curY = addControlWithBottomPadding(control, controls, 12);
+
+  // divider line
+  control = createDivider({
+    x: 0,
+    y: curY,
+    width: controlMaxWidth
+  });
+  curY = addControlWithBottomPadding(control, controls, 10);
+
+  // ====================== SETTING: current date format =======================
+
+  // label: date formet
+  control = createLabel("Add current date to symbol instances", {
+    x: 0,
+    y: curY,
+    width: controlMaxWidth
+  }, 1);
+  curY = addControlWithBottomPadding(control, controls, 3);
+
+  // description: use section numbering
+  control = createDescription("Instances with <currentDate> override get today's date using the format below:", NSColor.secondaryLabelColor(), 12, {
+    x: 0,
+    y: curY,
+    width: controlMaxWidth,
+    height: textHeight(12, 1)
+  });
+  curY = addControlWithBottomPadding(control, controls, 7);
+
+
+  // function (passed into createRadioButtonsVertical) is called when radio button is selected
+  const radioSelectedCallback = (buttonMatrix) => {
+    const buttonIndex = buttonMatrix.value; // gets index of selected button
+    customFormatField.setEnabled(buttonIndex == 2); // enables custom-format field if 3rd radio button is selected
+  }
+  const sampleDate = new Date(2047, 0, 5);
+
+  // radio buttons: date formats
+  const dateFormatRadios = createRadioButtonsVertical([dateFromTemplate(stockDateFormats[0], sampleDate), dateFromTemplate(stockDateFormats[1], sampleDate), "Custom format:"], storedValue('dateFormatChoice'), {
+    x: 0,
+    y: curY,
+    width: controlMaxWidth - 78
+  }, 23, radioSelectedCallback); //
+  controls.push(dateFormatRadios);
+  curY += 3;
+
+  // description: sample date for first radio button
+  control = createDescription(stockDateFormats[0], NSColor.secondaryLabelColor(), 12, {
+    x: 92,
+    y: curY,
+    width: controlMaxWidth - 170,
+    height: textHeight(12, 1)
+  });
+  curY = addControlWithBottomPadding(control, controls, 8);
+
+  // description: sample date for second radio button
+  control = createDescription(stockDateFormats[1], NSColor.secondaryLabelColor(), 12, {
+    x: 77,
+    y: curY,
+    width: controlMaxWidth - 155,
+    height: textHeight(12, 1)
+  });
+  curY = addControlWithBottomPadding(control, controls, 6);
+
+  // function (passed into createField) called when field's text changes. Updates date in sample-date below field to reflect the format entered.
+  const textChangedCallback = (notification) => {
+    const newText = notification.object().value; // gets text of field
+    const newDate = dateFromTemplate(newText, sampleDate);
+    sampleDateDisplay.value = newDate;
+  }
+
+  const customFormatField = createField(storedValue('lastEnteredFormatTemplate'), {
+    x: 114,
+    y: curY,
+    width: 200
+  }, textChangedCallback);
+  customFormatField.setEnabled(storedValue('dateFormatChoice') == 2);
+  curY = addControlWithBottomPadding(customFormatField, controls, 1);
+
+  // description: dynamic sample date display
+  const sampleDateDisplay = createDescription(dateFromTemplate(storedValue('lastEnteredFormatTemplate'), sampleDate), NSColor.secondaryLabelColor(), 12, {
+    x: 114,
+    y: curY,
+    width: controlMaxWidth - 192,
+    height: textHeight(12, 1)
+  });
+  curY = addControlWithBottomPadding(sampleDateDisplay, controls, 12);
 
   // divider line
   control = createDivider({
@@ -371,82 +460,8 @@ const settingsDialog = (context) => {
   });
   curY = addControlWithBottomPadding(control, controls, 14);
 
-  // label: date formet
-  curY += 2;
-  control = createLabel("Date format:", {
-    x: 0,
-    y: curY,
-    width: controlMaxWidth
-  }, 1);
-  controls.push(control);
-  curY -= 2;
+  // ================== SETTING: round to nearest pixel ========================
 
-  // SETTING RADIO BUTTONS: date format ========================================
-  // function (passed into createRadioButtonsVertical) is called when radio button is selected
-  const radioSelectedCallback = (buttonMatrix) => {
-    const buttonIndex = buttonMatrix.value; // gets index of selected button
-    customFormatField.setEnabled(buttonIndex == 2); // enables custom-format field if 3rd radio button is selected
-  }
-  const sampleDate = new Date(2047, 0, 5);
-  const dateFormatRadios = createRadioButtonsVertical([dateFromTemplate(stockDateFormats[0], sampleDate), dateFromTemplate(stockDateFormats[1], sampleDate), "Custom format:"], storedValue('dateFormatChoice'), {
-    x: 78,
-    y: curY,
-    width: controlMaxWidth - 78
-  }, 23, radioSelectedCallback); //
-  controls.push(dateFormatRadios);
-  curY += 3;
-
-  // description: sample date for first radio button
-  control = createDescription(stockDateFormats[0], NSColor.secondaryLabelColor(), 12, {
-    x: 170,
-    y: curY,
-    width: controlMaxWidth - 170,
-    height: textHeight(12, 1)
-  });
-  curY = addControlWithBottomPadding(control, controls, 8);
-
-  // description: sample date for second radio button
-  control = createDescription(stockDateFormats[1], NSColor.secondaryLabelColor(), 12, {
-    x: 155,
-    y: curY,
-    width: controlMaxWidth - 155,
-    height: textHeight(12, 1)
-  });
-  curY = addControlWithBottomPadding(control, controls, 6);
-
-  // SETTING FIELD: custom date format =========================================
-  // function (passed into createField) called when field's text changes. Updates date in sample-date below field to reflect the format entered.
-  const textChangedCallback = (notification) => {
-    const newText = notification.object().value; // gets text of field
-    const newDate = dateFromTemplate(newText, sampleDate);
-    sampleDateDisplay.value = newDate;
-  }
-  const customFormatField = createField(storedValue('lastEnteredFormatTemplate'), {
-    x: 192,
-    y: curY,
-    width: controlMaxWidth - 192
-  }, textChangedCallback);
-  customFormatField.setEnabled(storedValue('dateFormatChoice') == 2);
-  curY = addControlWithBottomPadding(customFormatField, controls, 1);
-
-  // description: dynamic sample date display
-  const sampleDateDisplay = createDescription(dateFromTemplate(storedValue('lastEnteredFormatTemplate'), sampleDate), NSColor.secondaryLabelColor(), 12, {
-    x: 192,
-    y: curY,
-    width: controlMaxWidth - 192,
-    height: textHeight(12, 1)
-  });
-  curY = addControlWithBottomPadding(sampleDateDisplay, controls, 14);
-
-  // divider line
-  control = createDivider({
-    x: 0,
-    y: curY,
-    width: controlMaxWidth
-  });
-  curY = addControlWithBottomPadding(control, controls, 19);
-
-  // SETTING CHECKBOX: round to nearest pixel =================================
   // function (passed into createCheckbox) is called when checkbox's selected state changes
   const roundToPixelCallback = (checkbox) => {
     roundToPixelSelect.setEnabled(checkbox.value);
@@ -459,25 +474,29 @@ const settingsDialog = (context) => {
   controls.push(roundToPixelCheckbox);
   curY -= 6;
 
-  // SETTING DROPDOWN: round to pixel ==============================================
-
+  const roundToPixelText = "Round each layer's x, y, width and height to nearest [n] pixels."
+  const roundToPixelDropdownChanged = (dropdown) => {
+    const val = stockRoundedPixels[dropdown.value].slice(0, 3);
+    roundToPixelDescription.value = roundToPixelText.replace('[n]', val);
+  }
+  // dropdown: rounding options
   const roundToPixelSelect = createDropdown(stockRoundedPixels, stockRoundedPixels.indexOf(storedValue('nearestPixelToRoundTo')), {
     x: 220,
     y: curY,
-    width: controlMaxWidth - 220
-  });
+    width: 198,
+  }, roundToPixelDropdownChanged);
   roundToPixelSelect.setEnabled(storedValue('roundToNearestPixel'));
   curY = addControlWithBottomPadding(roundToPixelSelect, controls, -1);
 
   // description
-  control = createDescription("Round each layer's x, y, width and height to nearest [n] pixels.", NSColor.secondaryLabelColor(), 12, {
+  roundToPixelDescription = createDescription(roundToPixelText, NSColor.secondaryLabelColor(), 12, {
     x: 0,
     y: curY,
     width: controlMaxWidth,
     height: textHeight(12, 1)
   });
-  curY = addControlWithBottomPadding(control, controls, 12);
-
+  curY = addControlWithBottomPadding(roundToPixelDescription, controls, 14);
+  roundToPixelDescription.value = roundToPixelText.replace('[n]', storedValue('nearestPixelToRoundTo').slice(0, 3));
 
   // ===========================================================================
   // ======      Done creating controls in alert: now finalize             =====
@@ -491,7 +510,7 @@ const settingsDialog = (context) => {
   for (const control of controls) {
     alertView.addSubview(control);
   }
-  alert.accessoryView = alertView;
+  alert.accessoryView = alertView; // add alert as accessory view
   // Add OK, cancel, and view documentation buttons. These automatically appear at the bottom of the alert (below accessoryView area)
   const okButton = alert.addButtonWithTitle("Save & Run");
   const cancelButton = alert.addButtonWithTitle("Cancel");
@@ -538,8 +557,7 @@ const settingsDialog = (context) => {
   } else if (alertValue == 1002) {
     // user chose to view documentation
     NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString("https://github.com/josephxbrick/documentorganizer/blob/master/README.md"));
-    return undefined;
   }
-  // user chose cancel
+  // user chose cancel or view docs
   return undefined;
 }

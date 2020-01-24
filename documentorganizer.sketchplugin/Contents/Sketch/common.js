@@ -35,7 +35,7 @@ const timeStamp = () => {
 }
 // assumes an existing text layer called 'debug_output' on the current page that's NOT in a group or artboard
 // parameters: the Sketch page object, the thing (or an array of things) to log, whether or not to clear previous logs
-const logit = (page, args, clear = false) => {
+const logIt = (page, args, clear = false) => {
   // converts args to array if it's not already an array
   args = [].concat(args || []);
   // find the 'debug_output' layer on page

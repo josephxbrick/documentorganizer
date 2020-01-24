@@ -79,7 +79,7 @@ const createCombobox = (items, selectedIndex, frame, onSelectionChangedFunction)
 // * to select a given index, set dropdown.value to that index
 // * onSelectionChangedFunction is a function that can be passed in. It will be called (with the dropdown control as its
 //   paramater) whenever the selected state of the checkbox changes. Here's a sample function you could pass in,
-//   where console.log displays the index of the selected item:
+//   where console.log displays the index of the newly selected item:
 //
 //   const selectCallback = (dropdown) => {
 //     console.log(dropdown.value);
