@@ -155,9 +155,13 @@ const docTitleFromDocument = (page) => {
   return storedValue('docTitle');
 }
 
+
+// ====================================================================================================
 // function that creates and displays the settings dialog and stores settings
 // receives: Sketch context
 // returns: true if dialog is not canceled, or undefined if it is
+// ====================================================================================================
+
 const settingsDialog = (context) => {
   const doc = context.document;
   const page = doc.currentPage();
@@ -166,7 +170,8 @@ const settingsDialog = (context) => {
   const alert = NSAlert.alloc().init();
   alert.setIcon(NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path()));
   alert.setMessageText('Settings');
-  const viewWidth = 418;
+  const viewWidth = 422;
+  const controlMaxWidth = 422;
   const controls = [];
   let curY = 0;
   let control = undefined;
@@ -183,20 +188,20 @@ const settingsDialog = (context) => {
   // ===========================================================================
 
   // description: dialog heading
-  control = createDescription("Organize design documents by creating a table of contents, adding page/section numbers, and managing callouts in mockups.", NSColor.labelColor(), 12, {
+  control = createDescription("Organize design documents by creating a table of contents, adding page/section numbers, and managing callouts in mockups.", NSColor.labelColor(), 13, {
     x: 0,
     y: curY,
-    width: viewWidth,
-    height: textHeight(12, 2)
+    width: controlMaxWidth,
+    height: textHeight(13, 2)
   });
-  curY = addControlWithBottomPadding(control, controls, 15);
+  curY = addControlWithBottomPadding(control, controls, 22);
 
   // label: document title
   curY += 2;
   control = createLabel("Title of document:", {
     x: 0,
     y: curY,
-    width: viewWidth
+    width: controlMaxWidth
   });
   controls.push(control);
   curY -= 2;
@@ -205,17 +210,17 @@ const settingsDialog = (context) => {
   const titleField = createField(docTitle, {
     x: 114,
     y: curY,
-    width: viewWidth - 114
+    width: controlMaxWidth - 114
   });
-  curY = addControlWithBottomPadding(titleField, controls, 14);
+  curY = addControlWithBottomPadding(titleField, controls, 18);
 
   // divider line
   control = createDivider({
     x: 0,
     y: curY,
-    width: viewWidth
+    width: controlMaxWidth
   });
-  curY = addControlWithBottomPadding(control, controls, 12);
+  curY = addControlWithBottomPadding(control, controls, 16);
 
   // SETTING CHECKBOX: create table of contents ================================
   // function (passed into createCheckbox) is called when checkbox's selected state changes
@@ -226,15 +231,15 @@ const settingsDialog = (context) => {
   const useTOCCheckbox = createCheckbox('Create table of contents', storedValue('useTOC'), {
     x: 0,
     y: curY,
-    width: viewWidth
+    width: controlMaxWidth
   }, useTOCCallback);
-  curY = addControlWithBottomPadding(useTOCCheckbox, controls, 3);
+  curY = addControlWithBottomPadding(useTOCCheckbox, controls, 6);
 
   // description: use table of contents
   control = createDescription("Place in group \"<tocGroup>\" containing rectangle \"<tocGroupRect>\"", NSColor.secondaryLabelColor(), 12, {
     x: 0,
     y: curY,
-    width: viewWidth,
+    width: controlMaxWidth,
     height: textHeight(12, 1)
   });
   curY = addControlWithBottomPadding(control, controls, 12);
@@ -244,21 +249,21 @@ const settingsDialog = (context) => {
   control = createLabel("Column spacing:", {
     x: 0,
     y: curY,
-    width: viewWidth
+    width: controlMaxWidth
   });
   controls.push(control);
   curY -= 2;
 
   // description: column spacing
-  curY += 3;
-  control = createDescription("Applies when table has multiple columns", NSColor.secondaryLabelColor(), 12, {
+  curY += 2;
+  control = createDescription("Applies when the TOC has multiple columns", NSColor.secondaryLabelColor(), 12, {
     x: 145,
     y: curY,
-    width: viewWidth - 145,
+    width: controlMaxWidth - 145,
     height: textHeight(12, 1)
   });
   controls.push(control);
-  curY -= 3;
+  curY -= 2;
 
   // SETTING FIELD: column spacing =============================================
   const spacingField = createField(storedValue('tocColumnSpacing'), {
@@ -274,7 +279,7 @@ const settingsDialog = (context) => {
   control = createLabel("Include:", {
     x: 0,
     y: curY,
-    width: viewWidth
+    width: controlMaxWidth
   }, 1);
   controls.push(control);
   curY -= 1;
@@ -283,7 +288,7 @@ const settingsDialog = (context) => {
   const tocShowRadios = createRadioButtonsHorizontal(["Section headings only", "All pages"], storedValue('tocShowSectionsOnly'), {
     x: 54,
     y: curY,
-    width: viewWidth - 54
+    width: controlMaxWidth - 54
   }, 155); //
   tocShowRadios.setEnabled(storedValue('useTOC'));
   curY = addControlWithBottomPadding(tocShowRadios, controls, 14);
@@ -292,9 +297,9 @@ const settingsDialog = (context) => {
   control = createDivider({
     x: 0,
     y: curY,
-    width: viewWidth
+    width: controlMaxWidth
   });
-  curY = addControlWithBottomPadding(control, controls, 14);
+  curY = addControlWithBottomPadding(control, controls, 16);
 
   // SETTING CHECKBOX: use section numbering ===================================
   // function (passed into createCheckbox) is called when checkbox's selected state changes
@@ -302,28 +307,28 @@ const settingsDialog = (context) => {
     const selected = checkbox.value; // gets true or false
     dashStyleSelect.setEnabled(selected);
   }
-  const useSectionsCheckbox = createCheckbox('Use section numbering', storedValue('useSections'), {
+  const useSectionsCheckbox = createCheckbox('Use legal-style numbering for pages and callouts', storedValue('useSections'), {
     x: 0,
     y: curY,
-    width: viewWidth
+    width: controlMaxWidth
   }, useSectionsCallback);
-  curY = addControlWithBottomPadding(useSectionsCheckbox, controls, 3);
+  curY = addControlWithBottomPadding(useSectionsCheckbox, controls, 6);
 
   // description: use section numbering
-  control = createDescription("Number page titles and callouts. Turn this off and on to see what it does.", NSColor.secondaryLabelColor(), 12, {
+  control = createDescription("The first page of section 5 will be numbered 5.1, and the first callout on page 5.1 will be numbered 5.1.1", NSColor.secondaryLabelColor(), 12, {
     x: 0,
     y: curY,
-    width: viewWidth,
-    height: textHeight(12, 1)
+    width: controlMaxWidth,
+    height: textHeight(12, 2)
   });
-  curY = addControlWithBottomPadding(control, controls, 12);
+  curY = addControlWithBottomPadding(control, controls, 10);
 
   // label: dash style
   curY += 4;
   control = createLabel("Dash style:", {
     x: 0,
     y: curY,
-    width: viewWidth
+    width: controlMaxWidth
   }, 6);
   controls.push(control);
   curY -= 4;
@@ -333,11 +338,12 @@ const settingsDialog = (context) => {
   control = createDescription("Separates section numbers and page titles", NSColor.secondaryLabelColor(), 12, {
     x: 130,
     y: curY,
-    width: viewWidth - 123,
+    width: controlMaxWidth - 130,
     height: textHeight(12, 1)
   });
   controls.push(control);
   curY -= 5;
+
 
   // SETTING DROPDOWN: dash style ==============================================
   const dashStyleSelect = createDropdown(stockDashes, stockDashes.indexOf(storedValue('dashType')), {
@@ -346,22 +352,31 @@ const settingsDialog = (context) => {
     width: 50
   });
   dashStyleSelect.setEnabled(storedValue('useSections'));
-  curY = addControlWithBottomPadding(dashStyleSelect, controls, 14);
+  curY = addControlWithBottomPadding(dashStyleSelect, controls, 6);
+
+  // description: use section numbering
+  control = createDescription("If numbering isn't used, callouts will be lettered. (A, B, C, etc.)", NSColor.secondaryLabelColor(), 12, {
+    x: 0,
+    y: curY,
+    width: controlMaxWidth,
+    height: textHeight(12, 1)
+  });
+  curY = addControlWithBottomPadding(control, controls, 16);
 
   // divider line
   control = createDivider({
     x: 0,
     y: curY,
-    width: viewWidth
+    width: controlMaxWidth
   });
-  curY = addControlWithBottomPadding(control, controls, 13);
+  curY = addControlWithBottomPadding(control, controls, 14);
 
   // label: date formet
   curY += 2;
   control = createLabel("Date format:", {
     x: 0,
     y: curY,
-    width: viewWidth
+    width: controlMaxWidth
   }, 1);
   controls.push(control);
   curY -= 2;
@@ -376,7 +391,7 @@ const settingsDialog = (context) => {
   const dateFormatRadios = createRadioButtonsVertical([dateFromTemplate(stockDateFormats[0], sampleDate), dateFromTemplate(stockDateFormats[1], sampleDate), "Custom format:"], storedValue('dateFormatChoice'), {
     x: 78,
     y: curY,
-    width: viewWidth - 78
+    width: controlMaxWidth - 78
   }, 23, radioSelectedCallback); //
   controls.push(dateFormatRadios);
   curY += 3;
@@ -385,7 +400,7 @@ const settingsDialog = (context) => {
   control = createDescription(stockDateFormats[0], NSColor.secondaryLabelColor(), 12, {
     x: 170,
     y: curY,
-    width: viewWidth - 170,
+    width: controlMaxWidth - 170,
     height: textHeight(12, 1)
   });
   curY = addControlWithBottomPadding(control, controls, 8);
@@ -394,10 +409,10 @@ const settingsDialog = (context) => {
   control = createDescription(stockDateFormats[1], NSColor.secondaryLabelColor(), 12, {
     x: 155,
     y: curY,
-    width: viewWidth - 155,
+    width: controlMaxWidth - 155,
     height: textHeight(12, 1)
   });
-  curY = addControlWithBottomPadding(control, controls, 7);
+  curY = addControlWithBottomPadding(control, controls, 6);
 
   // SETTING FIELD: custom date format =========================================
   // function (passed into createField) called when field's text changes. Updates date in sample-date below field to reflect the format entered.
@@ -409,16 +424,16 @@ const settingsDialog = (context) => {
   const customFormatField = createField(storedValue('lastEnteredFormatTemplate'), {
     x: 192,
     y: curY,
-    width: viewWidth - 192
+    width: controlMaxWidth - 192
   }, textChangedCallback);
   customFormatField.setEnabled(storedValue('dateFormatChoice') == 2);
-  curY = addControlWithBottomPadding(customFormatField, controls, 2);
+  curY = addControlWithBottomPadding(customFormatField, controls, 1);
 
   // description: dynamic sample date display
   const sampleDateDisplay = createDescription(dateFromTemplate(storedValue('lastEnteredFormatTemplate'), sampleDate), NSColor.secondaryLabelColor(), 12, {
     x: 192,
     y: curY,
-    width: viewWidth - 192,
+    width: controlMaxWidth - 192,
     height: textHeight(12, 1)
   });
   curY = addControlWithBottomPadding(sampleDateDisplay, controls, 14);
@@ -427,9 +442,9 @@ const settingsDialog = (context) => {
   control = createDivider({
     x: 0,
     y: curY,
-    width: viewWidth
+    width: controlMaxWidth
   });
-  curY = addControlWithBottomPadding(control, controls, 12);
+  curY = addControlWithBottomPadding(control, controls, 19);
 
   // SETTING CHECKBOX: round to nearest pixel =================================
   // function (passed into createCheckbox) is called when checkbox's selected state changes
@@ -439,7 +454,7 @@ const settingsDialog = (context) => {
   const roundToPixelCheckbox = createCheckbox('Round layer dimensions to nearest', storedValue('roundToNearestPixel'), {
     x: 0,
     y: curY,
-    width: viewWidth
+    width: controlMaxWidth
   }, roundToPixelCallback);
   controls.push(roundToPixelCheckbox);
   curY -= 6;
@@ -449,7 +464,7 @@ const settingsDialog = (context) => {
   const roundToPixelSelect = createDropdown(stockRoundedPixels, stockRoundedPixels.indexOf(storedValue('nearestPixelToRoundTo')), {
     x: 220,
     y: curY,
-    width: viewWidth - 220
+    width: controlMaxWidth - 220
   });
   roundToPixelSelect.setEnabled(storedValue('roundToNearestPixel'));
   curY = addControlWithBottomPadding(roundToPixelSelect, controls, -1);
@@ -458,19 +473,10 @@ const settingsDialog = (context) => {
   control = createDescription("Round each layer's x, y, width and height to nearest [n] pixels.", NSColor.secondaryLabelColor(), 12, {
     x: 0,
     y: curY,
-    width: viewWidth,
+    width: controlMaxWidth,
     height: textHeight(12, 1)
   });
   curY = addControlWithBottomPadding(control, controls, 12);
-
-
-  // divider line
-  control = createDivider({
-    x: 0,
-    y: curY,
-    width: viewWidth
-  });
-  curY = addControlWithBottomPadding(control, controls, 6);
 
 
   // ===========================================================================
@@ -487,7 +493,7 @@ const settingsDialog = (context) => {
   }
   alert.accessoryView = alertView;
   // Add OK, cancel, and view documentation buttons. These automatically appear at the bottom of the alert (below accessoryView area)
-  const okButton = alert.addButtonWithTitle("Save Settings");
+  const okButton = alert.addButtonWithTitle("Save & Run");
   const cancelButton = alert.addButtonWithTitle("Cancel");
   const viewDocs = alert.addButtonWithTitle("View Documentation");
   // set the tab order
@@ -531,7 +537,8 @@ const settingsDialog = (context) => {
     return true;
   } else if (alertValue == 1002) {
     // user chose to view documentation
-    NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString("https://github.com/josephxbrick/documentorganizer"));
+    NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString("https://github.com/josephxbrick/documentorganizer/blob/master/README.md"));
+    return undefined;
   }
   // user chose cancel
   return undefined;
