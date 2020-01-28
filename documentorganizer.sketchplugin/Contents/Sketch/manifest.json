@@ -35,6 +35,17 @@
           "LayersResized.finish": "_onLayersResizedFinish"
         }
       }
+    },
+    {
+      "name": "documentsaved",
+      "identifier": "documentsaved",
+      "script": "main.js",
+      "handlers": {
+        "run" : "onRun",
+        "actions": {
+          "DocumentSaved": "_onDocumentSaved"
+        }
+      }
     }
   ],
   "menu": {

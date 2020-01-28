@@ -377,7 +377,7 @@ const settingsDialog = (context) => {
   // ====================== SETTING: current date format =======================
 
   // label: date formet
-  control = createLabel("Add current date to symbol instances", {
+  control = createLabel("Add current date when document is saved", {
     x: 0,
     y: curY,
     width: controlMaxWidth
@@ -385,7 +385,7 @@ const settingsDialog = (context) => {
   curY = addControlWithBottomPadding(control, controls, 3);
 
   // description: use section numbering
-  control = createDescription("Instances with <currentDate> override get today's date using the format below:", NSColor.secondaryLabelColor(), 12, {
+  control = createDescription("Instances with <currentDate> override are updated on save using format below.", NSColor.secondaryLabelColor(), 12, {
     x: 0,
     y: curY,
     width: controlMaxWidth,

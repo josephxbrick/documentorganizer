@@ -73,6 +73,22 @@ _updateCalloutsOnArtboard = (context) => {
   }
 }
 
+_onDocumentSaved = (context, instance) => {
+  const action = context.actionContext;
+  const doc = action.document;
+  const autoSaved = action.autosaved; // 0 if user manually saves
+  const page = doc.currentPage();
+  if (autoSaved == 0) {
+    const artboards = allArtboards(page);
+    for (const artboard of artboards) {
+      const instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
+      for (const instance of instances) {
+        setOverrideText(instance, '<currentDate>', dateFromTemplate(storedValue('dateFormatTemplate')));
+      }
+    }
+  }
+}
+
 // called when any layer is resized; this is defined in manifest.json
 _onLayersResizedFinish = (context, instance) => {
   const action = context.actionContext;
@@ -135,7 +151,6 @@ const numberAndNameArtboards = (context, summary) => {
       };
       setOverrideText(instance, '<documentTitle>', storedValue('docTitle'));
       setOverrideText(instance, '<currentSection>', removeSectionNumbers(runningSectionTitle));
-      setOverrideText(instance, '<currentDate>', dateFromTemplate(storedValue('dateFormatTemplate')));
     }
     if (curSectionTitle || curPageTitle) {
       tocArray.push({
