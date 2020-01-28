@@ -1,8 +1,11 @@
 const UI = require('sketch/ui');
+const sketch = require('sketch');
 
-// javascript's modulo operator does not support floating-point numbers
+
+// javascript's modulo operator does not support a floating-point modulus
+// this function works when both numbers are floating-point
 // source: https://stackoverflow.com/questions/3966484/why-does-modulus-operator-return-fractional-number-in-javascript
-const floatingPointModulo = (val, modulus) => {
+const fmod = (val, modulus) => {
   const valDecCount = (val.toString().split('.')[1] || '').length;
   const stepDecCount = (modulus.toString().split('.')[1] || '').length;
   const decCount = valDecCount > stepDecCount ? valDecCount : stepDecCount;
@@ -113,8 +116,7 @@ const sortArtboards = (doc, page) => {
   artboards = allArtboards(page);
   sortLayersByRows(artboards);
   for (const artboard of artboards) {
-    artboard.moveToLayer_beforeLayer(page, nil);
-    artboard.select_byExtendingSelection(false, true);
+    MSLayerMovement.moveToFront([artboard]);
   }
   const action = doc.actionsController().actionForID("MSCollapseAllGroupsAction");
   if (action.validate()) {
@@ -163,5 +165,14 @@ const addOrdinalIndicator = (num) => {
     return `${num}rd`;
   } else {
     return `${num}th`;
+  }
+}
+
+// resizeToFitChildrenWithOption() was deprecated in Sketch v. 53.
+const sizeGroupToContent = (group) => {
+  if (sketch.version.sketch > 52) {
+    group.fixGeometryWithOptions(0);
+  } else {
+    group.resizeToFitChildrenWithOption(0);
   }
 }

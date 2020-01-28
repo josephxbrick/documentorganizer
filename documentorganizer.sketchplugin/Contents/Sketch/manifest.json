@@ -3,7 +3,7 @@
   "commands": [{
       "script": "main.js",
       "name": "Organize Now",
-			"shortcut" : "cmd shift option d",
+			"shortcut" : "cmd option shift d",
       "identifier": "organizeDocument",
       "handlers": {
         "run": "_organizeDocument"

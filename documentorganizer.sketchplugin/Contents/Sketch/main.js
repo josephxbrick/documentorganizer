@@ -292,7 +292,7 @@ const createTOC = (doc, tocArray, summary) => {
         groupNumber++;
         tocEntry.setName(curGroupName);
         tocEntry.addLayers(curGroup);
-        tocEntry.fixGeometryWithOptions(0); // fit group to its contents
+        sizeGroupToContent(tocEntry); // fit group to its contents
         tocGroup.addLayers([tocEntry]); // add the group to the TOC
         // get ready to start a new group
         curGroup = [];
@@ -496,7 +496,20 @@ const numberToLetters = (num) => {
 
 // lays out the descriptions for callouts in the calloutDescriptionsGroup
 const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
-  const groupRect = layerWithName(calloutDescriptionsGroup, MSRectangleShape, '<calloutGroupRect>')
+  let groupRect = layerWithName(calloutDescriptionsGroup, MSRectangleShape, '<calloutGroupRect>')
+  // if the rectangle is for some reason missing
+  if (groupRect == undefined) {
+    groupRect = MSRectangleShape.new();
+    groupRect.setName('<calloutGroupRect>');
+    // turn off constrain proportions
+    groupRect.setConstrainProportions(0);
+    groupRect.frame().setWidth(calloutDescriptionsGroup.frame().width());
+    groupRect.frame().setHeight(calloutDescriptionsGroup.frame().height());
+    calloutDescriptionsGroup.addLayers([groupRect]);
+    // make group fit its content
+    sizeGroupToContent(calloutDescriptionsGroup);
+    MSLayerMovement.moveToBack([groupRect]);
+  }
   const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
   const overrideLayer = getOverrideLayerfromSymbol(calloutDescriptionSymbol, '<calloutListDescription>')
   // get horizontal and vertical space NOT occupied by the description text area
@@ -563,9 +576,10 @@ const createCalloutDescriptionGroup = (artboard) => {
   artboard.addLayers([group]);
   group.addLayers([rect]);
   // make group fit its content
-  group.fixGeometryWithOptions(0);
+  sizeGroupToContent(group);
   return group;
 }
+
 
 const roundToNearestPixel = (context, summary) => {
   const doc = context.document;
@@ -584,19 +598,19 @@ const roundToNearestPixel = (context, summary) => {
         const y = frame.y();
         const w = frame.width();
         const h = frame.height();
-        if (floatingPointModulo(x, roundToValue) != 0) {
+        if (fmod(x, roundToValue) != 0) {
           fixCount++;
           frame.setX(Math.round(x / roundToValue) * roundToValue);
         }
-        if (floatingPointModulo(y, roundToValue) != 0) {
+        if (fmod(y, roundToValue) != 0) {
           fixCount++;
           frame.setY(Math.round(y / roundToValue) * roundToValue);
         }
-        if (floatingPointModulo(w, roundToValue) != 0) {
+        if (fmod(w, roundToValue) != 0) {
           fixCount++;
           frame.setWidth(Math.round(w / roundToValue) * roundToValue);
         }
-        if (floatingPointModulo(h, roundToValue) != 0) {
+        if (fmod(h, roundToValue) != 0) {
           fixCount++;
           frame.setHeight(Math.round(h / roundToValue) * roundToValue);
         }
