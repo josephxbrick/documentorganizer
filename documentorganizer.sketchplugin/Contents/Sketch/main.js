@@ -526,7 +526,7 @@ const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
     MSLayerMovement.moveToBack([groupRect]);
   }
   const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
-  const overrideLayer = getOverrideLayerfromSymbol(calloutDescriptionSymbol, '<calloutListDescription>')
+  const overrideLayer = getOverrideLayerfromSymbolMaster(calloutDescriptionSymbol, '<calloutListDescription>')
   // get horizontal and vertical space NOT occupied by the description text area
   const symbolPaddingVertical = calloutDescriptionSymbol.frame().height() - overrideLayer.frame().height();
   const symbolPaddingHorizonal = calloutDescriptionSymbol.frame().width() - overrideLayer.frame().width();
@@ -561,16 +561,16 @@ const sortedCallouts = (artboard) => {
   const groups = toArray(artboard.layers()).filter(item => item.class() === MSLayerGroup);
   sortByHorizontalPosition(groups);
   for (const group of groups) {
-    const symbols = toArray(group.children()).filter(item => item.class() === MSSymbolInstance);
-    const instances = symbolsWithOverride(symbols, '<calloutDescription>');
-    sortLayersByRows(instances);
-    callouts = callouts.concat(instances);
+    const instances = toArray(group.children()).filter(item => item.class() === MSSymbolInstance);
+    const calloutInstances = instancesWithOverride(instances, '<calloutDescription>');
+    sortLayersByRows(calloutInstances);
+    callouts = callouts.concat(calloutInstances);
   }
   // get all ungrouped callout symbols
-  const ungroupedSymbols = toArray(artboard.layers()).filter(item => item.class() === MSSymbolInstance);
-  const instances = symbolsWithOverride(ungroupedSymbols, '<calloutDescription>');
-  sortByVerticalPosition(instances);
-  callouts = callouts.concat(instances);
+  const ungroupedInstances = toArray(artboard.layers()).filter(item => item.class() === MSSymbolInstance);
+  const calloutInstances = instancesWithOverride(ungroupedInstances, '<calloutDescription>');
+  sortByVerticalPosition(calloutInstances);
+  callouts = callouts.concat(calloutInstances);
   return callouts;
 }
 
