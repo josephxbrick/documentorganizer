@@ -26,7 +26,7 @@ const instancesWithOverride = (instances, overrideName) => {
 
 const instanceHasOverride = (instance, overrideName) => {
   const child = toArray(instance.symbolMaster().children()).filter(item => item.class() === MSTextLayer && item.name() == overrideName)[0];
-  return (child !== undefined)
+  return (child !== undefined);
 }
 
 // assumes non-nested symbol
