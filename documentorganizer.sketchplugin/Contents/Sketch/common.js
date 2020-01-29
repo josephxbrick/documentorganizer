@@ -125,12 +125,17 @@ const sortArtboards = (doc, page) => {
 }
 
 const dateFromTemplate = (dateTemplate, date = new Date()) => {
-  dateTemplate = dateTemplate.toLowerCase();
   const origTemplate = dateTemplate;
   const w = date.getDay(); // Sunday is 0, Saturday is 6
   const d = date.getDate(); // date of month: 1 to (max) 31
   const m = date.getMonth(); //January is 0, December is 11
   const y = date.getFullYear(); // four digit year
+  const hour24 = date.getHours().toString();
+  const hour12 = (date.getHours() % 12).toString();
+  const min = '0'.concat(date.getMinutes()).slice(-2);
+  const sec = '0'.concat(date.getSeconds()).slice(-2);
+  const ampm = (date.getHours() < 12) ? 'am' : 'pm';
+
   const longMonth = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][m];
   const shortMonth = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'][m];
   const longWeekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][w];
@@ -147,6 +152,13 @@ const dateFromTemplate = (dateTemplate, date = new Date()) => {
   dateTemplate = dateTemplate.replace('[d]', d); // 4
   dateTemplate = dateTemplate.replace('[yyyy]', y); // 2019
   dateTemplate = dateTemplate.replace('[yy]', y.toString().slice(-2)); // 19
+  dateTemplate = dateTemplate.replace('[hour24]', hour24);
+  dateTemplate = dateTemplate.replace('[hour12]', hour12);
+  dateTemplate = dateTemplate.replace('[min]', min);
+  dateTemplate = dateTemplate.replace('[sec]', sec);
+  dateTemplate = dateTemplate.replace('[ampm]', ampm);
+  dateTemplate = dateTemplate.replace('[AMPM]', ampm.toUpperCase());
+
   if (dateTemplate == origTemplate) {
     // no segment of the date template was recognized, so return date in MM/DD/YYYY format
     dateTemplate = `${'0'.concat(m + 1).slice(-2)}/${'0'.concat(d).slice(-2)}/${y}`;
