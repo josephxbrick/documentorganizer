@@ -92,7 +92,7 @@ A dash appears between section numbers and the name of the page that follows the
 
 ### Date format
 
-You can choose between the formats mm/dd/yyyy and m/d/yyyy, or create a custom date format. Use the date elements below to construct a custom format. You can use either lowercase or uppercase for the elements.
+You can choose between the formats mm/dd/yyyy and m/d/yyyy, or create a custom date format. Use the date elements below to construct a custom format. Note that the elements are case-sensitive.
 
 #### Month elements, assuming it's January:
 * [mmmm] – January
@@ -117,9 +117,17 @@ Note that short [w] weekdays follow AP Style Guide recommendations, where Tuesda
 * [yyyy] – 2025
 * [yy] – 25
 
-### Examples templates, assuming it's January 3rd, 2025
+#### Time elements, assuming it's 15:32:01
+* [hour24] – 15
+* [hour12] – 3
+* [min] - 32
+* [sec] - 01
+* [AMPM] - PM
+* [ampm] – pm
+
+### Examples templates, assuming it's January 3rd, 2025 at 9:02:11 am
 * [ww], [mmmm] [ddd], [yyyy] – "Friday, January 3rd, 2025"
-* [dd] [mmm] [yyyy] – "03 Jan 2025"
+* [dd] [mmm] [yyyy] [hour12]:[min][ampm]– "03 Jan 2025 9:02am"
 * [m].[d].[yyyy] – "1.3.2025"
 
 ---
