@@ -9,6 +9,7 @@ const {
 //  Respond to plugin menu-items
 //=======================================================================================================================
 
+// user chose Settings menu
 _settings = (context) => {
   let summary = [];
   const doc = context.document;
@@ -20,7 +21,7 @@ _settings = (context) => {
   }
   // check if file is set up for creating a TOC
   if (checkTocSetup(doc, summary)) {
-    setTimeout(() => {
+    const runEverything = () => {
       sortArtboards(doc, page);
       const tocArray = numberAndNameArtboards(context, summary);
       if (storedValue('useTOC')) {
@@ -30,20 +31,25 @@ _settings = (context) => {
         roundToNearestPixel(context, summary);
       }
       displaySummary(doc, summary);
-    }, 0);
-    doc.showMessage('Updating artboards. This may take a moment...');
+    }
+    if (sketch.version.sketch > 52) {
+      setTimeout(runEverything, 0);
+      doc.showMessage('Updating artboards. This may take a moment...');
+    } else {
+      runEverything();
+    }
   } else {
     displaySummary(doc, summary);
   }
 }
 
-
+// user chose Organize Now
 _organizeDocument = (context) => {
   let summary = [];
   const doc = context.document;
   page = doc.currentPage();
   if (checkTocSetup(doc, summary)) {
-    setTimeout(() => {
+    const runEverything = () => {
       sortArtboards(doc, page);
       const tocArray = numberAndNameArtboards(context, summary);
       if (storedValue('useTOC')) {
@@ -53,13 +59,19 @@ _organizeDocument = (context) => {
         roundToNearestPixel(context, summary);
       }
       displaySummary(doc, summary);
-    }, 0);
-    doc.showMessage('Updating artboards. This may take a moment...');
+    }
+    if (sketch.version.sketch > 52) {
+      setTimeout(runEverything, 0);
+      doc.showMessage('Updating artboards. This may take a moment...');
+    } else {
+      runEverything();
+    }
   } else {
     displaySummary(doc, summary);
   }
 }
 
+// user chose Update Callouts on Artboard menu
 _updateCalloutsOnArtboard = (context) => {
   const doc = context.document;
   const page = doc.currentPage();
@@ -73,6 +85,7 @@ _updateCalloutsOnArtboard = (context) => {
   }
 }
 
+// user saved document
 _onDocumentSaved = (context, instance) => {
   const action = context.actionContext;
   const doc = action.document;
@@ -89,19 +102,17 @@ _onDocumentSaved = (context, instance) => {
   }
 }
 
-// called when any layer is resized; this is defined in manifest.json
+// user resized a layer
 _onLayersResizedFinish = (context, instance) => {
   const action = context.actionContext;
   const doc = action.document;
-  // get all layers that are being manually resized; note that this event does not
-  // chain to children of the layer being resized
-  const layers = action.layers;
-  for (let i = 0; i < layers.count(); i++) {
-    layer = layers[i];
-    // lay out the TOC if the TOC group is being resized
+  const layers = toArray(action.layers);
+  for (const layer of layers) {
+    // lay out the TOC group after it's resized by the user
     if (layer.name() == '<tocGroup>') {
       layoutTOC(doc);
     }
+    // lay out the callout-list group after it's resized by the user
     if (layer.name() == '<calloutListGroup>') {
       layoutCalloutDescriptions(layer, doc);
     }
