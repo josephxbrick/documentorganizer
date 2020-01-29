@@ -127,7 +127,7 @@ Note that short [w] weekdays follow AP Style Guide recommendations, where Tuesda
 
 ### Examples templates, assuming it's January 3rd, 2025 at 9:02:11 am
 * [ww], [mmmm] [ddd], [yyyy] – "Friday, January 3rd, 2025"
-* [dd] [mmm] [yyyy] [hour12]:[min][ampm]– "03 Jan 2025 9:02am"
+* [dd] [mmm] [yyyy] [hour12]:[min][ampm] – "03 Jan 2025 9:02am"
 * [m].[d].[yyyy] – "1.3.2025"
 
 ---
