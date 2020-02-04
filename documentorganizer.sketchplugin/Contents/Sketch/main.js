@@ -9,7 +9,6 @@ const {
 //  Respond to plugin menu-items
 //=======================================================================================================================
 
-// user chose Settings menu
 _settings = (context) => {
   let summary = [];
   const doc = context.document;
@@ -19,9 +18,9 @@ _settings = (context) => {
   if (val === undefined) {
     return;
   }
-  // check if file is set up for creating a TOC
-  if (checkTocSetup(doc, summary)) {
-    const runEverything = () => {
+  // check if current page is set up for plugin
+  if (checkPageSetup(doc, summary)) {
+    setTimeout(() => {
       sortArtboards(doc, page);
       const tocArray = numberAndNameArtboards(context, summary);
       if (storedValue('useTOC')) {
@@ -31,25 +30,22 @@ _settings = (context) => {
         roundToNearestPixel(context, summary);
       }
       displaySummary(doc, summary);
-    }
-    if (sketch.version.sketch > 52) {
-      setTimeout(runEverything, 0);
-      doc.showMessage('Updating artboards. This may take a moment...');
-    } else {
-      runEverything();
-    }
+    }, 0);
+    doc.showMessage('Updating artboards. This may take a moment...');
   } else {
+    // something is wrong with setup – inform user
     displaySummary(doc, summary);
   }
 }
 
-// user chose Organize Now
+
 _organizeDocument = (context) => {
   let summary = [];
   const doc = context.document;
   page = doc.currentPage();
-  if (checkTocSetup(doc, summary)) {
-    const runEverything = () => {
+  // check if current page is set up for plugin
+  if (checkPageSetup(doc, summary)) {
+    setTimeout(() => {
       sortArtboards(doc, page);
       const tocArray = numberAndNameArtboards(context, summary);
       if (storedValue('useTOC')) {
@@ -59,19 +55,14 @@ _organizeDocument = (context) => {
         roundToNearestPixel(context, summary);
       }
       displaySummary(doc, summary);
-    }
-    if (sketch.version.sketch > 52) {
-      setTimeout(runEverything, 0);
-      doc.showMessage('Updating artboards. This may take a moment...');
-    } else {
-      runEverything();
-    }
+    }, 0);
+    doc.showMessage('Updating artboards. This may take a moment...');
   } else {
+    // something is wrong with setup – inform user
     displaySummary(doc, summary);
   }
 }
 
-// user chose Update Callouts on Artboard menu
 _updateCalloutsOnArtboard = (context) => {
   const doc = context.document;
   const page = doc.currentPage();
@@ -85,7 +76,6 @@ _updateCalloutsOnArtboard = (context) => {
   }
 }
 
-// user saved document
 _onDocumentSaved = (context, instance) => {
   const action = context.actionContext;
   const doc = action.document;
@@ -102,17 +92,19 @@ _onDocumentSaved = (context, instance) => {
   }
 }
 
-// user resized a layer
+// called when any layer is resized; this is defined in manifest.json
 _onLayersResizedFinish = (context, instance) => {
   const action = context.actionContext;
   const doc = action.document;
-  const layers = toArray(action.layers);
-  for (const layer of layers) {
-    // lay out the TOC group after it's resized by the user
+  // get all layers that are being manually resized; note that this event does not
+  // chain to children of the layer being resized
+  const layers = action.layers;
+  for (let i = 0; i < layers.count(); i++) {
+    layer = layers[i];
+    // lay out the TOC if the TOC group is being resized
     if (layer.name() == '<tocGroup>') {
       layoutTOC(doc);
     }
-    // lay out the callout-list group after it's resized by the user
     if (layer.name() == '<calloutListGroup>') {
       layoutCalloutDescriptions(layer, doc);
     }
@@ -284,7 +276,7 @@ const createTOC = (doc, tocArray, summary) => {
     if (showSectionsOnly == true && tocItem.sectionTitle != '<undefined>' || !showSectionsOnly) {
       tocItemCount++;
       if (curGroup.length == 0) {
-        curGroupName = `TOC group: ${(tocItem.sectionTitle != '<undefined>') ? tocItem.sectionTitle : tocItem.pageTitle}`;
+        curGroupName = `<tocSection> ${(tocItem.sectionTitle != '<undefined>') ? tocItem.sectionTitle : tocItem.pageTitle}`;
       }
       if (tocItem.sectionTitle != '<undefined>') {
         // this item is a TOC section header
@@ -301,7 +293,7 @@ const createTOC = (doc, tocArray, summary) => {
       // store text values into object properties, because we can't set the overrides
       // yet as the instances are not part of the document
       instance.pageTitle = (tocItem.sectionTitle != '<undefined>') ? tocItem.sectionTitle : tocItem.pageTitle;
-      instance.setName(`TOC item: ${tocItem.pageTitle}`);
+      instance.setName(`${(tocItem.sectionTitle != '<undefined>') ? '<tocSectionEntry>' : '<tocPageEntry>'} ${instance.pageTitle}`);
       instance.pageNumber = tocItem.pageNumber;
       instance.frame().setX(0);
       instance.frame().setY(runningTop);
@@ -397,9 +389,8 @@ const layoutTOC = (doc) => {
   tocRect.frame().setHeight(tocGroup.frame().height());
 }
 
-
-// make sure user is set up for TOC
-const checkTocSetup = (doc, summary) => {
+// make sure current page is set up for this plugin
+const checkPageSetup = (doc, summary) => {
   let retval = 'success';
   const page = doc.currentPage();
   const artboards = allArtboards(page);
@@ -426,7 +417,7 @@ const checkTocSetup = (doc, summary) => {
   }
   if (retval === undefined) {
     // page numbers, section titles and/or page titles are absent
-    return retval
+    return retval;
   }
   // check for TOC stuff
   if (storedValue('useTOC')) {
@@ -610,38 +601,36 @@ const createCalloutDescriptionGroup = (artboard) => {
 const roundToNearestPixel = (context, summary) => {
   const doc = context.document;
   const page = doc.currentPage();
-  const roundToValue = Number(storedValue('nearestPixelToRoundTo').slice(0, 3));
+  const nearestPixelToRoundTo = Number(storedValue('nearestPixelToRoundTo').slice(0, 3));
   const artboards = allArtboards(page);
   let fixCount = 0;
   for (const artboard of artboards) {
-
     const layers = toArray(artboard.children()).filter(item => item.class() != MSLayerGroup);
-
     for (const layer of layers) {
-      if (layer.parentGroup() !== undefined && layer.parentGroup().name() != '<calloutListGroup>' && layer.parentGroup().name() != '<tocGroup>') {
+      if (layer.parentGroup() !== undefined && layer.parentGroup().name() != '<calloutListGroup>' && layer.parentGroup().name().indexOf('<tocSection>') != 0) {
         const frame = layer.frame();
         const x = frame.x();
         const y = frame.y();
         const w = frame.width();
         const h = frame.height();
-        if (fmod(x, roundToValue) != 0) {
+        if (fmod(x, nearestPixelToRoundTo) != 0) {
           fixCount++;
-          frame.setX(Math.round(x / roundToValue) * roundToValue);
+          frame.setX(Math.round(x / nearestPixelToRoundTo) * nearestPixelToRoundTo);
         }
-        if (fmod(y, roundToValue) != 0) {
+        if (fmod(y, nearestPixelToRoundTo) != 0) {
           fixCount++;
-          frame.setY(Math.round(y / roundToValue) * roundToValue);
+          frame.setY(Math.round(y / nearestPixelToRoundTo) * nearestPixelToRoundTo);
         }
-        if (fmod(w, roundToValue) != 0) {
+        if (fmod(w, nearestPixelToRoundTo) != 0) {
           fixCount++;
-          frame.setWidth(Math.round(w / roundToValue) * roundToValue);
+          frame.setWidth(Math.round(w / nearestPixelToRoundTo) * nearestPixelToRoundTo);
         }
-        if (fmod(h, roundToValue) != 0) {
+        if (fmod(h, nearestPixelToRoundTo) != 0) {
           fixCount++;
-          frame.setHeight(Math.round(h / roundToValue) * roundToValue);
+          frame.setHeight(Math.round(h / nearestPixelToRoundTo) * nearestPixelToRoundTo);
         }
       }
     }
   }
-  summary.push(`${fixCount} dimensions rounded to nearest ${roundToValue.toFixed(1)} pixels`);
+  summary.push(`${fixCount} dimensions rounded to nearest ${nearestPixelToRoundTo.toFixed(1)} pixels`);
 }

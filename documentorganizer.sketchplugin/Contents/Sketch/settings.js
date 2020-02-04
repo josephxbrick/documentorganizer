@@ -399,7 +399,8 @@ const settingsDialog = (context) => {
     const buttonIndex = buttonMatrix.value; // gets index of selected button
     customFormatField.setEnabled(buttonIndex == 2); // enables custom-format field if 3rd radio button is selected
   }
-  const sampleDate = new Date(2047, 0, 5);
+  const now = new Date();
+  const sampleDate = new Date(2047, 0, 5, now.getHours(), now.getMinutes(), now.getSeconds());
 
   // radio buttons: date formats
   const dateFormatRadios = createRadioButtonsVertical([dateFromTemplate(stockDateFormats[0], sampleDate), dateFromTemplate(stockDateFormats[1], sampleDate), "Custom format:"], storedValue('dateFormatChoice'), {
