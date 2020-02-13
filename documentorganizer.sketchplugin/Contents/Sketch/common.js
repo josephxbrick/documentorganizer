@@ -19,7 +19,7 @@ const allArtboards = (page) => {
 }
 
 const layerWithName = (container, className, name) => {
-  return toArray(container.children()).filter(item => item.class() === className && item.name() == name)[0];
+  return toArray(container.children()).find(item => item.class() === className && item.name() == name);
 }
 
 const layersWithName = (container, className, name) => {
@@ -112,8 +112,10 @@ const sortByVerticalPosition = (layers) => {
   layers.sort((a, b) => a.frame().y() - b.frame().y());
 }
 
+// sorts artboards in the layer list to match the layout order (determined by artboard position),
+// and moves all top-level layers on page such that the first artboard is at 0,0
 const sortArtboards = (doc, page) => {
-  artboards = allArtboards(page);
+  const artboards = allArtboards(page);
   sortLayersByRows(artboards);
   for (const artboard of artboards) {
     MSLayerMovement.moveToFront([artboard]);
@@ -122,6 +124,22 @@ const sortArtboards = (doc, page) => {
   if (action.validate()) {
     action.doPerformAction(nil);
   }
+  // move all top-level layers (including artboards) such that the first artboard is at x:0,y:0
+  const artBoardZero = artboards[0];
+  const xOffset = artBoardZero.frame().x();
+  const yOffset = artBoardZero.frame().y();
+  const layers = toArray(page.layers());
+  for (const layer of layers) {
+    layer.frame().setX(layer.frame().x() - xOffset);
+    layer.frame().setY(layer.frame().y() - yOffset);
+  }
+  // scroll Sketch's viewport to compensate for the movement of the artboards; this way nothing will visually move
+  const drawView = doc.contentDrawView();
+  const curZoom = drawView.zoomValue();
+  const curScroll = drawView.scrollOrigin();
+  curScroll.x += xOffset * curZoom;
+  curScroll.y += yOffset * curZoom;
+  drawView.setScrollOrigin(curScroll);
 }
 
 const dateFromTemplate = (dateTemplate, date = new Date()) => {

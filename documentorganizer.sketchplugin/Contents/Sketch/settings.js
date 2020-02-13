@@ -187,8 +187,6 @@ const settingsDialog = (context) => {
   // ======         Create controls that will appear in alert             ======
   // ===========================================================================
 
-  // ====================SETTING: document title ===============================
-
   // description: dialog heading
   control = createDescription("This plugin creates a table of contents, numbers pages and sections, and manages callouts in mockups.", NSColor.labelColor(), 13, {
     x: 0,
@@ -197,6 +195,8 @@ const settingsDialog = (context) => {
     height: textHeight(13, 2)
   });
   curY = addControlWithBottomPadding(control, controls, 18);
+
+  // ====================SETTING: document title ===============================
 
   // label: document title
   curY += 2;

@@ -91,6 +91,12 @@ _onDocumentSaved = (context, instance) => {
     }
   }
 }
+_onTextChangedFinished = (context, instance) => {
+  const action = context.actionContext;
+  const doc = action.document;
+  const page = doc.currentPage();
+  logIt(page, action.new());
+}
 
 // called when any layer is resized; this is defined in manifest.json
 _onLayersResizedFinish = (context, instance) => {

@@ -45,7 +45,17 @@
           "DocumentSaved": "_onDocumentSaved"
         }
       }
-    }
+    },
+    {
+      "name": "textchanged",
+      "identifier": "textchanged",
+      "script": "main.js",
+      "handlers": {
+        "actions": {
+          "TextChanged": "_onTextChangedFinished"
+        }
+      }
+    },
   ],
   "menu": {
     "title": "Organize Design Document",
