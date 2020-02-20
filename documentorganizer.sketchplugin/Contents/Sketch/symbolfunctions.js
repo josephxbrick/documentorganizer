@@ -1,7 +1,7 @@
 // assumes non-nested symbol
 
 const setOverrideText = (instance, overrideName, newText) => {
-  const child = toArray(instance.symbolMaster().children()).filter(item => item.class() === MSTextLayer && item.name() == overrideName)[0];
+  const child = getOverrideLayerfromSymbolMaster(instance.symbolMaster(), overrideName);
   if (child != undefined) {
     const objectID = child.objectID();
     const dictionary = instance.overrides() || NSDictionary.dictionary();
@@ -16,7 +16,7 @@ const setOverrideText = (instance, overrideName, newText) => {
 const instancesWithOverride = (instances, overrideName) => {
   const retval = [];
   for (instance of instances) {
-    const child = toArray(instance.symbolMaster().children()).filter(item => item.class() === MSTextLayer && item.name() == overrideName)[0];
+    const child = getOverrideLayerfromSymbolMaster(instance.symbolMaster(), overrideName);
     if (child) {
       retval.push(instance)
     }
@@ -25,13 +25,13 @@ const instancesWithOverride = (instances, overrideName) => {
 }
 
 const instanceHasOverride = (instance, overrideName) => {
-  const child = toArray(instance.symbolMaster().children()).filter(item => item.class() === MSTextLayer && item.name() == overrideName)[0];
+  const child = getOverrideLayerfromSymbolMaster(instance.symbolMaster(), overrideName);
   return (child !== undefined);
 }
 
 // assumes non-nested symbol
-const getInstanceDefaultOverrideText = (instance, overrideName) => {
-  const child = toArray(instance.symbolMaster().children()).filter(item => item.class() === MSTextLayer && item.name() == overrideName)[0];
+const getDefaultOverrideText = (instance, overrideName) => {
+  const child = getOverrideLayerfromSymbolMaster(instance.symbolMaster(), overrideName);
   if (child != undefined) {
     return child.stringValue()
   }
@@ -40,21 +40,26 @@ const getInstanceDefaultOverrideText = (instance, overrideName) => {
 
 // assumes non-nested symbol
 const getOverrideText = (instance, overrideName) => {
-  const child = toArray(instance.symbolMaster().children()).filter(item => item.class() === MSTextLayer && item.name() == overrideName)[0];
+  const child = getOverrideLayerfromSymbolMaster(instance.symbolMaster(), overrideName);
   if (child != undefined) {
-    return instance.overrides()[child.objectID()];
+    let retval = instance.overrides()[child.objectID()];
+    if (retval == null) {
+      // user left override blank: use default override instead
+      retval = getDefaultOverrideText(instance, overrideName);
+    }
+    return retval;
   }
   return undefined;
 }
 
 const getOverrideLayerfromSymbolMaster = (symbolMaster, overrideName) => {
-  return toArray(symbolMaster.children()).filter(item => item.class() === MSTextLayer && item.name() == overrideName)[0];
+  return toArray(symbolMaster.children()).find(item => item.class() === MSTextLayer && item.name() == overrideName);
 }
 
 const symbolMasterWithOverrideName = (doc, overrideName) => {
   const symbolMasters = toArray(doc.documentData().allSymbols());
   for (symbolMaster of symbolMasters) {
-    const child = toArray(symbolMaster.children()).filter(item => item.class() === MSTextLayer && item.name() == overrideName)[0];
+    const child = toArray(symbolMaster.children()).find(item => item.class() === MSTextLayer && item.name() == overrideName);
     if (child != undefined) {
       return symbolMaster;
     }

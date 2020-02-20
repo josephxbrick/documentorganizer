@@ -1,7 +1,6 @@
 const UI = require('sketch/ui');
 const sketch = require('sketch');
 
-
 // javascript's modulo operator does not support a floating-point modulus
 // this function works when both numbers are floating-point
 // source: https://stackoverflow.com/questions/3966484/why-does-modulus-operator-return-fractional-number-in-javascript
@@ -26,15 +25,20 @@ const layersWithName = (container, className, name) => {
   return toArray(container.children()).filter(item => item.class() === className && item.name() == name);
 }
 
-const leadingZeroes = (val, desiredLength) => {
-  return '0'.repeat(desiredLength).concat(val).slice(-desiredLength);
+const addLeadingZeroes = (val, totalLength = 2) => {
+  const stringVal = val.toString();
+  return '0'.repeat(totalLength - stringVal.length).concat(stringVal);
+}
+
+const addTrailingZeroes = (val, totalLength = 2) => {
+  const stringVal = val.toString();
+  return stringVal.concat('0'.repeat(totalLength - stringVal.length));
 }
 
 // returns a timestamp
 const timeStamp = () => {
   const now = new Date();
-  return `${'0'.concat(now.getHours()).slice(-2)}:${'0'.concat(now.getMinutes()).slice(-2)}:${'0'.concat(now.getSeconds()).slice(-2)}.${now.getMilliseconds().toString().concat('000').slice(0,3)}`;
-
+  return `${addLeadingZeroes(now.getHours())}:${addLeadingZeroes(now.getMinutes())}:${addLeadingZeroes(now.getSeconds())}.${addTrailingZeroes(now.getMilliseconds(), 3)}`;
 }
 // assumes an existing text layer called 'debug_output' on the current page that's NOT in a group or artboard
 // parameters: the Sketch page object, the thing (or an array of things) to log, whether or not to clear previous logs
@@ -120,26 +124,30 @@ const sortArtboards = (doc, page) => {
   for (const artboard of artboards) {
     MSLayerMovement.moveToFront([artboard]);
   }
-  const action = doc.actionsController().actionForID("MSCollapseAllGroupsAction");
-  if (action.validate()) {
-    action.doPerformAction(nil);
-  }
+
   // move all top-level layers (including artboards) such that the first artboard is at x:0,y:0
   const artBoardZero = artboards[0];
   const xOffset = artBoardZero.frame().x();
   const yOffset = artBoardZero.frame().y();
-  const layers = toArray(page.layers());
-  for (const layer of layers) {
-    layer.frame().setX(layer.frame().x() - xOffset);
-    layer.frame().setY(layer.frame().y() - yOffset);
+  if (xOffset != 0 || yOffset != 0) {
+    const layers = toArray(page.layers());
+    for (const layer of layers) {
+      layer.frame().setX(layer.frame().x() - xOffset);
+      layer.frame().setY(layer.frame().y() - yOffset);
+    }
+    // scroll Sketch's viewport to compensate for the movement of the artboards; this way nothing 
+    // will visually move and the user won't lose their place
+    const drawView = doc.contentDrawView();
+    const curZoom = drawView.zoomValue();
+    const curScroll = drawView.scrollOrigin();
+    curScroll.x += xOffset * curZoom;
+    curScroll.y += yOffset * curZoom;
+    drawView.setScrollOrigin(curScroll);
   }
-  // scroll Sketch's viewport to compensate for the movement of the artboards; this way nothing will visually move
-  const drawView = doc.contentDrawView();
-  const curZoom = drawView.zoomValue();
-  const curScroll = drawView.scrollOrigin();
-  curScroll.x += xOffset * curZoom;
-  curScroll.y += yOffset * curZoom;
-  drawView.setScrollOrigin(curScroll);
+  const action = doc.actionsController().actionForID("MSCollapseAllGroupsAction");
+  if (action.validate()) {
+    action.doPerformAction(nil);
+  }
 }
 
 const dateFromTemplate = (dateTemplate, date = new Date()) => {
@@ -150,8 +158,8 @@ const dateFromTemplate = (dateTemplate, date = new Date()) => {
   const y = date.getFullYear(); // four digit year
   const hour24 = date.getHours().toString();
   const hour12 = (date.getHours() % 12).toString();
-  const min = '0'.concat(date.getMinutes()).slice(-2);
-  const sec = '0'.concat(date.getSeconds()).slice(-2);
+  const min = addLeadingZeroes(date.getMinutes());
+  const sec = addLeadingZeroes(date.getSeconds());
   const ampm = (date.getHours() < 12) ? 'am' : 'pm';
 
   const longMonth = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][m];
@@ -161,12 +169,12 @@ const dateFromTemplate = (dateTemplate, date = new Date()) => {
   // comments below assume date of Friday, 1/4/2019
   dateTemplate = dateTemplate.replace('[mmmm]', longMonth); // January
   dateTemplate = dateTemplate.replace('[mmm]', shortMonth); // Jan
-  dateTemplate = dateTemplate.replace('[mm]', '0'.concat(m + 1).slice(-2)); // 01
+  dateTemplate = dateTemplate.replace('[mm]', addLeadingZeroes(m + 1)); // 01
   dateTemplate = dateTemplate.replace('[m]', m + 1); // 1
   dateTemplate = dateTemplate.replace('[ww]', longWeekday); // Friday
   dateTemplate = dateTemplate.replace('[w]', shortWeekday); // Fri
   dateTemplate = dateTemplate.replace(['[ddd]'], addOrdinalIndicator(d)); // 4th
-  dateTemplate = dateTemplate.replace(['[dd]'], '0'.concat(d).slice(-2)); // 04
+  dateTemplate = dateTemplate.replace(['[dd]'], addLeadingZeroes(d)); // 04
   dateTemplate = dateTemplate.replace('[d]', d); // 4
   dateTemplate = dateTemplate.replace('[yyyy]', y); // 2019
   dateTemplate = dateTemplate.replace('[yy]', y.toString().slice(-2)); // 19
@@ -179,7 +187,7 @@ const dateFromTemplate = (dateTemplate, date = new Date()) => {
 
   if (dateTemplate == origTemplate) {
     // no segment of the date template was recognized, so return date in MM/DD/YYYY format
-    dateTemplate = `${'0'.concat(m + 1).slice(-2)}/${'0'.concat(d).slice(-2)}/${y}`;
+    dateTemplate = `${addLeadingZeroes(m + 1)}/${addLeadingZeroes(d)}/${y}`;
   }
   return dateTemplate;
 }

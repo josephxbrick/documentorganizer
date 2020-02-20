@@ -46,19 +46,9 @@
         }
       }
     },
-    {
-      "name": "textchanged",
-      "identifier": "textchanged",
-      "script": "main.js",
-      "handlers": {
-        "actions": {
-          "TextChanged": "_onTextChangedFinished"
-        }
-      }
-    },
   ],
   "menu": {
-    "title": "Organize Design Document",
+    "title": "Design Document Organizer",
     "items": [
       "organizeDocument",
       "updateCalloutsOnArtboard",
@@ -72,5 +62,5 @@
   "icon" : "icon.png",
   "description": "Organize design documents by creating a table of contents, adding page/section numbers, and managing callouts in mockups.",
   "authorEmail": "jbrick@gmail.com",
-  "name": "Organize Design Document"
+  "name": "Design Document Organizer"
 }
