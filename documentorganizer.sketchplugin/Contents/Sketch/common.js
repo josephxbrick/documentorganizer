@@ -135,6 +135,7 @@ const sortByVerticalPosition = (layers) => {
 // and moves all top-level layers on page such that the first artboard is at 0,0
 const sortArtboards = (doc, page) => {
   const artboards = page.artboards();
+  sortLayersByRows(artboards);
   artboards.forEach(artboard => {
     MSLayerMovement.moveToFront([artboard]);
   });
