@@ -13,17 +13,32 @@ const fmod = (val, modulus) => {
   return (((valInt % stepInt) + stepInt) % stepInt) / Math.pow(10, decCount)
 }
 
-const allArtboards = (page) => {
-  return toArray(page.layers()).filter(item => item.class() === MSArtboardGroup);
+// returns first layer from list with name
+const layerWithName = (layerList, className, name) => {
+  for (let i = 0; i < layerList.count(); i++){
+    const layer = layerList[i];
+    if (layer.class() === className && layer.name() == name){
+      return layer;
+    }
+  }
+  return undefined;
 }
 
-const layerWithName = (container, className, name) => {
-  return toArray(container.children()).find(item => item.class() === className && item.name() == name);
+const layersWithClass = (layerList, className) => {
+  const predicate = NSPredicate.predicateWithFormat('class == %@', className);
+  return layerList.filteredArrayUsingPredicate(predicate);
 }
 
-const layersWithName = (container, className, name) => {
-  return toArray(container.children()).filter(item => item.class() === className && item.name() == name);
+const layerWithClass = (layerList, className) => {
+  for (let i = 0; i < layerList.count(); i++){
+    const layer = layerList[i];
+    if (layer.class() === className){
+      return layer;
+    }
+  }
+  return undefined;
 }
+
 
 const addLeadingZeroes = (val, totalLength = 2) => {
   const stringVal = val.toString();
@@ -46,7 +61,7 @@ const logIt = (page, args, clear = false) => {
   // converts args to array if it's not already an array
   args = [].concat(args || []);
   // find the 'debug_output' layer on page
-  const debugTextLayer = toArray(page.layers()).filter(item => item.name() == 'debug_output')[0];
+  const debugTextLayer = layerWithName(page.layers(), MSTextLayer, 'debug_output');
   if (debugTextLayer === undefined) {
     return undefined;
   }
@@ -119,23 +134,22 @@ const sortByVerticalPosition = (layers) => {
 // sorts artboards in the layer list to match the layout order (determined by artboard position),
 // and moves all top-level layers on page such that the first artboard is at 0,0
 const sortArtboards = (doc, page) => {
-  const artboards = allArtboards(page);
-  sortLayersByRows(artboards);
-  for (const artboard of artboards) {
+  const artboards = page.artboards();
+  artboards.forEach(artboard => {
     MSLayerMovement.moveToFront([artboard]);
-  }
+  });
 
   // move all top-level layers (including artboards) such that the first artboard is at x:0,y:0
   const artBoardZero = artboards[0];
   const xOffset = artBoardZero.frame().x();
   const yOffset = artBoardZero.frame().y();
   if (xOffset != 0 || yOffset != 0) {
-    const layers = toArray(page.layers());
-    for (const layer of layers) {
+    const layers = page.layers();
+    layers.forEach(layer => {
       layer.frame().setX(layer.frame().x() - xOffset);
       layer.frame().setY(layer.frame().y() - yOffset);
-    }
-    // scroll Sketch's viewport to compensate for the movement of the artboards; this way nothing 
+    });
+    // scroll Sketch's viewport to compensate for the movement of the artboards; this way nothing
     // will visually move and the user won't lose their place
     const drawView = doc.contentDrawView();
     const curZoom = drawView.zoomValue();

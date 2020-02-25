@@ -140,20 +140,21 @@ const setTabOrder = (alert, controls) => {
 // receives: the current Sketch page
 // returns: value of the first '<documentTitle>' override found in document, or the stored/default value if not found in document.
 const docTitleFromDocument = (page) => {
-  let docTitle = undefined;
-  const artboards = allArtboards(page);
-  for (const artboard of artboards) {
-    const instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance)
-    for (const instance of instances) {
-      docTitle = getOverrideText(instance, '<documentTitle>');
-      if (docTitle != undefined) {
-        return docTitle;
-      }
+  const symbolInstances = layersWithClass(page.children(), MSSymbolInstance);
+  for (let i = 0; i < symbolInstances.count(); i++){
+    const instance = symbolInstances[i];
+    const docTitle = getOverrideText(instance, '<documentTitle>');
+    if (docTitle != undefined) {
+      return docTitle;
     }
   }
   // no override found; return stored value
   return storedValue('docTitle');
 }
+
+
+
+
 
 
 // ====================================================================================================

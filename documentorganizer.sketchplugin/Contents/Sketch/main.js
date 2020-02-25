@@ -1,9 +1,7 @@
 @import 'common.js';
 @import 'symbolfunctions.js';
 @import 'settings.js';
-const {
-  toArray
-} = require('util');
+
 
 //=======================================================================================================================
 //  Respond to plugin menu-items
@@ -82,12 +80,18 @@ _onDocumentSaved = (context, instance) => {
   const autoSaved = action.autosaved; // 0 if user manually saves
   const page = doc.currentPage();
   if (autoSaved == 0) {
-    const artboards = allArtboards(page);
-    for (const artboard of artboards) {
-      const instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
-      for (const instance of instances) {
-        setOverrideText(instance, '<currentDate>', dateFromTemplate(storedValue('dateFormatTemplate')));
+    const artboards = page.artboards();
+    const instances = layersWithClass(page.children(), MSSymbolInstance);
+    let dateCount = 0;
+    instances.forEach(instance => {
+      const retval = setOverrideText(instance, '<currentDate>', dateFromTemplate(storedValue('dateFormatTemplate')));
+      if (retval !== undefined) {
+        dateCount ++;
       }
+    });
+    if (dateCount > 0){
+      const summary = [`${dateCount} current-date ${(dateCount > 1) ? 'instances' : 'instance'} updated on Save`];
+      displaySummary(doc, summary);
     }
   }
 }
@@ -106,8 +110,7 @@ _onLayersResizedFinish = (context, instance) => {
   // get all layers that are being manually resized; note that this event does not
   // chain to children of the layer being resized
   const layers = action.layers;
-  for (let i = 0; i < layers.count(); i++) {
-    layer = layers[i];
+  layers.forEach(layer => {
     // lay out the TOC if the TOC group is being resized
     if (layer.name() == '<tocGroup>') {
       layoutTOC(doc);
@@ -115,7 +118,7 @@ _onLayersResizedFinish = (context, instance) => {
     if (layer.name() == '<calloutListGroup>') {
       layoutCalloutDescriptions(layer, doc);
     }
-  };
+  });
 }
 
 //=======================================================================================================================
@@ -132,13 +135,13 @@ const numberAndNameArtboards = (context, summary) => {
   const startPageNum = 1;
   let curPage = startPageNum;
   let firstPageFound = false;
-  const artboards = allArtboards(page);
+  const artboards = page.artboards();
   let runningSectionTitle = undefined;
   // find index of first character that isn't part of an section number prefix
-  for (const artboard of artboards) {
+  artboards.forEach(artboard => {
     let curPageTitle = curSectionTitle = undefined;
-    const instances = toArray(artboard.children()).filter(item => item.class() === MSSymbolInstance);
-    for (const instance of instances) {
+    const instances = layersWithClass(artboard.children(), MSSymbolInstance);
+    instances.forEach(instance => {
       if (setOverrideText(instance, '<pageNumber>', curPage.toString())) {
         firstPageFound = true;
       }
@@ -161,7 +164,7 @@ const numberAndNameArtboards = (context, summary) => {
       };
       setOverrideText(instance, '<documentTitle>', storedValue('docTitle'));
       setOverrideText(instance, '<currentSection>', removeSectionNumbers(runningSectionTitle));
-    }
+    });
     if (curSectionTitle || curPageTitle) {
       tocArray.push({
         sectionTitle: (curSectionTitle === undefined) ? '<undefined>' : curSectionTitle,
@@ -173,7 +176,7 @@ const numberAndNameArtboards = (context, summary) => {
       curPage++;
     }
     calloutsUpdated += updateCalloutsOnArtboard(artboard, doc);
-  }
+  });
   // summary
   summary.push(`${titlesAdded} artboards updated`);
   summary.push(`${calloutsUpdated} callouts updated`);
@@ -247,13 +250,13 @@ const tableOfContents = (context, tocArray, summary) => {
 // remove all previous TOC groups from the TOC
 const initializeTOC = (doc) => {
   const page = doc.currentPage();
-  const tocGroup = layerWithName(page, MSLayerGroup, '<tocGroup>');
+  const tocGroup = layerWithName(page.children(), MSLayerGroup, '<tocGroup>');
   if (tocGroup) {
     // remove all TOC groups.
-    const groups = toArray(tocGroup.layers()).filter(item => item.class() === MSLayerGroup);
-    for (const group of groups) {
+    const groups = layersWithClass(tocGroup.layers(), MSLayerGroup);
+    groups.forEach(group => {
       tocGroup.removeLayer(group);
-    }
+    });
     return true;
   } else {
     return undefined;
@@ -267,7 +270,7 @@ const createTOC = (doc, tocArray, summary) => {
   const page = doc.currentPage();
   const tocSectionMaster = symbolMasterWithOverrideName(doc, '<tocSectionTitle>');
   const tocPageMaster = symbolMasterWithOverrideName(doc, '<tocPageTitle>');
-  let tocGroup = layerWithName(page, MSLayerGroup, '<tocGroup>');
+  let tocGroup = layerWithName(page.children(), MSLayerGroup, '<tocGroup>');
   // The TOC will be broken up into groups. The plugin groups sections together (e.g.,
   // the section header is grouped with all of its pages). If there is a page with no
   // parent section, it gets its own group. The loop below creates the groups.
@@ -326,12 +329,12 @@ const createTOC = (doc, tocArray, summary) => {
     }
   }
   // now that all instances reside in the document, we can update their overrides
-  instances = toArray(tocGroup.children()).filter(item => item.class() === MSSymbolInstance);
-  for (const instance of instances) {
+  instances = layersWithClass(tocGroup.children(), MSSymbolInstance);
+  instances.forEach(instance => {
     setOverrideText(instance, '<tocPageNumber>', instance.pageNumber.toString());
     setOverrideText(instance, '<tocPageTitle>', instance.pageTitle.toString());
     setOverrideText(instance, '<tocSectionTitle>', instance.pageTitle.toString());
-  }
+  });
   summary.push(`${tocItemCount} items added to TOC`);
 }
 
@@ -339,18 +342,17 @@ const layoutTOC = (doc) => {
   // get stored colSpacing setting
   const colSpacing = Number(storedValue('tocColumnSpacing'));
   const page = doc.currentPage();
-  const tocGroup = layerWithName(page, MSLayerGroup, '<tocGroup>');
-  const tocRect = layerWithName(tocGroup, MSRectangleShape, '<tocGroupRect>')
+  const tocGroup = layerWithName(page.children(), MSLayerGroup, '<tocGroup>');
+  const tocRect = layerWithName(tocGroup.children(), MSRectangleShape, '<tocGroupRect>')
   const tocW = tocGroup.frame().width();
   const tocH = tocGroup.frame().height();
-  const groups = toArray(tocGroup.layers()).filter(item => item.class() === MSLayerGroup);
+  const groups = layersWithClass(tocGroup.layers(), MSLayerGroup);
   let curY = curCol = 0;
   // add groups to an array of columns while setting each group's vertical position
   const columns = [
     []
   ];
-  for (const group of groups) {
-
+  groups.forEach(group => {
     if (curY > 0 && curY + group.frame().height() > tocH) {
       // group extends beyond the height of the TOC, so create new column for it
       curCol++
@@ -360,7 +362,7 @@ const layoutTOC = (doc) => {
     group.frame().setY(curY);
     curY += group.frame().height();
     columns[curCol].push(group);
-  }
+  });
   // set each group's x position and width; also set each group's pinning
   const numColumns = columns.length;
   const colWidth = Math.round((tocW - colSpacing * (numColumns - 1)) / numColumns);
@@ -400,9 +402,9 @@ const layoutTOC = (doc) => {
 const checkPageSetup = (doc, summary) => {
   let retval = 'success';
   const page = doc.currentPage();
-  const artboards = allArtboards(page);
+  const artboards = page.artboards();
   // make sure page contains artboards. Return error immediately in not
-  if (artboards.length == 0) {
+  if (artboards.count() == 0) {
     summary.push('[ERROR]The current page contains no artboards.');
     return undefined;
   }
@@ -438,12 +440,12 @@ const checkPageSetup = (doc, summary) => {
       summary.push('[ERROR]Table of contents: No symbol with override <tocPageTitle> found.');
       retval = undefined;
     }
-    const tocGroup = layerWithName(page, MSLayerGroup, '<tocGroup>');
+    const tocGroup = layerWithName(page.children(), MSLayerGroup, '<tocGroup>');
     if (tocGroup === undefined) {
       summary.push('[ERROR]Table of contents: Group named <tocGroup> not found on any artboard.');
       retval = undefined;
     }
-    if (tocGroup && layerWithName(tocGroup, MSRectangleShape, '<tocGroupRect>') === undefined) {
+    if (tocGroup && layerWithName(tocGroup.children(), MSRectangleShape, '<tocGroupRect>') === undefined) {
       summary.push('[ERROR]Table of contents: <tocGroup> must contain a rectangle named <tocGroupRect>.');
       retval = undefined;
     }
@@ -458,58 +460,58 @@ const checkPageSetup = (doc, summary) => {
 
 const updateCalloutsOnArtboard = (artboard, doc) => {
   const useSections = storedValue('useSections');
-  const callouts = sortedCallouts(artboard));
-let sectionNumber = '';
-let calloutCount = 0;
-if (useSections) {
-  sectionNumber = artboard.name().substring(0, artboard.name().indexOf(' ')).concat('.');
-}
-// get all symbol instances on the current artboard and find the ones that we care about
-const calloutListDescriptions = [];
-for (const callout of callouts) {
-  calloutCount++;
-  let overrideText = getOverrideText(callout, '<calloutDescription>');
-  if (overrideText === null) {
-    overrideText = ''
+  const callouts = sortedCallouts(artboard);
+  let sectionNumber = '';
+  let calloutCount = 0;
+  if (useSections) {
+    sectionNumber = artboard.name().substring(0, artboard.name().indexOf(' ')).concat('.');
   }
-  const calloutNumber = (useSections) ? `${sectionNumber}${calloutCount}` : numberToLetters(calloutCount - 1);
-  setOverrideText(callout, '<calloutNumber>', calloutNumber);
-  // reset this to its normal value to avoid the bug where you can't change any override in the Sketch UI.
-  setOverrideText(callout, '<calloutDescription>', ' ');
-  setOverrideText(callout, '<calloutDescription>', overrideText);
-  calloutListDescriptions.push({
-    description: overrideText,
-    calloutNumber: calloutNumber
-  });
-  callout.setName(`${calloutNumber} - ${overrideText.substring(0,30)}...`);
-}
-if (calloutCount > 0) {
-  let calloutDescriptionsGroup = layerWithName(artboard, MSLayerGroup, '<calloutListGroup>');
-  if (calloutDescriptionsGroup == undefined) {
-    calloutDescriptionsGroup = createCalloutDescriptionGroup(artboard);
-  } else {
-    // remove existing groups from calloutDescriptionsGroup
-    const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() !== MSRectangleShape);
-    for (const instance of instances) {
-      calloutDescriptionsGroup.removeLayer(instance);
+  // get all symbol instances on the current artboard and find the ones that we care about
+  const calloutListDescriptions = [];
+  callouts.forEach(callout => {
+    calloutCount++;
+    let overrideText = getOverrideText(callout, '<calloutDescription>');
+    if (overrideText === null) {
+      overrideText = ''
     }
+    const calloutNumber = (useSections) ? `${sectionNumber}${calloutCount}` : numberToLetters(calloutCount - 1);
+    setOverrideText(callout, '<calloutNumber>', calloutNumber);
+    // reset this to its normal value to avoid the bug where you can't change any override in the Sketch UI.
+    setOverrideText(callout, '<calloutDescription>', ' ');
+    setOverrideText(callout, '<calloutDescription>', overrideText);
+    calloutListDescriptions.push({
+      description: overrideText,
+      calloutNumber: calloutNumber
+    });
+    callout.setName(`${calloutNumber} - ${overrideText.substring(0,30)}...`);
+  });
+  if (calloutCount > 0) {
+    let calloutDescriptionsGroup = layerWithName(artboard.children(), MSLayerGroup, '<calloutListGroup>');
+    if (calloutDescriptionsGroup == undefined) {
+      calloutDescriptionsGroup = createCalloutDescriptionGroup(artboard);
+    } else {
+      // remove existing groups from calloutDescriptionsGroup
+      const instances = layersWithClass(calloutDescriptionsGroup.layers(), MSSymbolInstance);
+      instances.forEach(instance => {
+        calloutDescriptionsGroup.removeLayer(instance);
+      });
+    }
+    // get reference to the listing symbol
+    const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
+    // add one symbol to calloutDescriptionsGroup per string in array
+    calloutListDescriptions.forEach(calloutListDescription => {
+      const instance = calloutDescriptionSymbol.newSymbolInstance();
+      instance.setConstrainProportions(0); // unlock the aspect ratio
+      instance.setFixed_forEdge_(true, 4); // pin left
+      instance.setFixed_forEdge_(true, 32); // pin top
+      calloutDescriptionsGroup.addLayers([instance]);
+      setOverrideText(instance, '<calloutListDescription>', calloutListDescription.description);
+      setOverrideText(instance, '<calloutListNumber>', calloutListDescription.calloutNumber);
+      instance.setName(calloutListDescription.calloutNumber);
+    });
+    layoutCalloutDescriptions(calloutDescriptionsGroup, doc);
   }
-  // get reference to the listing symbol
-  const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
-  // add one symbol to calloutDescriptionsGroup per string in array
-  for (const calloutListDescription of calloutListDescriptions) {
-    const instance = calloutDescriptionSymbol.newSymbolInstance();
-    instance.setConstrainProportions(0); // unlock the aspect ratio
-    instance.setFixed_forEdge_(true, 4); // pin left
-    instance.setFixed_forEdge_(true, 32); // pin top
-    calloutDescriptionsGroup.addLayers([instance]);
-    setOverrideText(instance, '<calloutListDescription>', calloutListDescription.description);
-    setOverrideText(instance, '<calloutListNumber>', calloutListDescription.calloutNumber);
-    instance.setName(calloutListDescription.calloutNumber);
-  }
-  layoutCalloutDescriptions(calloutDescriptionsGroup, doc);
-}
-return calloutCount;
+  return calloutCount;
 }
 
 const numberToLetters = (num) => {
@@ -520,7 +522,7 @@ const numberToLetters = (num) => {
 
 // lays out the descriptions for callouts in the calloutDescriptionsGroup
 const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
-  let groupRect = layerWithName(calloutDescriptionsGroup, MSRectangleShape, '<calloutGroupRect>')
+  let groupRect = layerWithName(calloutDescriptionsGroup.children(), MSRectangleShape, '<calloutGroupRect>')
   // if the rectangle is for some reason missing
   if (groupRect == undefined) {
     groupRect = MSRectangleShape.new();
@@ -540,9 +542,9 @@ const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
   const symbolPaddingVertical = calloutDescriptionSymbol.frame().height() - overrideLayer.frame().height();
   const symbolPaddingHorizonal = calloutDescriptionSymbol.frame().width() - overrideLayer.frame().width();
   // get all symbols in the group
-  const instances = toArray(calloutDescriptionsGroup.layers()).filter(item => item.class() === MSSymbolInstance);
+  const instances = layersWithClass(calloutDescriptionsGroup.layers(), MSSymbolInstance);
   let runningTop = 0;
-  for (const instance of instances) {
+  instances.forEach(instance => {
     instance.frame().setWidth(calloutDescriptionsGroup.frame().width());
     instance.frame().setY(runningTop);
     // Need to account for wrapping of text. Get copy of the description text area, set it to the width of the
@@ -554,7 +556,7 @@ const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
     overrideLayerCopy.setStringValue(getOverrideText(instance, '<calloutListDescription>'));
     runningTop += symbolPaddingVertical + overrideLayerCopy.frame().height();
     calloutDescriptionsGroup.removeLayer(overrideLayerCopy);
-  }
+  });
   // set the calloutDescriptionsGroup's rectangle to size of group, just in case
   calloutDescriptionsGroup.frame().setHeight(runningTop);
   groupRect.frame().setWidth(calloutDescriptionsGroup.frame().width());
@@ -567,16 +569,16 @@ const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
 const sortedCallouts = (artboard) => {
   let callouts = [];
   // get all top-level layer groups
-  const groups = toArray(artboard.layers()).filter(item => item.class() === MSLayerGroup);
+  const groups = layersWithClass(artboard.layers(), MSLayerGroup);
   sortByHorizontalPosition(groups);
-  for (const group of groups) {
-    const instances = toArray(group.children()).filter(item => item.class() === MSSymbolInstance);
+  groups.forEach(group => {
+    const instances = layersWithClass(group.children(), MSSymbolInstance);
     const calloutInstances = instancesWithOverride(instances, '<calloutDescription>');
     sortLayersByRows(calloutInstances);
     callouts = callouts.concat(calloutInstances);
-  }
+  });
   // get all ungrouped callout symbols
-  const ungroupedInstances = toArray(artboard.layers()).filter(item => item.class() === MSSymbolInstance);
+  const ungroupedInstances = layersWithClass(artboard.layers(), MSSymbolInstance);
   const calloutInstances = instancesWithOverride(ungroupedInstances, '<calloutDescription>');
   sortByVerticalPosition(calloutInstances);
   callouts = callouts.concat(calloutInstances);
@@ -609,35 +611,37 @@ const roundToNearestPixel = (context, summary) => {
   const doc = context.document;
   const page = doc.currentPage();
   const nearestPixelToRoundTo = Number(storedValue('nearestPixelToRoundTo').slice(0, 3));
-  const artboards = allArtboards(page);
-  let fixCount = 0;
-  for (const artboard of artboards) {
-    const layers = toArray(artboard.children()).filter(item => item.class() != MSLayerGroup);
-    for (const layer of layers) {
-      if (layer.parentGroup() !== undefined && layer.parentGroup().name() != '<calloutListGroup>' && layer.parentGroup().name().indexOf('<tocSection>') != 0) {
+  const artboards = page.artboards();
+  let checkedCount = 0
+  let fixedCount = 0;
+
+    const layers = page.children();
+    layers.forEach(layer => {
+      if (layer.parentGroup() && layer.parentGroup().name() != '<calloutListGroup>' && layer.parentGroup().name().indexOf('<tocSection>') != 0) {
+        checkedCount += 4;
         const frame = layer.frame();
         const x = frame.x();
         const y = frame.y();
         const w = frame.width();
         const h = frame.height();
         if (fmod(x, nearestPixelToRoundTo) != 0) {
-          fixCount++;
+          fixedCount++;
           frame.setX(Math.round(x / nearestPixelToRoundTo) * nearestPixelToRoundTo);
         }
         if (fmod(y, nearestPixelToRoundTo) != 0) {
-          fixCount++;
+          fixedCount++;
           frame.setY(Math.round(y / nearestPixelToRoundTo) * nearestPixelToRoundTo);
         }
         if (fmod(w, nearestPixelToRoundTo) != 0) {
-          fixCount++;
+          fixedCount++;
           frame.setWidth(Math.round(w / nearestPixelToRoundTo) * nearestPixelToRoundTo);
         }
         if (fmod(h, nearestPixelToRoundTo) != 0) {
-          fixCount++;
+          fixedCount++;
           frame.setHeight(Math.round(h / nearestPixelToRoundTo) * nearestPixelToRoundTo);
         }
       }
-    }
-  }
-  summary.push(`${fixCount} dimensions rounded to nearest ${nearestPixelToRoundTo.toFixed(1)} pixels`);
+    });
+
+  summary.push(`${fixedCount} dimensions rounded to nearest ${nearestPixelToRoundTo.toFixed(1)} pixels`);
 }
