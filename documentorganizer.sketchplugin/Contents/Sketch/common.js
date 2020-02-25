@@ -15,9 +15,9 @@ const fmod = (val, modulus) => {
 
 // returns first layer from list with name
 const layerWithName = (layerList, className, name) => {
-  for (let i = 0; i < layerList.count(); i++){
+  for (let i = 0; i < layerList.count(); i++) {
     const layer = layerList[i];
-    if (layer.class() === className && layer.name() == name){
+    if (layer.class() === className && layer.name() == name) {
       return layer;
     }
   }
@@ -30,9 +30,9 @@ const layersWithClass = (layerList, className) => {
 }
 
 const layerWithClass = (layerList, className) => {
-  for (let i = 0; i < layerList.count(); i++){
+  for (let i = 0; i < layerList.count(); i++) {
     const layer = layerList[i];
-    if (layer.class() === className){
+    if (layer.class() === className) {
       return layer;
     }
   }
@@ -113,10 +113,10 @@ const displaySummary = (doc, summary) => {
 // sort layers laid out in horizontal rows
 const sortLayersByRows = (layers) => {
   let minX = minY = Number.MAX_SAFE_INTEGER;
-  for (const layer of layers) {
+  layers.forEach(layer => {
     minX = Math.min(minX, layer.frame().x())
     minY = Math.min(minY, layer.frame().y())
-  }
+  });
   layers.sort((a, b) => sortVal(a, minX, minY) - sortVal(b, minX, minY));
 }
 const sortVal = (layer, minX, minY) => {
