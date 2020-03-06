@@ -1,4 +1,3 @@
-
 // assumes non-nested symbol
 const setOverrideText = (instance, overrideName, newText) => {
   const child = getOverrideLayerfromSymbolMaster(instance.symbolMaster(), overrideName);
@@ -56,10 +55,10 @@ const instancesWithOverride = (instances, overrideName) => {
 
 // gets the layer representing the override from a symbol master
 const getOverrideLayerfromSymbolMaster = (symbolMaster, overrideName) => {
-  const layerList = symbolMaster.layers()
-  for (let i = 0; i < layerList.count(); i++){
+  const layerList = symbolMaster.children();
+  for (let i = 0; i < layerList.count(); i++) {
     const layer = layerList[i];
-    if (layer.name() == overrideName){
+    if (layer.name() == overrideName) {
       return layer;
     }
   }
@@ -72,9 +71,9 @@ const symbolMasterWithOverrideName = (doc, overrideName) => {
   for (let i = 0; i < symbolMasters.count(); i++) {
     const symbolMaster = symbolMasters[i];
     const layers = symbolMaster.children();
-    for (let j = 0; j < layers.count(); j++){
+    for (let j = 0; j < layers.count(); j++) {
       const layer = layers[j];
-      if (layer.name() == overrideName){
+      if (layer.name() == overrideName) {
         return symbolMaster;
       }
     }
