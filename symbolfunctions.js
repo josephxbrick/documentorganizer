@@ -56,7 +56,7 @@ const instancesWithOverride = (instances, overrideName) => {
 
 // gets the layer representing the override from a symbol master
 const getOverrideLayerfromSymbolMaster = (symbolMaster, overrideName) => {
-  const layerList = symbolMaster.layers()
+  const layerList = symbolMaster.children()
   for (let i = 0; i < layerList.count(); i++){
     const layer = layerList[i];
     if (layer.name() == overrideName){
