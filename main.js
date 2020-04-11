@@ -490,6 +490,8 @@ const updateCalloutsOnArtboard = (artboard, doc) => {
     if (calloutDescriptionsGroup == undefined) {
       calloutDescriptionsGroup = createCalloutDescriptionGroup(artboard);
     } else {
+      calloutDescriptionsGroup.setFixed_forEdge_(true, 51); // constraints: fix width and height, pin top right
+
       // remove existing groups from calloutDescriptionsGroup
       const instances = layersWithClass(calloutDescriptionsGroup.layers(), MSSymbolInstance);
       instances.forEach(instance => {
@@ -603,6 +605,7 @@ const createCalloutDescriptionGroup = (artboard) => {
   group.addLayers([rect]);
   // make group fit its content
   sizeGroupToContent(group);
+  group.setFixed_forEdge_(true, 51); // constraints: fix width and height, pin top right
   return group;
 }
 
