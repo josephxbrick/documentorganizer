@@ -32,11 +32,6 @@ const settingsObjects = [{
     default: 1
   },
   {
-    name: 'docTitle',
-    key: 'organize_document_docTitle',
-    default: 'Document title'
-  },
-  {
     name: 'dateFormatChoice',
     key: 'organize_document_dateFormatChoice',
     default: 0
@@ -195,35 +190,8 @@ const settingsDialog = (context) => {
     width: controlMaxWidth,
     height: textHeight(13, 2)
   });
-  curY = addControlWithBottomPadding(control, controls, 18);
+  curY = addControlWithBottomPadding(control, controls, 22);
 
-  // ====================SETTING: document title ===============================
-
-  // label: document title
-  curY += 2;
-  control = createLabel("Title of document:", {
-    x: 0,
-    y: curY,
-    width: controlMaxWidth
-  });
-  controls.push(control);
-  curY -= 2;
-
-  // field: docment title
-  const titleField = createField(docTitle, {
-    x: 114,
-    y: curY,
-    width: 300
-  });
-  curY = addControlWithBottomPadding(titleField, controls, 14);
-
-  // divider line
-  control = createDivider({
-    x: 0,
-    y: curY,
-    width: controlMaxWidth
-  });
-  curY = addControlWithBottomPadding(control, controls, 12);
 
   // ======================SETTING: Table of contents ==========================
 
@@ -519,7 +487,6 @@ const settingsDialog = (context) => {
   const viewDocs = alert.addButtonWithTitle("View Documentation");
   // set the tab order
   setTabOrder(alert, [
-    titleField,
     useTOCCheckbox,
     spacingField,
     tocShowRadios,
@@ -539,7 +506,6 @@ const settingsDialog = (context) => {
     // user pressed OK, so save settings
     setStoredValue('useTOC', useTOCCheckbox.value);
     setStoredValue('tocColumnSpacing', spacingField.value);
-    setStoredValue('docTitle', titleField.value);
     setStoredValue('tocShowSectionsOnly', tocShowRadios.value);
     setStoredValue('dashType', stockDashes[dashStyleSelect.value]);
     setStoredValue('useSections', useSectionsCheckbox.value);

@@ -162,7 +162,6 @@ const numberAndNameArtboards = (context, summary) => {
         artboard.setName(curPageTitle);
         titlesAdded++;
       };
-      setOverrideText(instance, '<documentTitle>', storedValue('docTitle'));
       setOverrideText(instance, '<currentSection>', removeSectionNumbers(runningSectionTitle));
     });
     if (curSectionTitle || curPageTitle) {
