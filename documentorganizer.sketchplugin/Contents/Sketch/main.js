@@ -645,5 +645,5 @@ const roundToNearestPixel = (context, summary) => {
       }
     });
 
-  summary.push(`${fixedCount} dimensions rounded to nearest ${nearestPixelToRoundTo.toFixed(1)} pixels`);
+  summary.push(`${fixedCount} dimensions rounded to nearest ${nearestPixelToRoundTo} pixels`);
 }

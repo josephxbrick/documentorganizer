@@ -5,12 +5,22 @@ const sketch = require('sketch');
 // this function works when both numbers are floating-point
 // source: https://stackoverflow.com/questions/3966484/why-does-modulus-operator-return-fractional-number-in-javascript
 const fmod = (val, modulus) => {
-  const valDecCount = (val.toString().split('.')[1] || '').length;
+  const valDecCount = Math.min((val.toString().split('.')[1] || '').length, 20);
   const stepDecCount = (modulus.toString().split('.')[1] || '').length;
   const decCount = valDecCount > stepDecCount ? valDecCount : stepDecCount;
   const valInt = parseInt(val.toFixed(decCount).replace('.', ''));
   const stepInt = parseInt(modulus.toFixed(decCount).replace('.', ''));
   return (((valInt % stepInt) + stepInt) % stepInt) / Math.pow(10, decCount)
+}
+
+// get artboards out of bullshit NSFrozenArray
+const allArtboards = (page) => {
+  const artboards = page.artboards();
+  const newArtboards = [];
+  artboards.forEach(artboard => {
+    newArtboards.push(artboard);
+  });
+  return newArtboards;
 }
 
 // returns first layer from list with name
@@ -134,16 +144,19 @@ const sortByVerticalPosition = (layers) => {
 // sorts artboards in the layer list to match the layout order (determined by artboard position),
 // and moves all top-level layers on page such that the first artboard is at 0,0
 const sortArtboards = (doc, page) => {
-  const artboards = page.artboards();
+  const artboards = allArtboards(page);
   sortLayersByRows(artboards);
+  const xOffset = artboards[0].frame().x();
+  const yOffset = artboards[0].frame().y();
   artboards.forEach(artboard => {
-    MSLayerMovement.moveToFront([artboard]);
+    artboard.moveToLayer_beforeLayer(page,nil);
+    artboard.select_byExtendingSelection(0,1);
   });
 
   // move all top-level layers (including artboards) such that the first artboard is at x:0,y:0
-  const artBoardZero = artboards[0];
-  const xOffset = artBoardZero.frame().x();
-  const yOffset = artBoardZero.frame().y();
+
+
+
   if (xOffset != 0 || yOffset != 0) {
     const layers = page.layers();
     layers.forEach(layer => {
