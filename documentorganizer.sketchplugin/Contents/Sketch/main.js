@@ -80,7 +80,7 @@ _onDocumentSaved = (context, instance) => {
   const autoSaved = action.autosaved; // 0 if user manually saves
   const page = doc.currentPage();
   if (autoSaved == 0) {
-    const artboards = page.artboards();
+    const artboards = allArtboards(page);
     const instances = layersWithClass(page.children(), MSSymbolInstance);
     let dateCount = 0;
     instances.forEach(instance => {
@@ -135,7 +135,7 @@ const numberAndNameArtboards = (context, summary) => {
   const startPageNum = 1;
   let curPage = startPageNum;
   let firstPageFound = false;
-  const artboards = page.artboards();
+  const artboards = allArtboards(page);
   let runningSectionTitle = undefined;
   // find index of first character that isn't part of an section number prefix
   artboards.forEach(artboard => {
@@ -401,9 +401,9 @@ const layoutTOC = (doc) => {
 const checkPageSetup = (doc, summary) => {
   let retval = 'success';
   const page = doc.currentPage();
-  const artboards = page.artboards();
+  const artboards = allArtboards(page);
   // make sure page contains artboards. Return error immediately in not
-  if (artboards.count() == 0) {
+  if (artboards.length == 0) {
     summary.push('[ERROR]The current page contains no artboards.');
     return undefined;
   }
@@ -613,7 +613,7 @@ const roundToNearestPixel = (context, summary) => {
   const doc = context.document;
   const page = doc.currentPage();
   const nearestPixelToRoundTo = Number(storedValue('nearestPixelToRoundTo').slice(0, 3));
-  const artboards = page.artboards();
+  const artboards = allArtboards(page);
   let checkedCount = 0
   let fixedCount = 0;
 
