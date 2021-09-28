@@ -298,11 +298,13 @@ const createTOC = (doc, tocArray, summary) => {
         instance = tocPageMaster.newSymbolInstance();
         instance.frame().setWidth(initColWidth);
       }
+      instance.frame().setConstrainProportions(0); // unlock the aspect ratio
       // store text values into object properties, because we can't set the overrides
       // yet as the instances are not part of the document
       instance.pageTitle = (tocItem.sectionTitle != '<undefined>') ? tocItem.sectionTitle : tocItem.pageTitle;
       instance.setName(`${(tocItem.sectionTitle != '<undefined>') ? '<tocSectionEntry>' : '<tocPageEntry>'} ${instance.pageTitle}`);
       instance.pageNumber = tocItem.pageNumber;
+      // instance.frame().setRectByIgnoringProportions(NSMakeRect(0, runningTop, initColWidth, instance.frame().height()));
       instance.frame().setX(0);
       instance.frame().setY(runningTop);
       runningTop += instance.frame().height();
@@ -314,6 +316,7 @@ const createTOC = (doc, tocArray, summary) => {
         // or the next item starts a new section, or we're only showing sections in the TOC,
         // so let's add the items we've been collecting to a new group
         let tocEntry = MSLayerGroup.new();
+        tocEntry.frame().setConstrainProportions(0); // unlock aspect ratio
         groupNumber++;
         tocEntry.setName(curGroupName);
         tocEntry.addLayers(curGroup);
@@ -500,6 +503,7 @@ const updateCalloutsOnArtboard = (artboard, doc) => {
     // add one symbol to calloutDescriptionsGroup per string in array
     calloutListDescriptions.forEach(calloutListDescription => {
       const instance = calloutDescriptionSymbol.newSymbolInstance();
+      instance.frame().setConstrainProportions(0); // unlock the aspect ratio
       instance.setFixed_forEdge_(true, 4); // pin left
       instance.setFixed_forEdge_(true, 32); // pin top
       calloutDescriptionsGroup.addLayers([instance]);
@@ -526,6 +530,7 @@ const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
     groupRect = MSRectangleShape.new();
     groupRect.setName('<calloutGroupRect>');
     // turn off constrain proportions
+    groupRect.frame().setConstrainProportions(0);
     groupRect.frame().setWidth(calloutDescriptionsGroup.frame().width());
     groupRect.frame().setHeight(calloutDescriptionsGroup.frame().height());
     calloutDescriptionsGroup.addLayers([groupRect]);
@@ -589,6 +594,8 @@ const createCalloutDescriptionGroup = (artboard) => {
   group.setName('<calloutListGroup>');
   rect.setName('<calloutGroupRect>');
   // turn off constrain proportions
+  rect.frame().setConstrainProportions(0);
+  group.frame().setConstrainProportions(0);
   // position group
   group.frame().setX(Math.round(artboard.frame().width() * 0.72));
   group.frame().setY(Math.round(artboard.frame().height() * 0.07));
