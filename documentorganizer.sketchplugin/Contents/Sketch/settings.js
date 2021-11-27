@@ -520,8 +520,8 @@ const settingsDialog = (context) => {
     y: curY,
     width: controlMaxWidth
   }, roundToPixelCallback);
-  controls.push(roundToPixelCheckbox);
-  curY -= 6;
+  // controls.push(roundToPixelCheckbox);
+  // curY -= 6;
 
   const roundToPixelText = "Round each layer's x, y, width and height to nearest [n] pixels."
   const roundToPixelDropdownChanged = (dropdown) => {
@@ -535,7 +535,7 @@ const settingsDialog = (context) => {
     width: 198,
   }, roundToPixelDropdownChanged);
   roundToPixelSelect.setEnabled(storedValue('roundToNearestPixel'));
-  curY = addControlWithBottomPadding(roundToPixelSelect, controls, -1);
+  // curY = addControlWithBottomPadding(roundToPixelSelect, controls, -1);
 
   // description
   roundToPixelDescription = createDescription(roundToPixelText, NSColor.secondaryLabelColor(), 12, {
@@ -544,7 +544,7 @@ const settingsDialog = (context) => {
     width: controlMaxWidth,
     height: textHeight(12, 1)
   });
-  curY = addControlWithBottomPadding(roundToPixelDescription, controls, 14);
+  // curY = addControlWithBottomPadding(roundToPixelDescription, controls, 14);
   roundToPixelDescription.value = roundToPixelText.replace('[n]', storedValue('nearestPixelToRoundTo').slice(0, 3));
 
   // ===========================================================================
@@ -594,7 +594,7 @@ const settingsDialog = (context) => {
     setStoredValue('usePageSpacing', usePageSpacingCheckbox.value);
     setStoredValue('pageSpacingH', horizontalSpacingField.value);
     setStoredValue('pageSpacingV', verticalSpacingField.value);
-    setStoredValue('roundToNearestPixel', roundToPixelCheckbox.value);
+    setStoredValue('roundToNearestPixel', 0);
     setStoredValue('nearestPixelToRoundTo', stockRoundedPixels[roundToPixelSelect.value]);
 
     if (dateFormatRadios.value == 2) {
