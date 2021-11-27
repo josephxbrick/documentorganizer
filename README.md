@@ -321,23 +321,9 @@ The image below shows two mobile mockups, where each mockup has been grouped wit
 
 ---
 
-# Round dimensions to nearest pixel
+# Set spacing between artboards
 
-This option will round each layer's x, y, width and height to the nearest pixel specified.
-
-## To nearest 0.1 pixels
-
-This rounds each dimension to the nearest 0.1 pixel, so both 100.37 and 100.43 become 100.4.
-
-## To nearest 0.5 pixels
-
-This rounds each dimension to the nearest 0.5 pixel, so both 100.37 and 100.63 become 100.5.
-
-This is recommended if the pixel-fitting preference is on, as upon resizing groups some layers might be moved or sized to a non-integer pixel value. Keeping such an object to the nearest half pixel will be more likely not to change the appearance or throw things out of alignment.
-
-## To nearest 1.0 pixels
-
-This rounds each dimension to the nearest whole number.
+Use this to adjust the horizontal and vertical spacing between artboards on your page. Note that the vertical spacing for rows of artboards spaces from the tallest artboard in the row.
 
 ---
 
