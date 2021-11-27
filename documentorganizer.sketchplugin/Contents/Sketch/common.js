@@ -1,650 +1,323 @@
-@import 'common.js';
-@import 'symbolfunctions.js';
-@import 'settings.js';
+const UI = require('sketch/ui');
+const sketch = require('sketch');
 
-
-//=======================================================================================================================
-//  Respond to plugin menu-items
-//=======================================================================================================================
-
-_settings = (context) => {
-  let summary = [];
-  const doc = context.document;
-  page = doc.currentPage();
-
-  const val = settingsDialog(context);
-  if (val === undefined) {
-    return;
-  }
-  // check if current page is set up for plugin
-  if (checkPageSetup(doc, summary)) {
-    setTimeout(() => {
-      sortArtboards(doc, page, { hSpacing: storedValue('pageSpacingH'), vSpacing: storedValue('pageSpacingV'), moveArtboards: storedValue('usePageSpacing') });
-      const tocArray = numberAndNameArtboards(context, summary);
-      if (storedValue('useTOC')) {
-        tableOfContents(context, tocArray, summary);
-      }
-      if (storedValue('roundToNearestPixel')) {
-        roundToNearestPixel(context, summary);
-      }
-      displaySummary(doc, summary);
-    }, 0);
-    doc.showMessage('Updating artboards. This may take a moment...');
-  } else {
-    // something is wrong with setup – inform user
-    displaySummary(doc, summary);
-  }
+// javascript's modulo operator does not support a floating-point modulus
+// this function works when both numbers are floating-point
+// source: https://stackoverflow.com/questions/3966484/why-does-modulus-operator-return-fractional-number-in-javascript
+const fmod = (val, modulus) => {
+  const valDecCount = Math.min((val.toString().split('.')[1] || '').length, 20);
+  const stepDecCount = (modulus.toString().split('.')[1] || '').length;
+  const decCount = valDecCount > stepDecCount ? valDecCount : stepDecCount;
+  const valInt = parseInt(val.toFixed(decCount).replace('.', ''));
+  const stepInt = parseInt(modulus.toFixed(decCount).replace('.', ''));
+  return (((valInt % stepInt) + stepInt) % stepInt) / Math.pow(10, decCount)
 }
 
-
-_organizeDocument = (context) => {
-  let summary = [];
-  const doc = context.document;
-  page = doc.currentPage();
-  // check if current page is set up for plugin
-  if (checkPageSetup(doc, summary)) {
-    setTimeout(() => {
-      sortArtboards(doc, page, { hSpacing: storedValue('pageSpacingH'), vSpacing: storedValue('pageSpacingV'), moveArtboards: storedValue('usePageSpacing') });
-      const tocArray = numberAndNameArtboards(context, summary);
-      if (storedValue('useTOC')) {
-        tableOfContents(context, tocArray, summary);
-      }
-      if (storedValue('roundToNearestPixel')) {
-        roundToNearestPixel(context, summary);
-      }
-      displaySummary(doc, summary);
-    }, 0);
-    doc.showMessage('Updating artboards. This may take a moment...');
-  } else {
-    // something is wrong with setup – inform user
-    displaySummary(doc, summary);
-  }
-}
-
-_updateCalloutsOnArtboard = (context) => {
-  const doc = context.document;
-  const page = doc.currentPage();
-  artboard = page.currentArtboard();
-  if (artboard == null) {
-    alert('No artboard selected', 'Select at least one layer on the artboard, or select the artboard itself.');
-  } else {
-    const calloutsUpdated = updateCalloutsOnArtboard(artboard, doc);
-    const summary = [`${calloutsUpdated} callouts updated`];
-    displaySummary(doc, summary);
-  }
-}
-
-_onDocumentSaved = (context, instance) => {
-  const action = context.actionContext;
-  const doc = action.document;
-  const autoSaved = action.autosaved; // 0 if user manually saves
-  const page = doc.currentPage();
-  if (autoSaved == 0) {
-    const artboards = allArtboards(page);
-    const instances = layersWithClass(page.children(), MSSymbolInstance);
-    let dateCount = 0;
-    instances.forEach(instance => {
-      const retval = setOverrideText(instance, '<currentDate>', dateFromTemplate(storedValue('dateFormatTemplate')));
-      if (retval !== undefined) {
-        dateCount ++;
-      }
-    });
-    if (dateCount > 0){
-      const summary = [`${dateCount} current-date ${(dateCount > 1) ? 'instances' : 'instance'} updated on Save`];
-      displaySummary(doc, summary);
-    }
-  }
-}
-
-// _onTextChangedFinished = (context, instance) => {
-//   const action = context.actionContext;
-//   const doc = action.document;
-//   const page = doc.currentPage();
-//   logIt(page, action.new());
-// }
-
-// called when any layer is resized; this is defined in manifest.json
-_onLayersResizedFinish = (context, instance) => {
-  const action = context.actionContext;
-  const doc = action.document;
-  // get all layers that are being manually resized; note that this event does not
-  // chain to children of the layer being resized
-  const layers = action.layers;
-  layers.forEach(layer => {
-    // lay out the TOC if the TOC group is being resized
-    if (layer.name() == '<tocGroup>') {
-      layoutTOC(doc);
-    }
-    if (layer.name() == '<calloutListGroup>') {
-      layoutCalloutDescriptions(layer, doc);
-    }
-  });
-}
-
-//=======================================================================================================================
-//  Add section numbering to page/section title instances, name artboards after page/section/document title instances,
-//  update all doc-title symbol instances, update all current-date instances, update all callouts, return tocArray which
-//  is used by createTOC() function
-//=======================================================================================================================
-const numberAndNameArtboards = (context, summary) => {
-  // get stored useSections setting
-  const tocArray = [];
-  const doc = context.document;
-  const page = doc.currentPage();
-  let sectionNumber = sectionPageNumber = titlesAdded = calloutsUpdated = 0;
-  const startPageNum = 1;
-  let curPage = startPageNum;
-  let firstPageFound = false;
-  const artboards = allArtboards(page);
-  let runningSectionTitle = undefined;
-  // find index of first character that isn't part of an section number prefix
+// get artboards out of bullshit NSFrozenArray
+const allArtboards = (page) => {
+  const artboards = page.artboards();
+  const newArtboards = [];
   artboards.forEach(artboard => {
-    let curPageTitle = curSectionTitle = undefined;
-    const instances = layersWithClass(artboard.children(), MSSymbolInstance);
-    instances.forEach(instance => {
-      if (setOverrideText(instance, '<pageNumber>', curPage.toString())) {
-        firstPageFound = true;
-      }
-      // check if current instance contains override '<sectionTitle>'
-      if (instanceHasOverride(instance, '<sectionTitle>')) {
-        sectionNumber++;
-        sectionPageNumber = 0;
-        curSectionTitle = runningSectionTitle = addSectionNumbers(getOverrideText(instance, '<sectionTitle>'), sectionNumber, sectionPageNumber);
-        setOverrideText(instance, '<sectionTitle>', curSectionTitle);
-        artboard.setName(curSectionTitle);
-        titlesAdded++;
-      }
-      // check if current instance contains override '<pageTitle>'
-      if (instanceHasOverride(instance, '<pageTitle>')) {
-        sectionPageNumber++;
-        curPageTitle = addSectionNumbers(getOverrideText(instance, '<pageTitle>'), sectionNumber, sectionPageNumber);
-        setOverrideText(instance, '<pageTitle>', curPageTitle);
-        artboard.setName(curPageTitle);
-        titlesAdded++;
-      };
-      setOverrideText(instance, '<currentSection>', removeSectionNumbers(runningSectionTitle));
-    });
-    if (curSectionTitle || curPageTitle) {
-      tocArray.push({
-        sectionTitle: (curSectionTitle === undefined) ? '<undefined>' : curSectionTitle,
-        pageTitle: (curPageTitle === undefined) ? '<undefined>' : curPageTitle,
-        pageNumber: (curPage === undefined) ? '<undefined>' : curPage
-      });
-    }
-    if (firstPageFound) {
-      curPage++;
-    }
-    calloutsUpdated += updateCalloutsOnArtboard(artboard, doc);
+    newArtboards.push(artboard);
   });
-  // summary
-  summary.push(`${titlesAdded} artboards updated`);
-  summary.push(`${calloutsUpdated} callouts updated`);
-  return tocArray;
+  return newArtboards;
 }
 
-const prefixEndIndex = (text) => {
-  const ndash = '\u2013';
-  const mdash = '\u2014';
-  const possibleIndexChars = '1234567890 .-'.concat(ndash).concat(mdash);
-  const charArray = text.trim().split('');
-  for (let i = 0; i < charArray.length; i++) {
-    const char = charArray[i];
-    if (possibleIndexChars.indexOf(char) < 0) {
-      return i;
+// returns first layer from list with name
+const layerWithName = (layerList, className, name) => {
+  for (let i = 0; i < layerList.count(); i++) {
+    const layer = layerList[i];
+    if (layer.class() === className && layer.name() == name) {
+      return layer;
     }
   }
-  return 0;
+  return undefined;
 }
-// adds section numbers, makes all dashes match the dash preference
-const addSectionNumbers = (text, sectionNumber, sectionPageNumber) => {
-  const endIndex = prefixEndIndex(text);
-  let retval = undefined;
-  const desiredDash = storedValue('dashType');
-  if (storedValue('useSections')) {
-    if (sectionPageNumber == 0) {
-      retval = `${sectionNumber} ${desiredDash} ${text.substring(endIndex)}`
-    } else {
-      retval = `${sectionNumber}.${sectionPageNumber} ${desiredDash} ${text.substring(endIndex)}`
+
+const layersWithClass = (layerList, className) => {
+  const predicate = NSPredicate.predicateWithFormat('class == %@', className);
+  return layerList.filteredArrayUsingPredicate(predicate);
+}
+
+const layerWithClass = (layerList, className) => {
+  for (let i = 0; i < layerList.count(); i++) {
+    const layer = layerList[i];
+    if (layer.class() === className) {
+      return layer;
     }
-  } else {
-    retval = `${text.substring(endIndex)}`
   }
-  return retval
+  return undefined;
 }
 
-const removeSectionNumbers = (text) => {
-  if (text) {
-    const endIndex = prefixEndIndex(text);
-    return `${text.substring(endIndex)}`
-  }
+
+const addLeadingZeroes = (val, totalLength = 2) => {
+  const stringVal = val.toString();
+  return '0'.repeat(totalLength - stringVal.length).concat(stringVal);
 }
 
-//=======================================================================================================================
-//  Table of contents
-//
-//  This creates a table of contents for artboards on the current page. This plugin assumes that the TOC is broken into
-//  sections, where each section is headed by an artboard containg a section-title symbol instance, and that all artboards
-//  belonging to a section contain a page-title symbol instance.
-//
-//  Required elements:
-//    Each artboard that will be represented in the TOC must have either:
-//    - A symbol instance with a text override named <sectionTitle> on all artboards you want a TOC section entry
-//    - A symbol instance with a text override named <pageTitle> on all artboards you want a TOC page entry
-//    Page numbers are also required. Page numbering will start at 1 upon finding the first instance of:
-//    - A symbol instance with a text override named <pageNumber> on any artboard you want the TOC to show a page number
-//    The TOC requires the following symbols. The plugin will create instances of them to create the TOC.
-//    - A symbol (on the Symbols page) with text overrides <tocSectionTitle> and <tocPageNumber>
-//      This symbol will be instantiated in the TOC for each page that has a section-title instance (see above)
-//    - A symbol (on the Symbols page) with text overrides <tocPageTitle> and <tocPageNumber>
-//      This symbol will be instantiated in the TOC for each page that has a page-title instance (see above)
-//=======================================================================================================================
-
-const tableOfContents = (context, tocArray, summary) => {
-  const doc = context.document;
-  initializeTOC(doc)
-  createTOC(doc, tocArray, summary);
-  layoutTOC(doc);
+const addTrailingZeroes = (val, totalLength = 2) => {
+  const stringVal = val.toString();
+  return stringVal.concat('0'.repeat(totalLength - stringVal.length));
 }
 
-// remove all previous TOC groups from the TOC
-const initializeTOC = (doc) => {
-  const page = doc.currentPage();
-  const tocGroup = layerWithName(page.children(), MSLayerGroup, '<tocGroup>');
-  if (tocGroup) {
-    // remove all TOC groups.
-    const groups = layersWithClass(tocGroup.layers(), MSLayerGroup);
-    groups.forEach(group => {
-      tocGroup.removeLayer(group);
-    });
-    return true;
-  } else {
+// returns a timestamp
+const timeStamp = () => {
+  const now = new Date();
+  return `${addLeadingZeroes(now.getHours())}:${addLeadingZeroes(now.getMinutes())}:${addLeadingZeroes(now.getSeconds())}.${addTrailingZeroes(now.getMilliseconds(), 3)}`;
+}
+// assumes an existing text layer called 'debug_output' on the current page that's NOT in a group or artboard
+// parameters: the Sketch page object, the thing (or an array of things) to log, whether or not to clear previous logs
+const logIt = (page, args, clear = false) => {
+  // converts args to array if it's not already an array
+  args = [].concat(args || []);
+  // find the 'debug_output' layer on page
+  const debugTextLayer = layerWithName(page.layers(), MSTextLayer, 'debug_output');
+  if (debugTextLayer === undefined) {
     return undefined;
   }
+  // clear out previous logs
+  if (clear) {
+    debugTextLayer.setStringValue("Debug output:");
+  }
+  // construct debug string from args[], delimited by the pipe character
+  if (args.length > 0) {
+    let debugString = `(${timeStamp()}): `;
+    for (arg of args) {
+      debugString = `${debugString}${arg.toString()} | `;
+    }
+    // get rid of trailing pipe delimiter
+    debugString = debugString.slice(0, debugString.length - 3);
+    // add debug string to debug_output text layer
+    debugTextLayer.setStringValue(`${debugTextLayer.stringValue()}\n${debugString}`);
+  }
 }
 
-// load the TOC with sectionTitle and pageTitle instances
-const createTOC = (doc, tocArray, summary) => {
-  const showSectionsOnly = (storedValue('tocShowSectionsOnly') == 0) ? true : false;
-  let tocItemCount = 0;
-  const page = doc.currentPage();
-  const tocSectionMaster = symbolMasterWithOverrideName(doc, '<tocSectionTitle>');
-  const tocPageMaster = symbolMasterWithOverrideName(doc, '<tocPageTitle>');
-  let tocGroup = layerWithName(page.children(), MSLayerGroup, '<tocGroup>');
-  // The TOC will be broken up into groups. The plugin groups sections together (e.g.,
-  // the section header is grouped with all of its pages). If there is a page with no
-  // parent section, it gets its own group. The loop below creates the groups.
-  let curGroup = [];
-  let curGroupName = undefined;
-  let runningTop = 0;
-  let groupNumber = 0;
-  let isPartOfSection = false;
-  let instance = undefined
-  let initColWidth = 100; // this is to make sure that sections are same width as pages
-  for (let i = 0; i < tocArray.length; i++) {
-    let tocItem = tocArray[i];
-    if (showSectionsOnly == true && tocItem.sectionTitle != '<undefined>' || !showSectionsOnly) {
-      tocItemCount++;
-      if (curGroup.length == 0) {
-        curGroupName = `<tocSection> ${(tocItem.sectionTitle != '<undefined>') ? tocItem.sectionTitle : tocItem.pageTitle}`;
-      }
-      if (tocItem.sectionTitle != '<undefined>') {
-        // this item is a TOC section header
-        instance = tocSectionMaster.newSymbolInstance();
-        instance.frame().setWidth(initColWidth);
-        // we've just started a new section, so set isPartOfSection to true
-        isPartOfSection = true;
-      } else if (tocItem.pageTitle != '<undefined>') {
-        // this item is a TOC page
-        instance = tocPageMaster.newSymbolInstance();
-        instance.frame().setWidth(initColWidth);
-      }
-      instance.frame().setConstrainProportions(0); // unlock the aspect ratio
-      // store text values into object properties, because we can't set the overrides
-      // yet as the instances are not part of the document
-      instance.pageTitle = (tocItem.sectionTitle != '<undefined>') ? tocItem.sectionTitle : tocItem.pageTitle;
-      instance.setName(`${(tocItem.sectionTitle != '<undefined>') ? '<tocSectionEntry>' : '<tocPageEntry>'} ${instance.pageTitle}`);
-      instance.pageNumber = tocItem.pageNumber;
-      // instance.frame().setRectByIgnoringProportions(NSMakeRect(0, runningTop, initColWidth, instance.frame().height()));
-      instance.frame().setX(0);
-      instance.frame().setY(runningTop);
-      runningTop += instance.frame().height();
-      // add the instance to the array we're building; we will eventually add this
-      // array to a group
-      curGroup.push(instance);
-      if (i == tocArray.length - 1 || isPartOfSection == false || tocArray[i + 1].sectionTitle != '<undefined>' || showSectionsOnly) {
-        // the current item is either the very last TOC item, or it's a sectionless TOC page,
-        // or the next item starts a new section, or we're only showing sections in the TOC,
-        // so let's add the items we've been collecting to a new group
-        let tocEntry = MSLayerGroup.new();
-        tocEntry.frame().setConstrainProportions(0); // unlock aspect ratio
-        groupNumber++;
-        tocEntry.setName(curGroupName);
-        tocEntry.addLayers(curGroup);
-        sizeGroupToContent(tocEntry); // fit group to its contents
-        tocGroup.addLayers([tocEntry]); // add the group to the TOC
-        // get ready to start a new group
-        curGroup = [];
-        isPartOfSection = false;
-      }
-    }
-  }
-  // now that all instances reside in the document, we can update their overrides
-  instances = layersWithClass(tocGroup.children(), MSSymbolInstance);
-  instances.forEach(instance => {
-    setOverrideText(instance, '<tocPageNumber>', instance.pageNumber.toString());
-    setOverrideText(instance, '<tocPageTitle>', instance.pageTitle.toString());
-    setOverrideText(instance, '<tocSectionTitle>', instance.pageTitle.toString());
-  });
-  summary.push(`${tocItemCount} items added to TOC`);
+const isNumeric = (value) => {
+  return !isNaN(value - parseFloat(value));
 }
 
-const layoutTOC = (doc) => {
-  // get stored colSpacing setting
-  const colSpacing = Number(storedValue('tocColumnSpacing'));
-  const page = doc.currentPage();
-  const tocGroup = layerWithName(page.children(), MSLayerGroup, '<tocGroup>');
-  const tocRect = layerWithName(tocGroup.children(), MSRectangleShape, '<tocGroupRect>')
-  const tocW = tocGroup.frame().width();
-  const tocH = tocGroup.frame().height();
-  const groups = layersWithClass(tocGroup.layers(), MSLayerGroup);
-  let curY = curCol = 0;
-  // add groups to an array of columns while setting each group's vertical position
-  const columns = [
-    []
-  ];
-  groups.forEach(group => {
-    if (curY > 0 && curY + group.frame().height() > tocH) {
-      // group extends beyond the height of the TOC, so create new column for it
-      curCol++
-      columns.push([]);
-      curY = 0;
-    }
-    group.frame().setY(curY);
-    curY += group.frame().height();
-    columns[curCol].push(group);
-  });
-  // set each group's x position and width; also set each group's pinning
-  const numColumns = columns.length;
-  const colWidth = Math.round((tocW - colSpacing * (numColumns - 1)) / numColumns);
-  for (let i = 0; i < numColumns; i++) {
-    let column = columns[i];
-    let x = i * (colWidth + colSpacing);
-    for (let j = 0; j < column.length; j++) {
-      const group = column[j];
-      // set all pinning to false
-      group.setFixed_forEdge_(false, 32) //pin top
-      group.setFixed_forEdge_(false, 1) // pin right
-      group.setFixed_forEdge_(false, 4) // pin left
-      // fix height of group
-      group.setFixed_forEdge_(true, 16); // fixed height
-      // set x and width
-      group.frame().setX(x);
-      group.frame().setWidth(colWidth);
-      if (j == 0) {
-        // group is top group of column
-        group.setFixed_forEdge_(true, 32); // pin top
-      }
-      if (i == 0) {
-        // group is leftmost group
-        group.setFixed_forEdge_(true, 4); // pin left
-      } else if (i == numColumns - 1) {
-        // group is rightmost group
-        group.setFixed_forEdge_(true, 1); // pin right
-      }
-    }
-  }
-  // set the tocGroup's rectangle to size of group, just in case
-  tocRect.frame().setWidth(tocGroup.frame().width());
-  tocRect.frame().setHeight(tocGroup.frame().height());
-}
-
-// make sure current page is set up for this plugin
-const checkPageSetup = (doc, summary) => {
-  let retval = 'success';
-  const page = doc.currentPage();
-  const artboards = allArtboards(page);
-  // make sure page contains artboards. Return error immediately in not
-  if (artboards.length == 0) {
-    summary.push('[ERROR]The current page contains no artboards.');
-    return undefined;
-  }
-  // check for page numbers, section titles and page titles;
-  const pageNumber = symbolMasterWithOverrideName(doc, '<pageNumber>');
-  if (pageNumber === undefined) {
-    summary.push('[ERROR]No symbol with override <pageNumber> found.');
-    retval = undefined;
-  }
-  const sectionTitle = symbolMasterWithOverrideName(doc, '<sectionTitle>');
-  if (sectionTitle === undefined) {
-    summary.push('[ERROR]No symbol with override <sectionTitle> found.');
-    retval = undefined;
-  }
-  const pageTitle = symbolMasterWithOverrideName(doc, '<pageTitle>');
-  if (pageTitle === undefined) {
-    summary.push('[ERROR]No symbol with override <pageTitle> found.');
-    retval = undefined;
-  }
-  if (retval === undefined) {
-    // page numbers, section titles and/or page titles are absent
-    return retval;
-  }
-  // check for TOC stuff
-  if (storedValue('useTOC')) {
-    const tocSectionTitle = symbolMasterWithOverrideName(doc, '<tocSectionTitle>');
-    if (tocSectionTitle === undefined) {
-      summary.push('[ERROR]Table of contents: No symbol with override <tocSectionTitle> found.');
-      retval = undefined;
-    }
-    const tocPageTitle = symbolMasterWithOverrideName(doc, '<tocPageTitle>');
-    if (tocPageTitle === undefined) {
-      summary.push('[ERROR]Table of contents: No symbol with override <tocPageTitle> found.');
-      retval = undefined;
-    }
-    const tocGroup = layerWithName(page.children(), MSLayerGroup, '<tocGroup>');
-    if (tocGroup === undefined) {
-      summary.push('[ERROR]Table of contents: Group named <tocGroup> not found on any artboard.');
-      retval = undefined;
-    }
-    if (tocGroup && layerWithName(tocGroup.children(), MSRectangleShape, '<tocGroupRect>') === undefined) {
-      summary.push('[ERROR]Table of contents: <tocGroup> must contain a rectangle named <tocGroupRect>.');
-      retval = undefined;
-    }
-  }
-  return retval;
-}
-
-//=======================================================================================================================
-//  Callouts
-//=======================================================================================================================
-
-
-const updateCalloutsOnArtboard = (artboard, doc) => {
-  const useSections = storedValue('useSections');
-  const callouts = sortedCallouts(artboard);
-  let sectionNumber = '';
-  let calloutCount = 0;
-  if (useSections) {
-    sectionNumber = artboard.name().substring(0, artboard.name().indexOf(' ')).concat('.');
-  }
-  // get all symbol instances on the current artboard and find the ones that we care about
-  const calloutListDescriptions = [];
-  callouts.forEach(callout => {
-    calloutCount++;
-    let overrideText = getOverrideText(callout, '<calloutDescription>');
-    if (overrideText === null) {
-      overrideText = ''
-    }
-    const calloutNumber = (useSections) ? `${sectionNumber}${calloutCount}` : numberToLetters(calloutCount - 1);
-    setOverrideText(callout, '<calloutNumber>', calloutNumber);
-    // reset this to its normal value to avoid the bug where you can't change any override in the Sketch UI.
-    setOverrideText(callout, '<calloutDescription>', ' ');
-    setOverrideText(callout, '<calloutDescription>', overrideText);
-    calloutListDescriptions.push({
-      description: overrideText,
-      calloutNumber: calloutNumber
-    });
-    callout.setName(`${calloutNumber} - ${overrideText.substring(0,30)}...`);
-  });
-  if (calloutCount > 0) {
-    let calloutDescriptionsGroup = layerWithName(artboard.children(), MSLayerGroup, '<calloutListGroup>');
-    if (calloutDescriptionsGroup == undefined) {
-      calloutDescriptionsGroup = createCalloutDescriptionGroup(artboard);
+const displaySummary = (doc, summary) => {
+  const br = String.fromCharCode(13);
+  const slash = String.fromCharCode(47);
+  let errorMessage = '';
+  let successMessage = '';
+  for (var val of summary) {
+    if (val.indexOf('[ERROR]') >= 0) {
+      val = val.replace('[ERROR]', '');
+      errorMessage = errorMessage.concat(`${val}${br}${br}`);
     } else {
-      calloutDescriptionsGroup.setFixed_forEdge_(true, 51); // constraints: fix width and height, pin top right
-
-      // remove existing groups from calloutDescriptionsGroup
-      const instances = layersWithClass(calloutDescriptionsGroup.layers(), MSSymbolInstance);
-      instances.forEach(instance => {
-        calloutDescriptionsGroup.removeLayer(instance);
-      });
+      successMessage = successMessage.concat(`${val}, `);
     }
-    // get reference to the listing symbol
-    const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
-    // add one symbol to calloutDescriptionsGroup per string in array
-    calloutListDescriptions.forEach(calloutListDescription => {
-      const instance = calloutDescriptionSymbol.newSymbolInstance();
-      instance.frame().setConstrainProportions(0); // unlock the aspect ratio
-      instance.setFixed_forEdge_(true, 4); // pin left
-      instance.setFixed_forEdge_(true, 32); // pin top
-      calloutDescriptionsGroup.addLayers([instance]);
-      setOverrideText(instance, '<calloutListDescription>', calloutListDescription.description);
-      setOverrideText(instance, '<calloutListNumber>', calloutListDescription.calloutNumber);
-      instance.setName(calloutListDescription.calloutNumber);
-    });
-    layoutCalloutDescriptions(calloutDescriptionsGroup, doc);
   }
-  return calloutCount;
-}
-
-const numberToLetters = (num) => {
-  const firstDigit = (num <= 25) ? '' : String.fromCharCode(Math.floor(num / 26) + 64);
-  const secondDigit = String.fromCharCode(num % 26 + 65);
-  return `${firstDigit}${secondDigit}`;
-}
-
-// lays out the descriptions for callouts in the calloutDescriptionsGroup
-const layoutCalloutDescriptions = (calloutDescriptionsGroup, doc) => {
-  let groupRect = layerWithName(calloutDescriptionsGroup.children(), MSRectangleShape, '<calloutGroupRect>')
-  // if the rectangle is for some reason missing
-  if (groupRect == undefined) {
-    groupRect = MSRectangleShape.new();
-    groupRect.setName('<calloutGroupRect>');
-    // turn off constrain proportions
-    groupRect.frame().setConstrainProportions(0);
-    groupRect.frame().setWidth(calloutDescriptionsGroup.frame().width());
-    groupRect.frame().setHeight(calloutDescriptionsGroup.frame().height());
-    calloutDescriptionsGroup.addLayers([groupRect]);
-    // make group fit its content
-    sizeGroupToContent(calloutDescriptionsGroup);
-    MSLayerMovement.moveToBack([groupRect]);
+  if (successMessage != '') {
+    // get rid of trailing comma and space
+    successMessage = successMessage.substr(0, successMessage.length - 2);
+    doc.showMessage(`${successMessage}`);
   }
-  const calloutDescriptionSymbol = symbolMasterWithOverrideName(doc, '<calloutListDescription>');
-  const overrideLayer = getOverrideLayerfromSymbolMaster(calloutDescriptionSymbol, '<calloutListDescription>')
-  // get horizontal and vertical space NOT occupied by the description text area
-  const symbolPaddingVertical = calloutDescriptionSymbol.frame().height() - overrideLayer.frame().height();
-  const symbolPaddingHorizonal = calloutDescriptionSymbol.frame().width() - overrideLayer.frame().width();
-  // get all symbols in the group
-  const instances = layersWithClass(calloutDescriptionsGroup.layers(), MSSymbolInstance);
-  let runningTop = 0;
-  instances.forEach(instance => {
-    instance.frame().setWidth(calloutDescriptionsGroup.frame().width());
-    instance.frame().setY(runningTop);
-    // Need to account for wrapping of text. Get copy of the description text area, set it to the width of the
-    // the field in the symbol, set its text to the same text, then check the text area's height.
-    // Use that height
-    const overrideLayerCopy = overrideLayer.copy();
-    calloutDescriptionsGroup.addLayers([overrideLayerCopy]);
-    overrideLayerCopy.frame().setWidth(calloutDescriptionsGroup.frame().width() - symbolPaddingHorizonal);
-    overrideLayerCopy.setStringValue(getOverrideText(instance, '<calloutListDescription>'));
-    runningTop += symbolPaddingVertical + overrideLayerCopy.frame().height();
-    calloutDescriptionsGroup.removeLayer(overrideLayerCopy);
+  if (errorMessage != '') {
+    errorMessage = errorMessage.concat(`Plugin and documentation:${br}https:${slash}${slash}github.com${slash}josephxbrick${slash}documentorganizer${br}`);
+    UI.alert('Error', errorMessage);
+  }
+}
+
+// sort layers laid out in horizontal rows
+const sortLayersByRows = (layers) => {
+  let minX = minY = Number.MAX_SAFE_INTEGER;
+  layers.forEach(layer => {
+    minX = Math.min(minX, layer.frame().x())
+    minY = Math.min(minY, layer.frame().y())
   });
-  // set the calloutDescriptionsGroup's rectangle to size of group, just in case
-  calloutDescriptionsGroup.frame().setHeight(runningTop);
-  groupRect.frame().setWidth(calloutDescriptionsGroup.frame().width());
-  groupRect.frame().setHeight(calloutDescriptionsGroup.frame().height());
+  layers.sort((a, b) => sortVal(a, minX, minY) - sortVal(b, minX, minY));
+}
+const sortVal = (layer, minX, minY) => {
+  return (layer.frame().y() - minY) * 100 + (layer.frame().x())
 }
 
-// Callouts can be organized into groups, or they can just be on the artboard.
-// If they are in groups, the sort order will be sorted first by group (running left to right),
-// then by vertical position within each group.
-const sortedCallouts = (artboard) => {
-  let callouts = [];
-  // get all top-level layer groups
-  const groups = layersWithClass(artboard.layers(), MSLayerGroup);
-  sortByHorizontalPosition(groups);
-  groups.forEach(group => {
-    const instances = layersWithClass(group.children(), MSSymbolInstance);
-    const calloutInstances = instancesWithOverride(instances, '<calloutDescription>');
-    sortLayersByRows(calloutInstances);
-    callouts = callouts.concat(calloutInstances);
-  });
-  // get all ungrouped callout symbols
-  const ungroupedInstances = layersWithClass(artboard.layers(), MSSymbolInstance);
-  const calloutInstances = instancesWithOverride(ungroupedInstances, '<calloutDescription>');
-  sortByVerticalPosition(calloutInstances);
-  callouts = callouts.concat(calloutInstances);
-  return callouts;
+const sortByHorizontalPosition = (layers) => {
+  layers.sort((a, b) => a.frame().x() - b.frame().x());
 }
 
-// creates group for callout list
-const createCalloutDescriptionGroup = (artboard) => {
-  const group = MSLayerGroup.new()
-  const rect = MSRectangleShape.new()
-  group.setName('<calloutListGroup>');
-  rect.setName('<calloutGroupRect>');
-  // turn off constrain proportions
-  rect.frame().setConstrainProportions(0);
-  group.frame().setConstrainProportions(0);
-  // position group
-  group.frame().setX(Math.round(artboard.frame().width() * 0.72));
-  group.frame().setY(Math.round(artboard.frame().height() * 0.07));
-  rect.frame().setWidth(Math.round(artboard.frame().width() * 0.25));
-  rect.frame().setHeight(artboard.frame().height());
-  artboard.addLayers([group]);
-  group.addLayers([rect]);
-  // make group fit its content
-  sizeGroupToContent(group);
-  group.setFixed_forEdge_(true, 51); // constraints: fix width and height, pin top right
-  return group;
+const sortByVerticalPosition = (layers) => {
+  layers.sort((a, b) => a.frame().y() - b.frame().y());
 }
 
+// sorts artboards in the layer list to match the layout order (determined by artboard position),
+// and moves all top-level layers on page such that the first artboard is at 0,0
 
-const roundToNearestPixel = (context, summary) => {
-  const doc = context.document;
-  const page = doc.currentPage();
-  const nearestPixelToRoundTo = Number(storedValue('nearestPixelToRoundTo').slice(0, 3));
+
+
+// Note that this function is modified from a function created by StackOverflow user "S Vogt" who was ordering
+// a tilted and possibly warped grid for camera calibration.
+// https://stackoverflow.com/a/64659569/8479960
+
+const sortArtboards = (doc, page, options = { hSpacing: 200, vSpacing: 200, moveArtboards: true }) => {
+  // insure that spacing values are 0 or greater
+  options.hSpacing = Math.max(options.hSpacing, 0);
+  options.vSpacing = Math.max(options.vSpacing, 0);
+  // inner function adjusts the in-between spacing and aligns the tops of artboards of the given row.
+  // It returns the y value of the bottom of the row (i.e., the bottom of its tallest artboard)
+  const tidyUpRow = (rowArtboards, rowX, rowY, rowSpacing) => {
+      let maxArtboardHeight = 0;
+      for (artboard of rowArtboards) {
+          maxArtboardHeight = Math.max(artboard.frame().height(), maxArtboardHeight);
+          if(options.moveArtboards){
+            artboard.frame().setX(rowX);
+            artboard.frame().setY(rowY);
+          }
+          // update rowX to the desired x value of next artboard in the row
+          rowX += artboard.frame().width() + rowSpacing;
+      }
+      return rowY + maxArtboardHeight;
+  };
+  let sortedArtboards = [];
+  let rowX = 0;
+  let rowY = 0;
+  let isFirstRow = true;
+  // get all top-level artboards on the page
+  let availableArtBoards = allArtboards(page);
+  while (availableArtBoards.length > 0) {
+      // find y of topmost artboard in availableArtBoards, as well as the height of the shortest artboard. 
+      // We will use these to find artboards in the top row.
+      let minY = Number.MAX_SAFE_INTEGER;
+      let minHeight = Number.MAX_SAFE_INTEGER;
+      for (const artboard of availableArtBoards) {
+          minY = Math.min(minY, artboard.frame().y());
+          minHeight = Math.min(minHeight, artboard.frame().height());
+      }
+      // find artboards in top row: assume a artboard is in the top row when its distance from minY 
+      // is less than the height of the shortest artboard.
+      const topRow = [];
+      const otherRows = [];
+      for (const artboard of availableArtBoards) {
+          if (Math.abs(minY - artboard.frame().y()) < minHeight * 0.85) {
+              topRow.push(artboard);
+          }
+          else {
+              otherRows.push(artboard);
+          }
+      }
+      // we have the top row of the remaining rows!
+      topRow.sort((a, b) => a.frame().x() - b.frame().x()); // sort artboards in array by left-to-right positon
+      // check if this is the first row so we can initialize rowX and rowY
+      if (isFirstRow) {
+          rowX = topRow[0].frame().x();
+          rowY = topRow[0].frame().y();
+          isFirstRow = false;
+      }
+      // clean up the row layout, get y value for top of next row
+      rowY = tidyUpRow(topRow, rowX, rowY, options.hSpacing) + options.vSpacing;
+      sortedArtboards = [...sortedArtboards, ...topRow]; // append artboards in row to sorted artboards
+      availableArtBoards = [...otherRows]; // update to contain the artboards not in any previous row
+  }
+  // sort the artboards in the layer list such that they read top-to-bottom (i.e., reverse z-order)
+  // for (let i = sortedArtboards.length - 1; i >= 0; i--) {
+  //     const docPage = sortedArtboards[i];
+  //     figma.currentPage.appendChild(docPage);
+  // }
+
+  sortedArtboards.forEach(artboard => {
+    artboard.moveToLayer_beforeLayer(page,nil);
+    artboard.select_byExtendingSelection(0,1);
+  });  
+  // return array of sorted artboards
+  return sortedArtboards;
+};
+
+const sortArtboardsOld = (doc, page) => {
   const artboards = allArtboards(page);
-  let checkedCount = 0
-  let fixedCount = 0;
+  sortLayersByRows(artboards);
+  const xOffset = artboards[0].frame().x();
+  const yOffset = artboards[0].frame().y();
+  artboards.forEach(artboard => {
+    artboard.moveToLayer_beforeLayer(page,nil);
+    artboard.select_byExtendingSelection(0,1);
+  });
 
-    const layers = page.children();
+
+  // move all top-level layers (including artboards) such that the first artboard is at x:0,y:0
+
+  if (xOffset != 0 || yOffset != 0) {
+    const layers = page.layers();
     layers.forEach(layer => {
-      if (layer.parentGroup() && layer.parentGroup().name() != '<calloutListGroup>' && layer.parentGroup().name().indexOf('<tocSection>') != 0) {
-        checkedCount += 4;
-        const frame = layer.frame();
-        const x = frame.x();
-        const y = frame.y();
-        const w = frame.width();
-        const h = frame.height();
-        if (fmod(x, nearestPixelToRoundTo) != 0) {
-          fixedCount++;
-          frame.setX(Math.round(x / nearestPixelToRoundTo) * nearestPixelToRoundTo);
-        }
-        if (fmod(y, nearestPixelToRoundTo) != 0) {
-          fixedCount++;
-          frame.setY(Math.round(y / nearestPixelToRoundTo) * nearestPixelToRoundTo);
-        }
-        if (fmod(w, nearestPixelToRoundTo) != 0) {
-          fixedCount++;
-          frame.setWidth(Math.round(w / nearestPixelToRoundTo) * nearestPixelToRoundTo);
-        }
-        if (fmod(h, nearestPixelToRoundTo) != 0) {
-          fixedCount++;
-          frame.setHeight(Math.round(h / nearestPixelToRoundTo) * nearestPixelToRoundTo);
-        }
-      }
+      layer.frame().setX(layer.frame().x() - xOffset);
+      layer.frame().setY(layer.frame().y() - yOffset);
     });
+    // scroll Sketch's viewport to compensate for the movement of the artboards; this way nothing
+    // will visually move and the user won't lose their place
+    const drawView = doc.contentDrawView();
+    const curZoom = drawView.zoomValue();
+    const curScroll = drawView.scrollOrigin();
+    curScroll.x += xOffset * curZoom;
+    curScroll.y += yOffset * curZoom;
+    drawView.setScrollOrigin(curScroll);
+  }
+  const action = doc.actionsController().actionForID("MSCollapseAllGroupsAction");
+  if (action.validate()) {
+    action.doPerformAction(nil);
+  }
+}
 
-  summary.push(`${fixedCount} dimensions rounded to nearest ${nearestPixelToRoundTo} pixels`);
+const dateFromTemplate = (dateTemplate, date = new Date()) => {
+  const origTemplate = dateTemplate;
+  const w = date.getDay(); // Sunday is 0, Saturday is 6
+  const d = date.getDate(); // date of month: 1 to (max) 31
+  const m = date.getMonth(); //January is 0, December is 11
+  const y = date.getFullYear(); // four digit year
+  const hour24 = date.getHours().toString();
+  const hour12 = (date.getHours() % 12).toString();
+  const min = addLeadingZeroes(date.getMinutes());
+  const sec = addLeadingZeroes(date.getSeconds());
+  const ampm = (date.getHours() < 12) ? 'am' : 'pm';
+
+  const longMonth = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][m];
+  const shortMonth = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'][m];
+  const longWeekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][w];
+  const shortWeekday = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'][w];
+  // comments below assume date of Friday, 1/4/2019
+  dateTemplate = dateTemplate.replace('[mmmm]', longMonth); // January
+  dateTemplate = dateTemplate.replace('[mmm]', shortMonth); // Jan
+  dateTemplate = dateTemplate.replace('[mm]', addLeadingZeroes(m + 1)); // 01
+  dateTemplate = dateTemplate.replace('[m]', m + 1); // 1
+  dateTemplate = dateTemplate.replace('[ww]', longWeekday); // Friday
+  dateTemplate = dateTemplate.replace('[w]', shortWeekday); // Fri
+  dateTemplate = dateTemplate.replace(['[ddd]'], addOrdinalIndicator(d)); // 4th
+  dateTemplate = dateTemplate.replace(['[dd]'], addLeadingZeroes(d)); // 04
+  dateTemplate = dateTemplate.replace('[d]', d); // 4
+  dateTemplate = dateTemplate.replace('[yyyy]', y); // 2019
+  dateTemplate = dateTemplate.replace('[yy]', y.toString().slice(-2)); // 19
+  dateTemplate = dateTemplate.replace('[hour24]', hour24);
+  dateTemplate = dateTemplate.replace('[hour12]', hour12);
+  dateTemplate = dateTemplate.replace('[min]', min);
+  dateTemplate = dateTemplate.replace('[sec]', sec);
+  dateTemplate = dateTemplate.replace('[ampm]', ampm);
+  dateTemplate = dateTemplate.replace('[AMPM]', ampm.toUpperCase());
+
+  if (dateTemplate == origTemplate) {
+    // no segment of the date template was recognized, so return date in MM/DD/YYYY format
+    dateTemplate = `${addLeadingZeroes(m + 1)}/${addLeadingZeroes(d)}/${y}`;
+  }
+  return dateTemplate;
+}
+
+const addOrdinalIndicator = (num) => {
+  const lastNum = num.toString().slice(-1);
+  const lastTwoNums = num.toString().slice(-2);
+  if (lastNum == '1' && lastTwoNums != '11') {
+    return `${num}st`;
+  } else if (lastNum == '2' && lastTwoNums != '12') {
+    return `${num}nd`;
+  } else if (lastNum == '3' && lastTwoNums != '13') {
+    return `${num}rd`;
+  } else {
+    return `${num}th`;
+  }
+}
+
+// resizeToFitChildrenWithOption() was deprecated in Sketch v. 53.
+const sizeGroupToContent = (group) => {
+  if (sketch.version.sketch > 52) {
+    group.fixGeometryWithOptions(0);
+  } else {
+    group.resizeToFitChildrenWithOption(0);
+  }
 }
