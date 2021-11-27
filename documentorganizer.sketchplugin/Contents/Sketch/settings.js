@@ -152,7 +152,7 @@ const setTabOrder = (alert, controls) => {
 // returns: value of the first '<documentTitle>' override found in document, or the stored/default value if not found in document.
 const docTitleFromDocument = (page) => {
   const symbolInstances = layersWithClass(page.children(), MSSymbolInstance);
-  for (let i = 0; i < symbolInstances.count(); i++){
+  for (let i = 0; i < symbolInstances.length; i++){
     const instance = symbolInstances[i];
     const docTitle = getOverrideText(instance, '<documentTitle>');
     if (docTitle != undefined) {

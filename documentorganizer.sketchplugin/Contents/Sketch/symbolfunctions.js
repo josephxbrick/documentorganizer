@@ -57,7 +57,7 @@ const instancesWithOverride = (instances, overrideName) => {
 // gets the layer representing the override from a symbol master
 const getOverrideLayerfromSymbolMaster = (symbolMaster, overrideName) => {
   const layerList = symbolMaster.children()
-  for (let i = 0; i < layerList.count(); i++){
+  for (let i = 0; i < layerList.length; i++){
     const layer = layerList[i];
     if (layer.name() == overrideName){
       return layer;
@@ -69,10 +69,10 @@ const getOverrideLayerfromSymbolMaster = (symbolMaster, overrideName) => {
 // returns the first symbol master in the document that contains a given override name
 const symbolMasterWithOverrideName = (doc, overrideName) => {
   const symbolMasters = doc.documentData().allSymbols();
-  for (let i = 0; i < symbolMasters.count(); i++) {
+  for (let i = 0; i < symbolMasters.length; i++) {
     const symbolMaster = symbolMasters[i];
     const layers = symbolMaster.children();
-    for (let j = 0; j < layers.count(); j++){
+    for (let j = 0; j < layers.length; j++){
       const layer = layers[j];
       if (layer.name() == overrideName){
         return symbolMaster;

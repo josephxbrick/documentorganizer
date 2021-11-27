@@ -25,7 +25,7 @@ const allArtboards = (page) => {
 
 // returns first layer from list with name
 const layerWithName = (layerList, className, name) => {
-  for (let i = 0; i < layerList.count(); i++) {
+  for (let i = 0; i < layerList.length; i++) {
     const layer = layerList[i];
     if (layer.class() === className && layer.name() == name) {
       return layer;
@@ -35,12 +35,19 @@ const layerWithName = (layerList, className, name) => {
 }
 
 const layersWithClass = (layerList, className) => {
+  const newLayerList = [];
   const predicate = NSPredicate.predicateWithFormat('class == %@', className);
-  return layerList.filteredArrayUsingPredicate(predicate);
+  const temp = layerList.filteredArrayUsingPredicate(predicate);
+  temp.forEach(
+    layer => {
+      newLayerList.push(layer);
+    }
+  );
+  return newLayerList;
 }
 
 const layerWithClass = (layerList, className) => {
-  for (let i = 0; i < layerList.count(); i++) {
+  for (let i = 0; i < layerList.length; i++) {
     const layer = layerList[i];
     if (layer.class() === className) {
       return layer;
