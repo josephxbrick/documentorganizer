@@ -265,14 +265,14 @@ const settingsDialog = (context) => {
   curY = addControlWithBottomPadding(spacingField, controls, 10);
 
   // label: pages to include in TOC
-  curY += 1;
+  curY += 2;
   control = createLabel("Include:", {
     x: 0,
     y: curY,
     width: controlMaxWidth
   }, 1);
   controls.push(control);
-  curY -= 1;
+  curY -= 2;
 
   const tocShowRadios = createRadioButtonsHorizontal(["Section headings only", "All pages"], storedValue('tocShowSectionsOnly'), {
     x: 54,
@@ -359,6 +359,73 @@ const settingsDialog = (context) => {
   });
   curY = addControlWithBottomPadding(control, controls, 10);
 
+
+
+
+   // ================== SETTING: page spacing ========================
+   const usePageSpacingCallback = (checkbox) => {
+    const selected = checkbox.value; // gets true or false
+    horizontalSpacingField.setEnabled(selected);
+    verticalSpacingField.setEnabled(selected);
+  }
+  
+  
+   // checkbox: usePage spacing
+  const usePageSpacingCheckbox = createCheckbox('Set spacing between artboards', storedValue('usePageSpacing'), {
+    x: 0,
+    y: curY,
+    width: controlMaxWidth
+  }, usePageSpacingCallback);
+  curY = addControlWithBottomPadding(usePageSpacingCheckbox, controls, 6);
+
+
+
+  control = createLabel("Horizontal spacing:", {
+    x: 0,
+    y: curY,
+    width: controlMaxWidth
+  });
+  controls.push(control);
+  curY -= 2;
+
+
+  // field: column spacing
+  const horizontalSpacingField = createField(storedValue('pageSpacingH'), {
+    x: 115,
+    y: curY,
+    width: 40
+  });
+  controls.push(horizontalSpacingField);
+  curY += 2;
+
+  control = createLabel("Vertical spacing:", {
+    x: 168,
+    y: curY,
+    width: controlMaxWidth
+  });
+  controls.push(control);
+  curY -= 2;
+
+
+  // field: column spacing
+  const verticalSpacingField = createField(storedValue('pageSpacingV'), {
+    x: 264,
+    y: curY,
+    width: 40
+  });
+  curY = addControlWithBottomPadding(verticalSpacingField, controls,12);
+
+
+  usePageSpacingCallback(usePageSpacingCheckbox);
+
+    // divider line
+    control = createDivider({
+      x: 0,
+      y: curY,
+      width: controlMaxWidth
+    });
+    curY = addControlWithBottomPadding(control, controls, 12);
+
   // ====================== SETTING: current date format =======================
 
   // label: date formet
@@ -437,76 +504,6 @@ const settingsDialog = (context) => {
     height: textHeight(12, 1)
   });
   curY = addControlWithBottomPadding(sampleDateDisplay, controls, 12);
-
-  // divider line
-  control = createDivider({
-    x: 0,
-    y: curY,
-    width: controlMaxWidth
-  });
-  curY = addControlWithBottomPadding(control, controls, 10);
-
-
-   // ================== SETTING: page spacing ========================
-   const usePageSpacingCallback = (checkbox) => {
-    const selected = checkbox.value; // gets true or false
-    horizontalSpacingField.setEnabled(selected);
-    verticalSpacingField.setEnabled(selected);
-  }
-  
-  
-   // checkbox: usePage spacing
-  const usePageSpacingCheckbox = createCheckbox('Set spacing between artboards', storedValue('usePageSpacing'), {
-    x: 0,
-    y: curY,
-    width: controlMaxWidth
-  }, usePageSpacingCallback);
-  curY = addControlWithBottomPadding(usePageSpacingCheckbox, controls, 6);
-
-
-
-  control = createLabel("Horizontal spacing:", {
-    x: 0,
-    y: curY,
-    width: controlMaxWidth
-  });
-  controls.push(control);
-  curY -= 2;
-
-
-  // field: column spacing
-  const horizontalSpacingField = createField(storedValue('pageSpacingH'), {
-    x: 115,
-    y: curY,
-    width: 40
-  });
-  controls.push(horizontalSpacingField);
-  curY += 2;
-
-  control = createLabel("Vertical spacing:", {
-    x: 168,
-    y: curY,
-    width: controlMaxWidth
-  });
-  controls.push(control);
-  curY -= 2;
-
-
-  // field: column spacing
-  const verticalSpacingField = createField(storedValue('pageSpacingV'), {
-    x: 264,
-    y: curY,
-    width: 40
-  });
-  curY = addControlWithBottomPadding(verticalSpacingField, controls,20);
-
-
-  usePageSpacingCallback(usePageSpacingCheckbox);
-
-
-
-
-
 
 
   // ================== SETTING: round to nearest pixel ========================
