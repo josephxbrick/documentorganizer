@@ -315,6 +315,8 @@ The image below shows two mobile mockups, where each mockup has been grouped wit
 
 Use this to adjust the horizontal and vertical spacing between artboards on your page. When vertically spacing rows of artboards, the plugin uses the distance from tallest artboard in a given row.
 
+<img src="/readme_images/artboard-spacing.png" width="335">
+
 ---
 
 # Troubleshooting your document
