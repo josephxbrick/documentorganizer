@@ -19,7 +19,7 @@ _settings = (context) => {
   // check if current page is set up for plugin
   if (checkPageSetup(doc, summary)) {
     setTimeout(() => {
-      sortArtboards(doc, page);
+      sortArtboards(doc, page, { hSpacing: storedValue('pageSpacingH'), vSpacing: storedValue('pageSpacingV'), moveArtboards: storedValue('usePageSpacing') });
       const tocArray = numberAndNameArtboards(context, summary);
       if (storedValue('useTOC')) {
         tableOfContents(context, tocArray, summary);
@@ -44,7 +44,7 @@ _organizeDocument = (context) => {
   // check if current page is set up for plugin
   if (checkPageSetup(doc, summary)) {
     setTimeout(() => {
-      sortArtboards(doc, page);
+      sortArtboards(doc, page, { hSpacing: storedValue('pageSpacingH'), vSpacing: storedValue('pageSpacingV'), moveArtboards: storedValue('usePageSpacing') });
       const tocArray = numberAndNameArtboards(context, summary);
       if (storedValue('useTOC')) {
         tableOfContents(context, tocArray, summary);
