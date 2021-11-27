@@ -55,7 +55,23 @@ const settingsObjects = [{
     name: 'nearestPixelToRoundTo',
     key: 'organize_document_nearestPixelToRoundTo',
     default: '0.5 pixels (recommended)'
+  },
+  {
+    name: 'usePageSpacing',
+    key: 'organize_document_usePageSpacing',
+    default: 1
+  },
+  {
+    name: 'pageSpacingH',
+    key: 'organize_document_pageSpacingH',
+    default: 200
+  },
+  {
+    name: 'pageSpacingV',
+    key: 'organize_document_pageSpacingV',
+    default: 200
   }
+
 ];
 
 const stockDateFormats = ['[mm]/[dd]/[yyyy]', '[m]/[d]/[yyyy]'];
@@ -428,7 +444,70 @@ const settingsDialog = (context) => {
     y: curY,
     width: controlMaxWidth
   });
-  curY = addControlWithBottomPadding(control, controls, 14);
+  curY = addControlWithBottomPadding(control, controls, 10);
+
+
+   // ================== SETTING: page spacing ========================
+   const usePageSpacingCallback = (checkbox) => {
+    const selected = checkbox.value; // gets true or false
+    horizontalSpacingField.setEnabled(selected);
+    verticalSpacingField.setEnabled(selected);
+  }
+  
+  
+   // checkbox: usePage spacing
+  const usePageSpacingCheckbox = createCheckbox('Set spacing between artboards', storedValue('usePageSpacing'), {
+    x: 0,
+    y: curY,
+    width: controlMaxWidth
+  }, usePageSpacingCallback);
+  curY = addControlWithBottomPadding(usePageSpacingCheckbox, controls, 6);
+
+
+
+  control = createLabel("Horizontal spacing:", {
+    x: 0,
+    y: curY,
+    width: controlMaxWidth
+  });
+  controls.push(control);
+  curY -= 2;
+
+
+  // field: column spacing
+  const horizontalSpacingField = createField(storedValue('pageSpacingH'), {
+    x: 115,
+    y: curY,
+    width: 40
+  });
+  controls.push(horizontalSpacingField);
+  curY += 2;
+
+  control = createLabel("Vertical spacing:", {
+    x: 168,
+    y: curY,
+    width: controlMaxWidth
+  });
+  controls.push(control);
+  curY -= 2;
+
+
+  // field: column spacing
+  const verticalSpacingField = createField(storedValue('pageSpacingV'), {
+    x: 264,
+    y: curY,
+    width: 40
+  });
+  curY = addControlWithBottomPadding(verticalSpacingField, controls,20);
+
+
+  usePageSpacingCallback(usePageSpacingCheckbox);
+
+
+
+
+
+
 
   // ================== SETTING: round to nearest pixel ========================
 
@@ -494,6 +573,8 @@ const settingsDialog = (context) => {
     dashStyleSelect,
     dateFormatRadios,
     customFormatField,
+    horizontalSpacingField,
+    verticalSpacingField,
     roundToPixelCheckbox,
     roundToPixelSelect,
     okButton,
@@ -510,6 +591,9 @@ const settingsDialog = (context) => {
     setStoredValue('dashType', stockDashes[dashStyleSelect.value]);
     setStoredValue('useSections', useSectionsCheckbox.value);
     setStoredValue('dateFormatChoice', dateFormatRadios.value);
+    setStoredValue('usePageSpacing', usePageSpacingCheckbox.value);
+    setStoredValue('pageSpacingH', horizontalSpacingField.value);
+    setStoredValue('pageSpacingV', verticalSpacingField.value);
     setStoredValue('roundToNearestPixel', roundToPixelCheckbox.value);
     setStoredValue('nearestPixelToRoundTo', stockRoundedPixels[roundToPixelSelect.value]);
 
