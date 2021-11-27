@@ -86,6 +86,13 @@ Assigns legal-style numbering to section headings and pages in the document
 
 A dash appears between section numbers and the name of the page that follows the section number. You can choose to use a dash, an ndash, or an mdash.
 
+### Spacing between artboards
+
+Use this to adjust the horizontal and vertical spacing between artboards on your page. When vertically spacing rows of artboards, the plugin uses the distance from tallest artboard in a given row.
+
+<img src="/readme_images/artboard-spacing.png" width="335">
+
+
 ### Date format
 
 You can choose between the formats mm/dd/yyyy and m/d/yyyy, or create a custom date format. Use the date elements below to construct a custom format. Note that the elements are case-sensitive.
@@ -308,14 +315,6 @@ You can create groups of callout markers on the given artboard if you want numbe
 The image below shows two mobile mockups, where each mockup has been grouped with its associated callout markers. Note the order of the numbering. (Section numbering is not used in this example.)
 
 <img src="/readme_images/multiMockupExample.png" width="600">
-
----
-
-# Set spacing between artboards
-
-Use this to adjust the horizontal and vertical spacing between artboards on your page. When vertically spacing rows of artboards, the plugin uses the distance from tallest artboard in a given row.
-
-<img src="/readme_images/artboard-spacing.png" width="335">
 
 ---
 
