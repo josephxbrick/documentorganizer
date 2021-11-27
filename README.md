@@ -8,9 +8,9 @@ This plugin updates page numbers, section numbers, callout numbers, and creates 
 
 ## Installing the plugin
 
-The easiest way to  install this plugin is to choose `Download Zip` from the `Clone or Download` button at the top of the page, unzip the downloaded file, and double-click `documentorganizer.sketchplugin`.
+The easiest way to  install this plugin is to choose `Download Zip` from the `Code ` button at the top of the page, unzip the downloaded file, and double-click `documentorganizer.sketchplugin`.
 
-<img src="/readme_images/clone-or-download.png" width="320">
+<img src="/readme_images/clone-or-download.png" width="378">
 
 ## Downloading the sample file
 
@@ -61,14 +61,10 @@ This opens the Settings dialog. (See below)
 
 Here is the Settings dialog:
 
-<img src="/readme_images/settings.png" width="709">
+<img src="/readme_images/settings.png" width="629">
 
 Settings are saved from session to session. Below is a description of each setting.
 
-
-### Title of document
-
-The value in this Settings field updates all symbol instances that have a text override named `<documentTitle>`. 
 
 ### Create table of contents
 
@@ -145,12 +141,6 @@ You can opt not to page-number an artboard, but once the first page-number insta
 Place the page-number symbol instance on an artboard to assign it a page number. The symbol must have a text override named `<pageNumber>`. It doesn't matter what the symbol itself is named or what any of its instances are named. The name of the text override is all that matters.
 
 <img src="/readme_images/page_number_symbol.png" width="335">
-
----
-
-# Add the document title to an artboard
-
-The document title is specified in Settings (see above). To display a document title on a given artboard, the artboard needs to include a symbol instance with a text override named `<documentTitle>`. The name of the symbol instance itself does not matter. Note that this override cannot be in a nested symbol.
 
 ---
 
