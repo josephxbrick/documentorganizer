@@ -58,7 +58,7 @@
   },
   "identifier": "https://github.com/josephxbrick/organize-sketch-doc",
   "homepage": "https://github.com/josephxbrick/documentorganizer",
-  "version": "1.2",
+  "version": "2.0",
   "icon" : "icon.png",
   "description": "Organize design documents by creating a table of contents, adding page/section numbers, and managing callouts in mockups.",
   "authorEmail": "jbrick@gmail.com",
