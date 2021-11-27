@@ -219,19 +219,14 @@ const sortArtboards = (doc, page, options = { hSpacing: 200, vSpacing: 200, move
     artboard.moveToLayer_beforeLayer(page,nil);
     artboard.select_byExtendingSelection(0,1);
   });  
+  moveToZero(doc, page, sortedArtboards)
   // return array of sorted artboards
   return sortedArtboards;
 };
 
-const sortArtboardsOld = (doc, page) => {
-  const artboards = allArtboards(page);
-  sortLayersByRows(artboards);
+const moveToZero = (doc, page, artboards) => {
   const xOffset = artboards[0].frame().x();
   const yOffset = artboards[0].frame().y();
-  artboards.forEach(artboard => {
-    artboard.moveToLayer_beforeLayer(page,nil);
-    artboard.select_byExtendingSelection(0,1);
-  });
 
 
   // move all top-level layers (including artboards) such that the first artboard is at x:0,y:0
