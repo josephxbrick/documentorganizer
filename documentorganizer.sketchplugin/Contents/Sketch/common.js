@@ -143,7 +143,87 @@ const sortByVerticalPosition = (layers) => {
 
 // sorts artboards in the layer list to match the layout order (determined by artboard position),
 // and moves all top-level layers on page such that the first artboard is at 0,0
-const sortArtboards = (doc, page) => {
+
+
+
+// Note that this function is modified from a function created by StackOverflow user "S Vogt" who was ordering
+// a tilted and possibly warped grid for camera calibration.
+// https://stackoverflow.com/a/64659569/8479960
+
+const sortArtboards = (doc, page, options = { hSpacing: 200, vSpacing: 200, moveArtboards: true }) => {
+  // insure that spacing values are 0 or greater
+  options.hSpacing = Math.max(options.hSpacing, 0);
+  options.vSpacing = Math.max(options.vSpacing, 0);
+  // inner function adjusts the in-between spacing and aligns the tops of artboards of the given row.
+  // It returns the y value of the bottom of the row (i.e., the bottom of its tallest artboard)
+  const tidyUpRow = (rowArtboards, rowX, rowY, rowSpacing) => {
+      let maxArtboardHeight = 0;
+      for (artboard of rowArtboards) {
+          maxArtboardHeight = Math.max(artboard.frame().height(), maxArtboardHeight);
+          if(options.moveArtboards){
+            artboard.frame().setX(rowX);
+            artboard.frame().setY(rowY);
+          }
+          // update rowX to the desired x value of next artboard in the row
+          rowX += artboard.frame().width() + rowSpacing;
+      }
+      return rowY + maxArtboardHeight;
+  };
+  let sortedArtboards = [];
+  let rowX = 0;
+  let rowY = 0;
+  let isFirstRow = true;
+  // get all top-level artboards on the page
+  let availableArtBoards = allArtboards(page);
+  while (availableArtBoards.length > 0) {
+      // find y of topmost artboard in availableArtBoards, as well as the height of the shortest artboard. 
+      // We will use these to find artboards in the top row.
+      let minY = Number.MAX_SAFE_INTEGER;
+      let minHeight = Number.MAX_SAFE_INTEGER;
+      for (const artboard of availableArtBoards) {
+          minY = Math.min(minY, artboard.frame().y());
+          minHeight = Math.min(minHeight, artboard.frame().height());
+      }
+      // find artboards in top row: assume a artboard is in the top row when its distance from minY 
+      // is less than the height of the shortest artboard.
+      const topRow = [];
+      const otherRows = [];
+      for (const artboard of availableArtBoards) {
+          if (Math.abs(minY - artboard.frame().y()) < minHeight * 0.85) {
+              topRow.push(artboard);
+          }
+          else {
+              otherRows.push(artboard);
+          }
+      }
+      // we have the top row of the remaining rows!
+      topRow.sort((a, b) => a.frame().x() - b.frame().x()); // sort artboards in array by left-to-right positon
+      // check if this is the first row so we can initialize rowX and rowY
+      if (isFirstRow) {
+          rowX = topRow[0].frame().x();
+          rowY = topRow[0].frame().y();
+          isFirstRow = false;
+      }
+      // clean up the row layout, get y value for top of next row
+      rowY = tidyUpRow(topRow, rowX, rowY, options.hSpacing) + options.vSpacing;
+      sortedArtboards = [...sortedArtboards, ...topRow]; // append artboards in row to sorted artboards
+      availableArtBoards = [...otherRows]; // update to contain the artboards not in any previous row
+  }
+  // sort the artboards in the layer list such that they read top-to-bottom (i.e., reverse z-order)
+  // for (let i = sortedArtboards.length - 1; i >= 0; i--) {
+  //     const docPage = sortedArtboards[i];
+  //     figma.currentPage.appendChild(docPage);
+  // }
+
+  sortedArtboards.forEach(artboard => {
+    artboard.moveToLayer_beforeLayer(page,nil);
+    artboard.select_byExtendingSelection(0,1);
+  });  
+  // return array of sorted artboards
+  return sortedArtboards;
+};
+
+const sortArtboardsOld = (doc, page) => {
   const artboards = allArtboards(page);
   sortLayersByRows(artboards);
   const xOffset = artboards[0].frame().x();
@@ -153,9 +233,8 @@ const sortArtboards = (doc, page) => {
     artboard.select_byExtendingSelection(0,1);
   });
 
+
   // move all top-level layers (including artboards) such that the first artboard is at x:0,y:0
-
-
 
   if (xOffset != 0 || yOffset != 0) {
     const layers = page.layers();
