@@ -413,10 +413,20 @@ const settingsDialog = (context) => {
     y: curY,
     width: 40
   });
-  curY = addControlWithBottomPadding(verticalSpacingField, controls,12);
+  curY = addControlWithBottomPadding(verticalSpacingField, controls,5);
 
+    // description
+    control = createDescription("Creates uniform spacing between artboards. Note that vertical spacing starts from the bottom of the tallest artboard in a given row.", NSColor.secondaryLabelColor(), 12, {
+      x: 0,
+      y: curY,
+      width: controlMaxWidth,
+      height: textHeight(12, 2)
+    });
+    curY = addControlWithBottomPadding(control, controls, 8);
 
   usePageSpacingCallback(usePageSpacingCheckbox);
+
+
 
     // divider line
     control = createDivider({
