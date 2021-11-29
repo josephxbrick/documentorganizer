@@ -155,6 +155,8 @@ Place the page-number symbol instance on an artboard to assign it a page number.
 
 To display a date, an artboard needs to include a symbol instance with a text override named `"<currentDate>"`. The name of the symbol instance itself does not matter. Note that this override cannot be in a nested symbol.
 
+NOTE: the current date updates when you save the document, not when you run the plugin.
+
 The current date will be in the format specified in Settings.
 
 ---
