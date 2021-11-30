@@ -14,7 +14,7 @@ It is also much more tolerant of sloppy grid arrangement, so no need to have the
 
 ### Fixed callout ordering bug when using grouped callouts
 
-Grouping callouts markers in an artboard affects the numbering order. This is useful when you have, say, 3 mobile wires on a single page, arranged left to right. Grouping the callouts with their corresponding mockups will cause the numbering order to start with the leftmost group, and procede in-turn throught the groups to the right. See more details [here](#Numbering0callouts-in group-order).
+Grouping callouts markers in an artboard affects the numbering order. This is useful when you have, say, 3 mobile wires on a single page, arranged left to right. Grouping the callouts with their corresponding mockups will cause the numbering order to start with the leftmost group, and procede in-turn throught the groups to the right. See more details [here](https://github.com/josephxbrick/documentorganizer/blob/master/README.md#numbering-callouts-in-group-order).
 
 Somewhere along the line, the Sketch folks made a change that broke this feature. It's now working again. See Numbering callouts in group order below
 
