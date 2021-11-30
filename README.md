@@ -4,7 +4,20 @@ Note: this plugin requires Sketch 53.2 or above.
 
 This plugin updates page numbers, section numbers, callout numbers, and creates a table of contents in your document. This readme describes how to set up your document to use this plugin.
 
-**IMPORTANT!** plugin is currently in Beta. Please add any bug reports, feature requests, or suggested refinements to the Issues section of this repo.
+## Recent updates November 28, 2021
+
+### Added Artboard spacing adjustments
+
+The plugin will now automatically set uniform horizontal and vertical spacing between artboards, if desired. 
+
+It is also much more tolerant of sloppy grid arrangement, so no need to have the tops of all artboards in a row precisely aligned. 
+
+### Fixed callout ordering bug when using grouped callouts
+
+Grouping callouts markers in an artboard affects the numbering order. This is useful when you have, say, 3 mobile wires on a single page, arranged left to right. Grouping the callouts with their corresponding mockups will cause the numbering order to start with the leftmost group, and procede in-turn throught the groups to the right. See more details [here](#Numbering0callouts-in group-order).
+
+Somewhere along the line, the Sketch folks made a change that broke this feature. It's now working again. See Numbering callouts in group order below
+
 
 ## Installing the plugin
 
@@ -318,24 +331,4 @@ The image below shows two mobile mockups, where each mockup has been grouped wit
 
 <img src="/readme_images/multiMockupExample.png" width="600">
 
----
 
-# Troubleshooting your document
-
-## The TOC lists pages in the wrong order
-
-Make sure the tops of all artboards in arrow are aligned perfectly and arranged left-to right, whether your artboards are arranged in a single horizontal row, or if each section's artboards are arranged in their own row.
-
----
-
-# To-dos
-
-## TOC documentation
-
-Show images of both symbols that create the TOC instead of just the page-entry symbol.
-
-## Saving settings
-
-Currently settings are saved session-to-session at the plug-in level, meaning that the saved settings are the same no matter which document you are editing. (I put in a hack so document-title doesn't behave that way.) This is annoying.
-
-It would be better if settings were saved **per document**. An easy method might be saving them to a special symbol on the Symbols page. The symbol would not even need a to have an instance in the document: could just write to text layers of the symbol itself.
