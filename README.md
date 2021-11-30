@@ -4,25 +4,11 @@ Note: this plugin requires Sketch 53.2 or above.
 
 This plugin updates page numbers, section numbers, callout numbers, and creates a table of contents in your document. This readme describes how to set up your document to use this plugin.
 
-## Recent updates November 28, 2021
-
-### Added Artboard spacing adjustments
-
-The plugin will now automatically set uniform horizontal and vertical spacing between artboards, if desired. 
-
-It is also much more tolerant of sloppy grid arrangement, so no need to have the tops of all artboards in a row precisely aligned. 
-
-### Fixed callout ordering bug when using grouped callouts
-
-Grouping callouts markers in an artboard affects the numbering order. This is useful when you have, say, 3 mobile wires on a single page, arranged left to right. Grouping the callouts with their corresponding mockups will cause the numbering order to start with the leftmost group, and procede in-turn throught the groups to the right. See more details [here](https://github.com/josephxbrick/documentorganizer/blob/master/README.md#numbering-callouts-in-group-order).
-
-Somewhere along the line, the Sketch folks made a change that broke this feature. It's now working again.
-
 ## Installing the plugin
 
-The easiest way to  install this plugin is to choose `Download Zip` from the `Code ` button at the top of the page, unzip the downloaded file, and double-click `documentorganizer.sketchplugin`.
+The easiest way to  install this plugin is download the ZIP file (called "Source code") from the [Releases page](https://github.com/josephxbrick/documentorganizer/releases/tag/v2.0), unzip the downloaded file, and double-click `documentorganizer.sketchplugin`.
 
-<img src="/readme_images/clone-or-download.png" width="378">
+<img src="/readme_images/releases2.png" width="179">
 
 ## Downloading the sample file
 
@@ -329,5 +315,20 @@ You can create groups of callout markers on the given artboard if you want numbe
 The image below shows two mobile mockups, where each mockup has been grouped with its associated callout markers. Note the order of the numbering. (Section numbering is not used in this example.)
 
 <img src="/readme_images/multiMockupExample.png" width="600">
+
+## Recent updates November 28, 2021
+
+### Added Artboard spacing adjustments
+
+The plugin will now automatically set uniform horizontal and vertical spacing between artboards, if desired. 
+
+It is also much more tolerant of sloppy grid arrangement, so no need to have the tops of all artboards in a row precisely aligned. 
+
+### Fixed callout ordering bug when using grouped callouts
+
+Grouping callouts markers in an artboard affects the numbering order. This is useful when you have, say, 3 mobile wires on a single page, arranged left to right. Grouping the callouts with their corresponding mockups will cause the numbering order to start with the leftmost group, and procede in-turn throught the groups to the right. See more details [here](https://github.com/josephxbrick/documentorganizer/blob/master/README.md#numbering-callouts-in-group-order).
+
+Somewhere along the line, the Sketch folks made a change that broke this feature. It's now working again.
+
 
 
